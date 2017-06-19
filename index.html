@@ -26,6 +26,8 @@ window.onload=function(){
 	function handleFileSelect(evt) {
 		var file = evt.target.files[0];
 		var output = "<h2>Results</h2>\n";
+		// A couple of generic variables to use in various checks
+		var result, count;
 
 		var reader = new FileReader();
 
@@ -69,27 +71,186 @@ window.onload=function(){
 			});
 			output += '<span class="result">Friends with 5+ hearts: ' + count_5h + '</span><ul>\n';
 			output += '<li>'
-			output += (count_5h >= 1) ? '<span class="ach_yes">A New Friend Achievement (1 with 5H) Eligible</span>' :
-				'<span class="ach_no">A New Friend Achievement (1 with 5H) Not Eligible</span> -- need ' + (1-count_5h) + ' more';
+			output += (count_5h >= 1) ? '<span class="ach_yes">A New Friend Achievement (1 with 5♥) Eligible</span>' :
+				'<span class="ach_no">A New Friend Achievement (1 with 5♥) Not Eligible</span> -- need ' + (1-count_5h) + ' more';
 			output += '</li>\n<li>';
-			output += (count_5h >= 4) ? '<span class="ach_yes">Cliques Achievement (4 with 5H) Eligible</span>' :
-				'<span class="ach_no">Cliques Achievement (4 with 5H) Not Eligible</span> -- need ' + (4-count_5h) + ' more>\n';
+			output += (count_5h >= 4) ? '<span class="ach_yes">Cliques Achievement (4 with 5♥) Eligible</span>' :
+				'<span class="ach_no">Cliques Achievement (4 with 5♥) Not Eligible</span> -- need ' + (4-count_5h) + ' more>\n';
 			output += '</li>\n<li>';
-			output += (count_5h >= 10) ? '<span class="ach_yes">Networking Achievement (10 with 5H) Eligible</span>' :
-				'<span class="ach_no">Networking Achievement (10 with 5H) Not Eligible</span> -- need ' + (10-count_5h) + ' more';
+			output += (count_5h >= 10) ? '<span class="ach_yes">Networking Achievement (10 with 5♥) Eligible</span>' :
+				'<span class="ach_no">Networking Achievement (10 with 5♥) Not Eligible</span> -- need ' + (10-count_5h) + ' more';
 			output += '</li>\n<li>';
-			output += (count_5h >= 20) ? '<span class="ach_yes">Popular Achievement (20 with 5H) Eligible</span>' :
-				'<span class="ach_no">Popular Achievement (20 with 5H) Not Eligible</span> -- need ' + (20-count_5h) + ' more';
+			output += (count_5h >= 20) ? '<span class="ach_yes">Popular Achievement (20 with 5♥) Eligible</span>' :
+				'<span class="ach_no">Popular Achievement (20 with 5♥) Not Eligible</span> -- need ' + (20-count_5h) + ' more';
 			output += '</li></ul>\n';
 			output += '<span class="result">Friends with 10+ hearts: ' + count_10h + '</span><ul>\n';
 			output += '<li>'
-			output += (count_10h >= 1) ? '<span class="ach_yes">Best Friends Achievement (1 with 10H) Eligible</span>' :
-				'<span class="ach_no">Best Friends Achievement (1 with 10H) Not Eligible</span> -- need ' + (1-count_10h) + ' more';
+			output += (count_10h >= 1) ? '<span class="ach_yes">Best Friends Achievement (1 with 10♥) Eligible</span>' :
+				'<span class="ach_no">Best Friends Achievement (1 with 10♥) Not Eligible</span> -- need ' + (1-count_10h) + ' more';
 			output += '</li>\n<li>';
-			output += (count_10h >= 8) ? '<span class="ach_yes">The Beloved Farmer Achievement (4 with 10H) Eligible</span>' :
-				'<span class="ach_no">The Beloved Farmer Achievement (4 with 10H) Not Eligible</span> -- need ' + (8-count_10h) + ' more';
+			output += (count_10h >= 8) ? '<span class="ach_yes">The Beloved Farmer Achievement (8 with 10♥) Eligible</span>' :
+				'<span class="ach_no">The Beloved Farmer Achievement (8 with 10♥) Not Eligible</span> -- need ' + (8-count_10h) + ' more';
 			output += '</li></ul>\n';
-				
+			
+			var spouse = '(None)';
+			var needs = [];
+			count = 0;
+			result = $(xmlDoc).find('player > spouse')
+			if (result.length > 0) {
+				spouse = result.text();
+				count++;
+			} else {
+				needs.push('Spouse');
+			}
+			output += '<span class="result">Spouse: ' + spouse + '</span><br />\n';
+			var children = '(None)';
+			var child_name = [];
+			// not sure how to get the [] attribute selectors to recognize xsi:type as valid attribute name, so working around it
+			result = $(xmlDoc).find('locations > GameLocation > Characters > NPC').each(function() {
+				if ( $(this).attr('xsi:type') == 'Child' ) {
+					count++;
+					child_name.push($(this).find('name').text());
+				}
+			});
+			if (child_name.length) {
+				children = child_name.join(', ');
+				if (child_name.length == 1) { 
+					needs.push("1 child");
+				}
+			} else {
+				needs.push("2 children");
+			}
+			output += '<span class="result">Children: ' + children + '</span><ul><li>\n';
+			output += (count >= 3) ? '<span class="ach_yes">Full House Achievement (Married + 2 kids) Eligible</span>' :
+				'<span class="ach_no">Full House Achievement (Married + 2 kids) Not Eligible</span> -- need ' + needs.join('; ');
+			output += '</li></ul>\n';
+
+			//TODO: Joja vs CC.
+			// CC bundles: locations > GameLocation [attr('xsi:type') == 'CommunityCenter'] > bundles (individual) & areasComplete
+			
+			// cookingRecipes is keyed by name, but recipesCooked is keyed by ObjectInformation ID.
+			var recipeIDs = {
+				194:"Fried Egg",
+				195:"Omelet",
+				196:"Salad",
+				197:"Cheese Cauliflower",
+				198:"Baked Fish",
+				199:"Parsnip Soup",
+				200:"Vegetable Medley",
+				201:"Complete Breakfast",
+				202:"Fried Calamari",
+				203:"Strange Bun",
+				204:"Lucky Lunch",
+				205:"Fried Mushroom",
+				206:"Pizza",
+				207:"Bean Hotpot",
+				208:"Glazed Yams",
+				209:"Carp Surprise",
+				210:"Hashbrowns",
+				211:"Pancakes",
+				212:"Salmon Dinner",
+				213:"Fish Taco",
+				214:"Crispy Bass",
+				215:"Pepper Poppers",
+				216:"Bread",
+				218:"Tom Kha Soup",
+				219:"Trout Soup",
+				220:"Chocolate Cake",
+				221:"Pink Cake",
+				222:"Rhubarb Pie",
+				223:"Cookie",
+				224:"Spaghetti",
+				225:"Fried Eel",
+				226:"Spicy Eel",
+				227:"Sashimi",
+				228:"Maki Roll",
+				229:"Tortilla",
+				230:"Red Plate",
+				231:"Eggplant Parmesan",
+				232:"Rice Pudding",
+				233:"Ice Cream",
+				234:"Blueberry Tart",
+				235:"Autumn's Bounty",
+				236:"Pumpkin Soup",
+				237:"Super Meal",
+				238:"Cranberry Sauce",
+				239:"Stuffing",
+				240:"Farmer's Lunch",
+				241:"Survival Burger",
+				242:"Dish O' The Sea",
+				243:"Miner's Treat",
+				244:"Roots Platter",
+				456:"Algae Soup",
+				457:"Pale Broth",
+				604:"Plum Pudding",
+				605:"Artichoke Dip",
+				606:"Stir Fry",
+				607:"Roasted Hazelnuts",
+				608:"Pumpkin Pie",
+				609:"Radish Salad",
+				610:"Fruit Salad",
+				611:"Blackberry Cobbler",
+				612:"Cranberry Candy",
+				618:"Bruschetta",
+				648:"Coleslaw",
+				649:"Fiddlehead Risotto",
+				651:"Poppyseed Muffin",
+				727:"Chowder",
+				728:"Fish Stew",
+				729:"Escargot",
+				730:"Lobster Bisque",
+				731:"Maple Bar",
+				732:"Crab Cakes",
+			};
+			var recipe_count = 71; // Yes, this is hardcoded since .length doesn't work on the object
+			
+			output += '<h3>Cooking</h3>\n';
+			var known = {};
+			var known_count = 0;
+			var crafted = {};
+			var craft_count = 0;
+			
+			$(xmlDoc).find('player > cookingRecipes > item').each(function() {
+				var id = $(this).find('key > string').text();
+				var num = $(this).find('value > int').text();
+				known[id] = num;
+				known_count++;
+			});
+			$(xmlDoc).find('player > recipesCooked > item').each(function() {
+				var id = $(this).find('key > int').text();
+				var num = $(this).find('value > int').text();
+				// Do we need to check that num>0?
+				crafted[recipeIDs[id]] = num;
+				craft_count++;
+			});
+			
+			output += '<span class="result">Know  ' + known_count + ' recipes and have cooked ' + craft_count + 
+				' of them (out of ' + recipe_count + ' total)</span><ul>\n';
+			output += '<li>'
+			output += (craft_count >= 10) ? '<span class="ach_yes">Cook Achievement (10 recipes cooked) Eligible</span>' :
+				'<span class="ach_no">Cook Achievement (10 recipes cooked) Not Eligible</span> -- need ' + (10-craft_count) + ' more';
+			output += '</li>\n<li>';
+			output += (craft_count >= 25) ? '<span class="ach_yes">Sous Chef Achievement (25 recipes cooked) Eligible</span>' :
+				'<span class="ach_no">Sous Chef Achievement (25 recipes cooked) Not Eligible</span> -- need ' + (25-craft_count) + ' more';
+			output += '</li>\n<li>';
+			output += (craft_count >= recipe_count) ? '<span class="ach_yes">Gourmet Chef Achievement (all recipes cooked) Eligible</span>' :
+				'<span class="ach_no">Gourmet Chef Achievement (all recipes cooked) Not Eligible</span> -- need ' + (recipe_count-craft_count) + ' more';
+			output += '</li></ul>\n';
+			// We are assuming it is impossible to craft something without knowing the recipe.
+			if (craft_count < recipe_count) {
+				var need = [];
+				for (var id in recipeIDs) {
+					var r = recipeIDs[id];
+					if (!known.hasOwnProperty(r)) {
+						// FIXME: The span screws up the sorting. 
+						need.push('<span class="unknown">' + r + ' (unknown)</span>');
+					} else if (!crafted.hasOwnProperty(r)) {
+						need.push(r);
+					}
+				}
+				output += '<span class="results">Left to cook:</span><ul><li>' + need.sort().join("</li><li>") + '</li></ul>\n';
+			}
+
 			document.getElementById('out').innerHTML = output;
 		};
 		reader.readAsText(file);
@@ -98,9 +259,6 @@ window.onload=function(){
 	}
 	document.getElementById('file_select').addEventListener('change', handleFileSelect, false);
 	
-	function singleResult(key,value) {
-		return '<span class="key">' + key + ':</span> <span class="value">' + value + '</span><br />\n';
-	}
 }
 </script>
 
