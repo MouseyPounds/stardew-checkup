@@ -2,9 +2,107 @@
 <html>
 <head>
 <title>Stardew Checkup</title>
+<meta charset="UTF-8" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </head>
 <body>
-<h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
+<h1>Stardew Checkup</h1>
+<p>This script checks a Stardew Valley save file for various achievements and milestones and
+lets you know what is missing.</p>
+<p>Select a save file to check:
+<input type="file" id="file_select" /></p>
+
+<output id="out"> </output>
+
+<script>
+window.onload=function(){
+	// Check for the various File API support.
+	if (window.File && window.FileReader) {
+		// Great success! All the File APIs are supported.
+	} else {
+		alert('The File APIs are not fully supported in this browser.');
+	}
+
+	function handleFileSelect(evt) {
+		var file = evt.target.files[0];
+		var output = "<h2>Results</h2>\n";
+
+		var reader = new FileReader();
+
+		reader.onload = function(e) {
+			var output = document.getElementById('out').innerHTML;
+			var xmlDoc = $.parseXML(e.target.result);
+
+			output += '<h3>Summary</h3>\n';
+			output += '<span class="result">Farmer ' + $(xmlDoc).find('player > name').text() + ' of '
+				+ $(xmlDoc).find('player > farmName').text() + ' Farm</span><br />\n';
+				
+			output += '<h3>Money</h3>\n';
+			var money = Number($(xmlDoc).find('player > totalMoneyEarned').text());
+			output += '<span class="result">Total Earnings: ' + money + 'g</span><br /><ul>\n';
+			output += '<li>'
+			output += (money >= 15000) ? '<span class="ach_yes">Greenhorn Achievement (15K earnings) Eligible</span>' :
+				'<span class="ach_no">Greenhorn Achievement (15K earnings) Not Eligible</span> -- need ' + (15000-money) + 'g more>';
+			output += '</li>\n<li>';
+			output += (money >= 50000) ? '<span class="ach_yes">Cowpoke Achievement (50K earnings) Eligible</span>' :
+				'<span class="ach_no">Cowpoke Achievement (50K earnings) Not Eligible</span> -- need ' + (50000-money) + 'g more';
+			output += '</li>\n<li>';
+			output += (money >= 250000) ? '<span class="ach_yes">Homesteader Achievement (250K earnings) Eligible</span>' :
+				'<span class="ach_no">Homesteader Achievement (250K earnings) Not Eligible</span> -- need ' + (250000-money) + 'g more';
+			output += '</li>\n<li>';
+			output += (money >= 1000000) ? '<span class="ach_yes">Millionaire Achievement (1M earnings) Eligible</span>' :
+				'<span class="ach_no">Millionaire Achievement (1M earnings) Not Eligible</span> -- need ' + (1000000-money) + 'g more';
+			output += '</li>\n<li>';
+			output += (money >= 10000000) ? '<span class="ach_yes">Legend Achievement (10M earnings) Eligible</span>' :
+				'<span class="ach_no">Legend Achievement (10M earnings) Not Eligible</span> -- need ' + (10000000-money) + 'g more';
+			output += '</li></ul>\n';
+
+			output += '<h3>Social</h3>\n';
+			var count_5h = 0;
+			var count_10h = 0;
+			$(xmlDoc).find('player > friendships > item').each(function() {
+				var who = $(this).find('key > string').text();
+				var num = $(this).find('value > ArrayOfInt > int').first().text();
+				if (num >= 2500) { count_10h++; }
+				if (num >= 1250) { count_5h++; }
+				// TODO: check for maxed out hearts on everyone
+			});
+			output += '<span class="result">Friends with 5+ hearts: ' + count_5h + '</span><ul>\n';
+			output += '<li>'
+			output += (count_5h >= 1) ? '<span class="ach_yes">A New Friend Achievement (1 with 5H) Eligible</span>' :
+				'<span class="ach_no">A New Friend Achievement (1 with 5H) Not Eligible</span> -- need ' + (1-count_5h) + ' more';
+			output += '</li>\n<li>';
+			output += (count_5h >= 4) ? '<span class="ach_yes">Cliques Achievement (4 with 5H) Eligible</span>' :
+				'<span class="ach_no">Cliques Achievement (4 with 5H) Not Eligible</span> -- need ' + (4-count_5h) + ' more>\n';
+			output += '</li>\n<li>';
+			output += (count_5h >= 10) ? '<span class="ach_yes">Networking Achievement (10 with 5H) Eligible</span>' :
+				'<span class="ach_no">Networking Achievement (10 with 5H) Not Eligible</span> -- need ' + (10-count_5h) + ' more';
+			output += '</li>\n<li>';
+			output += (count_5h >= 20) ? '<span class="ach_yes">Popular Achievement (20 with 5H) Eligible</span>' :
+				'<span class="ach_no">Popular Achievement (20 with 5H) Not Eligible</span> -- need ' + (20-count_5h) + ' more';
+			output += '</li></ul>\n';
+			output += '<span class="result">Friends with 10+ hearts: ' + count_10h + '</span><ul>\n';
+			output += '<li>'
+			output += (count_10h >= 1) ? '<span class="ach_yes">Best Friends Achievement (1 with 10H) Eligible</span>' :
+				'<span class="ach_no">Best Friends Achievement (1 with 10H) Not Eligible</span> -- need ' + (1-count_10h) + ' more';
+			output += '</li>\n<li>';
+			output += (count_10h >= 8) ? '<span class="ach_yes">The Beloved Farmer Achievement (4 with 10H) Eligible</span>' :
+				'<span class="ach_no">The Beloved Farmer Achievement (4 with 10H) Not Eligible</span> -- need ' + (8-count_10h) + ' more';
+			output += '</li></ul>\n';
+				
+			document.getElementById('out').innerHTML = output;
+		};
+		reader.readAsText(file);
+
+		document.getElementById('out').innerHTML = output;
+	}
+	document.getElementById('file_select').addEventListener('change', handleFileSelect, false);
+	
+	function singleResult(key,value) {
+		return '<span class="key">' + key + ':</span> <span class="value">' + value + '</span><br />\n';
+	}
+}
+</script>
+
 </body>
 </html>
