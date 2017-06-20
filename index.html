@@ -4,17 +4,132 @@
 <title>Stardew Checkup</title>
 <meta charset="UTF-8" />
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<style type="text/css">
+	html {
+		min-height: 100%;
+		background-attachment: fixed;
+		background-color: #80a0f0; /* fallback color if gradients are not supported */
+		background-image: -webkit-linear-gradient(top, #80a0f0, #c0ffff, #40c040); /* For Chrome 25 and Safari 6, iOS 6.1, Android 4.3 */
+		background-image:    -moz-linear-gradient(top, #80a0f0, #c0ffff, #40c040); /* For Firefox (3.6 to 15) */
+		background-image:      -o-linear-gradient(top, #80a0f0, #c0ffff, #40c040); /* For old Opera (11.1 to 12.0) */ 
+		background-image:         linear-gradient(to bottom, #80a0f0, #c0ffff, #40c040); /* Standard syntax; must be last */
+	}
+	body {
+		/* background-color: #ffe0b0; */
+		margin: 15px;
+		color: #603000;
+	}
+	a:link { color: #d06000; }
+	a:visited { color: #804000; }
+	a:hover,a:active { color: #ffa000; }
+	.panel {
+		background-color: #ffe0b0;
+		padding: 8px;
+		margin: 5px;
+		border: 5px solid #804000;
+		border-radius: 15px;
+	}
+	#input-container { display: none; }
+	#output-container { display: none; }
+	.error {
+		font-weight: bold;
+		font-size: 150%;
+		color: #ff0000;
+	}
+	.path {
+		font-family: monospace;
+	}
+	#footer {
+		text-align: center;
+	}
+	.ach {
+		font-style: italic;
+	}
+	.ach_yes {
+		color: #004000;
+	}
+	.ach_yes:before {
+		content: "\2714 ";
+		margin-right: 3px;
+	}
+	.ach_no {
+		color: #c00000;
+	}
+	.ach_no:before {
+		content: "\2718 ";
+		margin-right: 3px;
+	}
+	.ach_list {
+		list-style: none;
+		padding-left: 35px;
+		margin-top: 0px;
+	}
+	.result:before {
+		content: "\25c8 ";
+		margin-right: 3px;
+	}
+	.result {
+		padding-left: 15px;
+	}
+	.need:before {
+		content: "! ";
+		font-weight: bold;
+		margin-right: 3px;
+	}
+	.need {
+		margin-left: 38px;
+	}
+	.need ul{
+		margin-left: 48px;
+		margin-top: 0px;
+	}
+</style>
 </head>
 <body>
+<div id="header" class="panel">
 <h1>Stardew Checkup</h1>
+<h2>About</h2>
 <p>This script checks a <a href="http://stardewvalley.net/">Stardew Valley</a> save file for various achievements and milestones and
 lets you know what is missing.</p>
-<noscript>Javascript appears to be unsupported by or disabled in your browser. Stardew Checkup will not work without it.</noscript>
+<p>The newest version of the script is available on GitHub Pages at <a href="https://mouseypounds.github.io/stardew-checkup/">https://mouseypounds.github.io/stardew-checkup/</a> and the source code repository is <a href="https://github.com/MouseyPounds/stardew-checkup">https://github.com/MouseyPounds/stardew-checkup</a>.</p>
 
-<div id='input-container'></div>
+</div>
 
+<div id="input-container" class="panel">
+<h2>Save File</h2>
+<p>Select a save file to check: <input type="file" id="file_select" /></p>
+<p>Standard save file locations are:
+<ul><li>Windows: <span class="path">%AppData%\StardewValley\Saves\</span></li>
+<li>Mac OSX & Linux: <span class="path">~/.config/StardewValley/Saves/</span></li>
+</ol>
+</div>
+
+<div id="output-container" class="panel">
+<h2>Results</h2>
 <output id="out"> </output>
+</div>
 
+<div id="changelog" class="panel">
+<noscript><span class="error">Javascript appears to be unsupported by or disabled in your browser. Stardew Checkup will not work without it.</span></noscript>
+<h2>Changelog</h2>
+<ul>
+<li>20 June 2017 - v1.0 - Initial Release
+</ul>
+</div>
+
+<div id="footer" class="panel">
+Stardew Valley resources: <a href="http://stardewvalley.net/">Website</a> || 
+<a href="http://store.steampowered.com/app/413150/Stardew_Valley/">Steam Page</a> ||
+<a href="https://www.gog.com/game/stardew_valley">GOG Page</a> ||
+<a href="http://www.stardewvalleywiki.com/">Wiki</a> || 
+<a href="http://community.playstarbound.com/index.php?forums/stardew-valley.72/">Forums</a> ||
+<a href="https://www.reddit.com/r/StardewValley">Subreddit</a>
+<br />
+Stardew Checkup written by MouseyPounds. 
+Stardew Valley developed by <a href="http://twitter.com/concernedape">ConcernedApe</a> and published by 
+<a href="http://blog.chucklefish.org/about/">Chucklefish Games</a>.
+</div>
 <script>
 window.onload=function(){
 	// Check for the various File API support.
@@ -23,21 +138,17 @@ window.onload=function(){
 		return;
 	}
 
-	// Add input fields
-	var para = document.createElement("p");
-	para.innerHTML = 'Select a save file to check: <input type="file" id="file_select" />';
-	document.getElementById('input-container').appendChild(para);
+	// Show input & output fields
+	$(document.getElementById('input-container')).show();
 	
 	function handleFileSelect(evt) {
 		var file = evt.target.files[0];
-		var output = "<h2>Results</h2>\n";
-		// A couple of generic variables to use in various checks
-		var result, count;
-
 		var reader = new FileReader();
 
 		reader.onload = function(e) {
-			var output = document.getElementById('out').innerHTML;
+			$(document.getElementById('changelog')).hide();
+			$(document.getElementById('output-container')).show();
+			var output = "";
 			var xmlDoc = $.parseXML(e.target.result);
 
 			output += '<h3>Summary</h3>\n';
@@ -46,22 +157,22 @@ window.onload=function(){
 				
 			output += '<h3>Money</h3>\n';
 			var money = Number($(xmlDoc).find('player > totalMoneyEarned').text());
-			output += '<span class="result">Total Earnings: ' + money + 'g</span><br /><ul>\n';
+			output += '<span class="result">Total Earnings: ' + money + 'g</span><br /><ul class="ach_list">\n';
 			output += '<li>'
-			output += (money >= 15000) ? '<span class="ach_yes">Greenhorn Achievement (15K earnings) Eligible</span>' :
-				'<span class="ach_no">Greenhorn Achievement (15K earnings) Not Eligible</span> -- need ' + (15000-money) + 'g more>';
+			output += (money >= 15000) ? '<span class="ach_yes"><span class="ach">Greenhorn</span> Achievement (15K earnings) Eligible</span>' :
+				'<span class="ach_no"><span class="ach">Greenhorn</span> Achievement (15K earnings) Not Eligible</span> -- need ' + (15000-money) + 'g more>';
 			output += '</li>\n<li>';
-			output += (money >= 50000) ? '<span class="ach_yes">Cowpoke Achievement (50K earnings) Eligible</span>' :
-				'<span class="ach_no">Cowpoke Achievement (50K earnings) Not Eligible</span> -- need ' + (50000-money) + 'g more';
+			output += (money >= 50000) ? '<span class="ach_yes"><span class="ach">Cowpoke</span> Achievement (50K earnings) Eligible</span>' :
+				'<span class="ach_no"><span class="ach">Cowpoke</span> Achievement (50K earnings) Not Eligible</span> -- need ' + (50000-money) + 'g more';
 			output += '</li>\n<li>';
-			output += (money >= 250000) ? '<span class="ach_yes">Homesteader Achievement (250K earnings) Eligible</span>' :
-				'<span class="ach_no">Homesteader Achievement (250K earnings) Not Eligible</span> -- need ' + (250000-money) + 'g more';
+			output += (money >= 250000) ? '<span class="ach_yes"><span class="ach">Homesteader</span> Achievement (250K earnings) Eligible</span>' :
+				'<span class="ach_no"><span class="ach">Homesteader</span> Achievement (250K earnings) Not Eligible</span> -- need ' + (250000-money) + 'g more';
 			output += '</li>\n<li>';
-			output += (money >= 1000000) ? '<span class="ach_yes">Millionaire Achievement (1M earnings) Eligible</span>' :
-				'<span class="ach_no">Millionaire Achievement (1M earnings) Not Eligible</span> -- need ' + (1000000-money) + 'g more';
+			output += (money >= 1000000) ? '<span class="ach_yes"><span class="ach">Millionaire</span> Achievement (1M earnings) Eligible</span>' :
+				'<span class="ach_no"><span class="ach">Millionaire</span> Achievement (1M earnings) Not Eligible</span> -- need ' + (1000000-money) + 'g more';
 			output += '</li>\n<li>';
-			output += (money >= 10000000) ? '<span class="ach_yes">Legend Achievement (10M earnings) Eligible</span>' :
-				'<span class="ach_no">Legend Achievement (10M earnings) Not Eligible</span> -- need ' + (10000000-money) + 'g more';
+			output += (money >= 10000000) ? '<span class="ach_yes"><span class="ach">Legend</span> Achievement (10M earnings) Eligible</span>' :
+				'<span class="ach_no"><span class="ach">Legend</span> Achievement (10M earnings) Not Eligible</span> -- need ' + (10000000-money) + 'g more';
 			output += '</li></ul>\n';
 
 			output += '<h3>Social</h3>\n';
@@ -74,33 +185,33 @@ window.onload=function(){
 				if (num >= 1250) { count_5h++; }
 				// TODO: check for maxed out hearts on everyone
 			});
-			output += '<span class="result">Friends with 5+ hearts: ' + count_5h + '</span><ul>\n';
+			output += '<span class="result">Friends with 5+ hearts: ' + count_5h + '</span><ul class="ach_list">\n';
 			output += '<li>'
-			output += (count_5h >= 1) ? '<span class="ach_yes">A New Friend Achievement (1 with 5♥) Eligible</span>' :
-				'<span class="ach_no">A New Friend Achievement (1 with 5♥) Not Eligible</span> -- need ' + (1-count_5h) + ' more';
+			output += (count_5h >= 1) ? '<span class="ach_yes"><span class="ach">A New Friend</span> Achievement (1 with 5&#x2764;) Eligible</span>' :
+				'<span class="ach_no"><span class="ach">A New Friend</span> Achievement (1 with 5&#x2764;) Not Eligible</span> -- need ' + (1-count_5h) + ' more';
 			output += '</li>\n<li>';
-			output += (count_5h >= 4) ? '<span class="ach_yes">Cliques Achievement (4 with 5♥) Eligible</span>' :
-				'<span class="ach_no">Cliques Achievement (4 with 5♥) Not Eligible</span> -- need ' + (4-count_5h) + ' more>\n';
+			output += (count_5h >= 4) ? '<span class="ach_yes"><span class="ach">Cliques</span> Achievement (4 with 5&#x2764;) Eligible</span>' :
+				'<span class="ach_no"><span class="ach">Cliques</span> Achievement (4 with 5&#x2764;) Not Eligible</span> -- need ' + (4-count_5h) + ' more>\n';
 			output += '</li>\n<li>';
-			output += (count_5h >= 10) ? '<span class="ach_yes">Networking Achievement (10 with 5♥) Eligible</span>' :
-				'<span class="ach_no">Networking Achievement (10 with 5♥) Not Eligible</span> -- need ' + (10-count_5h) + ' more';
+			output += (count_5h >= 10) ? '<span class="ach_yes"><span class="ach">Networking</span> Achievement (10 with 5&#x2764;) Eligible</span>' :
+				'<span class="ach_no"><span class="ach">Networking</span> Achievement (10 with 5&#x2764;) Not Eligible</span> -- need ' + (10-count_5h) + ' more';
 			output += '</li>\n<li>';
-			output += (count_5h >= 20) ? '<span class="ach_yes">Popular Achievement (20 with 5♥) Eligible</span>' :
-				'<span class="ach_no">Popular Achievement (20 with 5♥) Not Eligible</span> -- need ' + (20-count_5h) + ' more';
+			output += (count_5h >= 20) ? '<span class="ach_yes"><span class="ach">Popular</span> Achievement (20 with 5&#x2764;) Eligible</span>' :
+				'<span class="ach_no"><span class="ach">Popular</span> Achievement (20 with 5&#x2764;) Not Eligible</span> -- need ' + (20-count_5h) + ' more';
 			output += '</li></ul>\n';
-			output += '<span class="result">Friends with 10+ hearts: ' + count_10h + '</span><ul>\n';
+			output += '<span class="result">Friends with 10+ hearts: ' + count_10h + '</span><ul class="ach_list">\n';
 			output += '<li>'
-			output += (count_10h >= 1) ? '<span class="ach_yes">Best Friends Achievement (1 with 10♥) Eligible</span>' :
-				'<span class="ach_no">Best Friends Achievement (1 with 10♥) Not Eligible</span> -- need ' + (1-count_10h) + ' more';
+			output += (count_10h >= 1) ? '<span class="ach_yes"><span class="ach">Best Friends</span> Achievement (1 with 10&#x2764;) Eligible</span>' :
+				'<span class="ach_no"><span class="ach">Best Friends</span> Achievement (1 with 10&#x2764;) Not Eligible</span> -- need ' + (1-count_10h) + ' more';
 			output += '</li>\n<li>';
-			output += (count_10h >= 8) ? '<span class="ach_yes">The Beloved Farmer Achievement (8 with 10♥) Eligible</span>' :
-				'<span class="ach_no">The Beloved Farmer Achievement (8 with 10♥) Not Eligible</span> -- need ' + (8-count_10h) + ' more';
+			output += (count_10h >= 8) ? '<span class="ach_yes"><span class="ach">The Beloved Farmer</span> Achievement (8 with 10&#x2764;) Eligible</span>' :
+				'<span class="ach_no"><span class="ach">The Beloved Farmer</span> Achievement (8 with 10&#x2764;) Not Eligible</span> -- need ' + (8-count_10h) + ' more';
 			output += '</li></ul>\n';
 			
 			var spouse = '(None)';
 			var needs = [];
-			count = 0;
-			result = $(xmlDoc).find('player > spouse')
+			var count = 0;
+			var result = $(xmlDoc).find('player > spouse')
 			if (result.length > 0) {
 				spouse = result.text();
 				count++;
@@ -125,9 +236,9 @@ window.onload=function(){
 			} else {
 				needs.push("2 children");
 			}
-			output += '<span class="result">Children: ' + children + '</span><ul><li>\n';
-			output += (count >= 3) ? '<span class="ach_yes">Full House Achievement (Married + 2 kids) Eligible</span>' :
-				'<span class="ach_no">Full House Achievement (Married + 2 kids) Not Eligible</span> -- need ' + needs.join('; ');
+			output += '<span class="result">Children: ' + children + '</span><ul class="ach_list"><li>\n';
+			output += (count >= 3) ? '<span class="ach_yes"><span class="ach">Full House</span> Achievement (Married + 2 kids) Eligible</span>' :
+				'<span class="ach_no"><span class="ach">Full House</span> Achievement (Married + 2 kids) Not Eligible</span> -- need ' + needs.join('; ');
 			output += '</li></ul>\n';
 
 			//TODO: Joja vs CC.
@@ -240,17 +351,17 @@ window.onload=function(){
 				craft_count++;
 			});
 			
-			output += '<span class="result">Know  ' + known_count + ' recipes and have cooked ' + craft_count + 
-				' of them (out of ' + recipe_count + ' total)</span><ul>\n';
+			output += '<span class="result">Knows  ' + known_count + ' recipes and has cooked ' + craft_count + 
+				' of them (out of ' + recipe_count + ' total)</span><ul class="ach_list">\n';
 			output += '<li>'
-			output += (craft_count >= 10) ? '<span class="ach_yes">Cook Achievement (10 recipes cooked) Eligible</span>' :
-				'<span class="ach_no">Cook Achievement (10 recipes cooked) Not Eligible</span> -- need ' + (10-craft_count) + ' more';
+			output += (craft_count >= 10) ? '<span class="ach_yes"><span class="ach">Cook</span> Achievement (10 recipes cooked) Eligible</span>' :
+				'<span class="ach_no"><span class="ach">Cook</span> Achievement (10 recipes cooked) Not Eligible</span> -- need ' + (10-craft_count) + ' more';
 			output += '</li>\n<li>';
-			output += (craft_count >= 25) ? '<span class="ach_yes">Sous Chef Achievement (25 recipes cooked) Eligible</span>' :
-				'<span class="ach_no">Sous Chef Achievement (25 recipes cooked) Not Eligible</span> -- need ' + (25-craft_count) + ' more';
+			output += (craft_count >= 25) ? '<span class="ach_yes"><span class="ach">Sous Chef</span> Achievement (25 recipes cooked) Eligible</span>' :
+				'<span class="ach_no"><span class="ach">Sous Chef</span> Achievement (25 recipes cooked) Not Eligible</span> -- need ' + (25-craft_count) + ' more';
 			output += '</li>\n<li>';
-			output += (craft_count >= recipe_count) ? '<span class="ach_yes">Gourmet Chef Achievement (all recipes cooked) Eligible</span>' :
-				'<span class="ach_no">Gourmet Chef Achievement (all recipes cooked) Not Eligible</span> -- need ' + (recipe_count-craft_count) + ' more';
+			output += (craft_count >= recipe_count) ? '<span class="ach_yes"><span class="ach">Gourmet Chef</span> Achievement (all recipes cooked) Eligible</span>' :
+				'<span class="ach_no"><span class="ach">Gourmet Chef</span> Achievement (all recipes cooked) Not Eligible</span> -- need ' + (recipe_count-craft_count) + ' more';
 			output += '</li></ul>\n';
 			// We are assuming it is impossible to craft something without knowing the recipe.
 			if (craft_count < recipe_count) {
@@ -265,9 +376,15 @@ window.onload=function(){
 					} 
 				}
 				// TODO: Test knowing all recipes but not having crafted them in both cooking and crafting
-				output += '<span class="results">Left to cook:</span><ul><li>Known<ol>';
-				output += need_c.sort().join('') + '</ol></li>\n<li>Unknown<ol>';
-				output += need_k.sort().join('') + '</ol></li></ul>\n';
+				output += '<span class="need">Left to cook:<ul>'
+				if (need_c.length > 0) {
+					output += '<li>Known Recipes<ol>' + need_c.sort().join('') + '</ol></li>\n';
+				}
+				if (need_k.length > 0) {
+					output += '<li>Unknown Recipes<ol>' + need_k.sort().join('') + '</ol></li>\n';
+				}
+
+				output += '</ul></span>\n';
 			}
 
 			output += '<h3>Crafting</h3>\n';
@@ -316,21 +433,24 @@ window.onload=function(){
 				}
 			});
 
-			output += '<span class="result">Know  ' + known_count + ' recipes and have crafted ' + craft_count + 
-				' of them (out of ' + recipes.length + ' total)</span><ul>\n';
+			output += '<span class="result">Knows ' + known_count + ' recipes and has crafted ' + craft_count + 
+				' of them (out of ' + recipes.length + ' total)</span><ul class="ach_list">\n';
 			output += '<li>'
-			output += (craft_count >= 15) ? '<span class="ach_yes">D.I.Y. Achievement (15 recipes crafted) Eligible</span>' :
-				'<span class="ach_no">D.I.Y. Achievement (15 recipes crafted) Not Eligible</span> -- need ' + (15-craft_count) + ' more';
+			output += (craft_count >= 15) ? '<span class="ach_yes"><span class="ach">D.I.Y.</span> Achievement (15 recipes crafted) Eligible</span>' :
+				'<span class="ach_no"><span class="ach">D.I.Y.</span> Achievement (15 recipes crafted) Not Eligible</span> -- need ' + (15-craft_count) + ' more';
 			output += '</li>\n<li>';
-			output += (craft_count >= 30) ? '<span class="ach_yes">Artisan Achievement (30 recipes crafted) Eligible</span>' :
-				'<span class="ach_no">Artisan Achievement (30 recipes crafted) Not Eligible</span> -- need ' + (30-craft_count) + ' more';
+			output += (craft_count >= 30) ? '<span class="ach_yes"><span class="ach">Artisan</span> Achievement (30 recipes crafted) Eligible</span>' :
+				'<span class="ach_no"><span class="ach">Artisan</span> Achievement (30 recipes crafted) Not Eligible</span> -- need ' + (30-craft_count) + ' more';
 			output += '</li>\n<li>';
-			output += (craft_count >= recipe_count) ? '<span class="ach_yes">Craft Master Achievement (all recipes cooked) Eligible</span>' :
-				'<span class="ach_no">Craft Master Achievement (all recipes cooked) Not Eligible</span> -- need ' + (recipes.length-craft_count) + ' more';
+			output += (craft_count >= recipe_count) ? '<span class="ach_yes"><span class="ach">Craft Master</span> Achievement (all recipes cooked) Eligible</span>' :
+				'<span class="ach_no"><span class="ach">Craft Master</span> Achievement (all recipes cooked) Not Eligible</span> -- need ' + (recipes.length-craft_count) + ' more';
 			output += '</li></ul>\n';
 			if (craft_count < recipes.length) {
-				output += '<span class="results">Left to craft:</span><ul><li>Known<ol>';
-				output += need_c.sort().join('') + '</ol></li>\n';
+				output += '<span class="need">Left to craft:<ul>';
+				
+				if (need_c.length > 0) {
+					output += '<li>Known Recipes<ol>' + need_c.sort().join('') + '</ol></li>\n';
+				}
 
 				if (known_count < recipes.length) {
 					var need_k = [];
@@ -340,16 +460,15 @@ window.onload=function(){
 							need_k.push('<li>' + r + '</li>');
 						} 
 					}
-					output += '<li>Unknown<ol>' + need_k.sort().join('') + '</ol></li>';
+					output += '<li>Unknown Recipes<ol>' + need_k.sort().join('') + '</ol></li>';
 				}
-				output += '</ul>\n';
+				output += '</ul></span>\n';
 			}
 			
 			document.getElementById('out').innerHTML = output;
 		};
 		reader.readAsText(file);
 
-		document.getElementById('out').innerHTML = output;
 	}
 	document.getElementById('file_select').addEventListener('change', handleFileSelect, false);
 	
