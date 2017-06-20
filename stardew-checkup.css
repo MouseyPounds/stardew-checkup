@@ -1,0 +1,86 @@
+/* stardew-checkup.css
+ * https://mouseypounds.github.io/stardew-checkup/
+ */
+
+html {
+	min-height: 100%;
+	background-attachment: fixed;
+	background-color: #80a0f0; /* fallback color if gradients are not supported */
+	background-image: -webkit-linear-gradient(top, #80a0f0, #c0ffff, #40c040); /* For Chrome 25 and Safari 6, iOS 6.1, Android 4.3 */
+	background-image:    -moz-linear-gradient(top, #80a0f0, #c0ffff, #40c040); /* For Firefox (3.6 to 15) */
+	background-image:      -o-linear-gradient(top, #80a0f0, #c0ffff, #40c040); /* For old Opera (11.1 to 12.0) */ 
+	background-image:         linear-gradient(to bottom, #80a0f0, #c0ffff, #40c040); /* Standard syntax; must be last */
+}
+body {
+	/* background-color: #ffe0b0; */
+	margin: 15px;
+	color: #603000;
+}
+a:link { color: #d06000; }
+a:visited { color: #804000; }
+a:hover,a:active { color: #ffa000; }
+.panel {
+	background-color: #ffe0b0;
+	padding: 8px;
+	margin: 5px;
+	border: 5px solid #804000;
+	border-radius: 15px;
+}
+#input-container { display: none; }
+#output-container { display: none; }
+.error {
+	font-weight: bold;
+	font-size: 150%;
+	color: #ff0000;
+}
+.path {
+	font-family: monospace;
+}
+#footer {
+	text-align: center;
+}
+.ach {
+	font-style: italic;
+}
+.ach_yes,.ms_yes {
+	color: #004000;
+}
+.ach_yes:before,.ms_yes:before {
+	content: "\2714 ";
+	margin-right: 3px;
+}
+.ach_no,.ms_no {
+	color: #c00000;
+}
+.ach_no:before,.ms_no:before {
+	content: "\2718 ";
+	margin-right: 3px;
+}
+.ach_list {
+	list-style: none;
+	padding-left: 35px;
+	margin-top: 0px;
+}
+.result:before {
+	content: "\25c8 ";
+	margin-right: 3px;
+}
+.result {
+	padding-left: 15px;
+}
+.need:before {
+	content: "! ";
+	font-weight: bold;
+	margin-right: 3px;
+}
+.need {
+	margin-left: 38px;
+}
+.need > ul{
+	margin-left: 48px;
+	margin-top: 0px;
+}
+.need > ol{
+	margin-left: 48px;
+	margin-top: 0px;
+}
