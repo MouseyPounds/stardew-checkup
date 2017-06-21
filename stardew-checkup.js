@@ -24,6 +24,22 @@ window.onload = function () {
 		return x.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",");
 	}
 
+	function getAchieveString(name, desc, yes) {
+		if (yes) {
+			return('<span class="ach_yes"><span class="ach">' + name + '</span> Achievement (' + desc + ') requirements met</span>');
+		} else {
+			return('<span class="ach_no"><span class="ach">' + name + '</span> Achievement (' + desc + ') requirements not met</span> -- need ');
+		}
+	}
+
+	function getMilestoneString(desc, yes) {
+		if (yes) {
+			return('<span class="ms_yes">' + desc + ' <span class="ach">(no associated achievement)</span> requirements met</span>');
+		} else {
+			return('<span class="ms_no">' + desc + ' <span class="ach">(no associated achievement)</span> requirements not met</span> -- need ');
+		}
+	}
+
 	// Individual chunks of save parsing.
 	// Each receives the xmlDoc object to parse and returns HTML to output.
 	function parseSummary(xmlDoc) {
@@ -58,20 +74,20 @@ window.onload = function () {
 
 		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' has earned a total of ' + addCommas(money) + 'g.</span><br />\n';
 		output += '<ul class="ach_list"><li>';
-		output += (money >= 15e3) ? '<span class="ach_yes"><span class="ach">Greenhorn</span> Achievement (earn 15,000g) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Greenhorn</span> Achievement (earn 15,000g) requirements not met</span> -- need ' + addCommas(15e3 - money) + 'g more';
+		output += (money >= 15e3) ? getAchieveString('Greenhorn', 'earn 15,000g', 1) :
+				getAchieveString('Greenhorn', 'earn 15,000g', 0) + addCommas(15e3 - money) + 'g more';
 		output += '</li>\n<li>';
-		output += (money >= 5e4) ? '<span class="ach_yes"><span class="ach">Cowpoke</span> Achievement (earn 50,000g) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Cowpoke</span> Achievement (earn 50,000g) requirements not met</span> -- need ' + addCommas(5e4 - money) + 'g more';
+		output += (money >= 5e4) ? getAchieveString('Cowpoke', 'earn 50,000g', 1) :
+				getAchieveString('Cowpoke', 'earn 50,000g', 0) + addCommas(5e4 - money) + 'g more';
 		output += '</li>\n<li>';
-		output += (money >= 25e4) ? '<span class="ach_yes"><span class="ach">Homesteader</span> Achievement (earn 250,000g) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Homesteader</span> Achievement (earn 250,000g) requirements not met</span> -- need ' + addCommas(25e4 - money) + 'g more';
+		output += (money >= 25e4) ? getAchieveString('Homesteader', 'earn 250,000g', 1) :
+				getAchieveString('Homesteader', 'earn 250,000g', 0) + addCommas(25e4 - money) + 'g more';
 		output += '</li>\n<li>';
-		output += (money >= 1e6) ? '<span class="ach_yes"><span class="ach">Millionaire</span> Achievement (earn 1,000,000g) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Millionaire</span> Achievement (earn 1,000,000g) requirements not met</span> -- need ' + addCommas(1e6 - money) + 'g more';
+		output += (money >= 1e6) ? getAchieveString('Millionaire', 'earn 1,000,000g', 1) :
+				getAchieveString('Millionaire', 'earn 1,000,000g', 0) + addCommas(1e6 - money) + 'g more';
 		output += '</li>\n<li>';
-		output += (money >= 1e7) ? '<span class="ach_yes"><span class="ach">Legend</span> Achievement (earn 10,000,000g) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Legend</span> Achievement (earn 10,000,000g) requirements not met</span> -- need ' + addCommas(1e7 - money) + 'g more';
+		output += (money >= 1e7) ? getAchieveString('Legend', 'earn 10,000,000g', 1) :
+				getAchieveString('Legend', 'earn 10,000,000g', 0) + addCommas(1e7 - money) + 'g more';
 		output += '</li></ul>\n';
 		return output;
 	}
@@ -91,25 +107,25 @@ window.onload = function () {
 		});
 		output += '<span class="result">' + farmer + ' has ' + count_5h + ' relationships of 5+ hearts.</span><ul class="ach_list">\n';
 		output += '<li>';
-		output += (count_5h >= 1) ? '<span class="ach_yes"><span class="ach">A New Friend</span> Achievement (5&#x2764; with 1 person) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">A New Friend</span> Achievement (5&#x2764; with 1 person) requirements not met</span> -- need ' + (1 - count_5h) + ' more';
+		output += (count_5h >= 1) ? getAchieveString('A New Friend', '5&#x2764; with 1 person', 1) :
+				getAchieveString('A New Friend', '5&#x2764; with 1 person', 0) + (1 - count_5h) + ' more';
 		output += '</li>\n<li>';
-		output += (count_5h >= 4) ? '<span class="ach_yes"><span class="ach">Cliques</span> Achievement (5&#x2764; with 4 people) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Cliques</span> Achievement (5&#x2764; with 4 people) requirements not met</span> -- need ' + (4 - count_5h) + ' more\n';
+		output += (count_5h >= 4) ? getAchieveString('Cliques', '5&#x2764; with 4 people', 1) :
+				getAchieveString('Cliques', '5&#x2764; with 4 people', 0) + (4 - count_5h) + ' more\n';
 		output += '</li>\n<li>';
-		output += (count_5h >= 10) ? '<span class="ach_yes"><span class="ach">Networking</span> Achievement (5&#x2764; with 10 people) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Networking</span> Achievement (5&#x2764; with 10 people) requirements not met</span> -- need ' + (10 - count_5h) + ' more';
+		output += (count_5h >= 10) ? getAchieveString('Networking', '5&#x2764; with 10 people', 1) :
+				getAchieveString('Networking', '5&#x2764; with 10 people', 0) + (10 - count_5h) + ' more';
 		output += '</li>\n<li>';
-		output += (count_5h >= 20) ? '<span class="ach_yes"><span class="ach">Popular</span> Achievement (5&#x2764; with 20 people) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Popular</span> Achievement (5&#x2764; with 20 people) requirements not met</span> -- need ' + (20 - count_5h) + ' more';
+		output += (count_5h >= 20) ? getAchieveString('Popular', '5&#x2764; with 20 people', 1) :
+				getAchieveString('Popular', '5&#x2764; with 20 people', 0) + (20 - count_5h) + ' more';
 		output += '</li></ul>\n';
 		output += '<span class="result">' + farmer + ' has ' + count_10h + ' relationships of 10+ hearts.</span><ul class="ach_list">\n';
 		output += '<li>';
-		output += (count_10h >= 1) ? '<span class="ach_yes"><span class="ach">Best Friends</span> Achievement (10&#x2764; with 1 person) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Best Friends</span> Achievement (10&#x2764; with 1 person) requirements not met</span> -- need ' + (1 - count_10h) + ' more';
+		output += (count_10h >= 1) ? getAchieveString('Best Friends', '10&#x2764; with 1 person', 1) :
+				getAchieveString('Best Friends', '10&#x2764; with 1 person', 0) + (1 - count_10h) + ' more';
 		output += '</li>\n<li>';
-		output += (count_10h >= 8) ? '<span class="ach_yes"><span class="ach">The Beloved Farmer</span> Achievement (10&#x2764; with 8 people) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">The Beloved Farmer</span> Achievement (10&#x2764; with 8 people) requirements not met</span> -- need ' + (8 - count_10h) + ' more';
+		output += (count_10h >= 8) ? getAchieveString('The Beloved Farmer', '10&#x2764; with 8 people', 1) :
+				getAchieveString('The Beloved Farmer', '10&#x2764; with 8 people', 0) + (8 - count_10h) + ' more';
 		output += '</li></ul>\n';
 		return output;
 	}
@@ -146,20 +162,20 @@ window.onload = function () {
 			needs.push("2 children");
 		}
 		output += '<span class="result">Children: ' + children + '</span><ul class="ach_list"><li>\n';
-		output += (count >= 3) ? '<span class="ach_yes"><span class="ach">Full House</span> Achievement (Married + 2 kids) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Full House</span> Achievement (Married + 2 kids) requirements not met</span> -- need ' + needs.join('; ');
+		output += (count >= 3) ? getAchieveString('Full House', 'Married + 2 kids', 1) :
+				getAchieveString('Full House', 'Married + 2 kids', 0) + needs.join('; ');
 		output += '</li></ul>\n';
 
 		output += '<span class="result">Farmhouse has been upgraded ' + houseUpgrades + ' time(s); 3 upgrades are possible.</span><br /><ul class="ach_list">\n';
 		output += '<li>';
-		output += (houseUpgrades >= 1) ? '<span class="ach_yes"><span class="ach">Moving Up</span> Achievement (1 upgrade) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Moving Up</span> Achievement (1 upgrade) requirements not met</span> -- need ' + (1 - houseUpgrades) + ' more';
+		output += (houseUpgrades >= 1) ? getAchieveString('Moving Up', '1 upgrade', 1) :
+				getAchieveString('Moving Up', '1 upgrade', 0) + (1 - houseUpgrades) + ' more';
 		output += '</li>\n<li>';
-		output += (houseUpgrades >= 2) ? '<span class="ach_yes"><span class="ach">Living Large</span> Achievement (2 upgrades) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Living Large</span> Achievement (2 upgrades) requirements not met</span> -- need ' + (2 - houseUpgrades) + ' more';
+		output += (houseUpgrades >= 2) ? getAchieveString('Living Large', '2 upgrades', 1) :
+				getAchieveString('Living Large', '2 upgrades', 0) + (2 - houseUpgrades) + ' more';
 		output += '</li>\n<li>';
-		output += (houseUpgrades >= 3) ? '<span class="ms_yes">All upgrades <span class="ach">(no associated achievement)</span> completed </span>' :
-				'<span class="ms_no">All upgrades <span class="ach">(no associated achievement)</span> not completed</span> -- need ' + (3 - houseUpgrades) + ' more';
+		output += (houseUpgrades >= 3) ? getMilestoneString('House fully upgraded', 1) :
+				getMilestoneString('House fully upgraded', 0) + (3 - houseUpgrades) + ' more';
 		output += '</li></ul>\n';
 		return output;
 	}
@@ -279,14 +295,14 @@ window.onload = function () {
 		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' knows  ' + known_count + ' recipe(s) and has cooked ' +
 			craft_count + ' of them; there are ' + recipe_count + ' total recipes.</span><ul class="ach_list">\n';
 		output += '<li>';
-		output += (craft_count >= 10) ? '<span class="ach_yes"><span class="ach">Cook</span> Achievement (cook 10 different recipes) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Cook</span> Achievement (cook 10 different recipes) requirements not met</span> -- need ' + (10 - craft_count) + ' more';
+		output += (craft_count >= 10) ? getAchieveString('Cook', 'cook 10 different recipes', 1) :
+				getAchieveString('Cook', 'cook 10 different recipes', 0) + (10 - craft_count) + ' more';
 		output += '</li>\n<li>';
-		output += (craft_count >= 25) ? '<span class="ach_yes"><span class="ach">Sous Chef</span> Achievement (cook 25 different recipes) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Sous Chef</span> Achievement (cook 25 different recipes) requirements not met</span> -- need ' + (25 - craft_count) + ' more';
+		output += (craft_count >= 25) ? getAchieveString('Sous Chef', 'cook 25 different recipes', 1) :
+				getAchieveString('Sous Chef', 'cook 25 different recipes', 0) + (25 - craft_count) + ' more';
 		output += '</li>\n<li>';
-		output += (craft_count >= recipe_count) ? '<span class="ach_yes"><span class="ach">Gourmet Chef</span> Achievement (cook every recipe) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Gourmet Chef</span> Achievement (cook every recipe) requirements not met</span> -- need ' + (recipe_count - craft_count) + ' more';
+		output += (craft_count >= recipe_count) ? getAchieveString('Gourmet Chef', 'cook every recipe', 1) :
+				getAchieveString('Gourmet Chef', 'cook every recipe', 0) + (recipe_count - craft_count) + ' more';
 		output += '</li></ul>\n';
 		// We are assuming it is impossible to craft something without knowing the recipe.
 		if (craft_count < recipe_count) {
@@ -365,14 +381,14 @@ window.onload = function () {
 		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' knows ' + known_count + ' recipe(s) and has crafted ' +
 				craft_count + ' of them; there are ' + recipe_count + ' total recipes.</span><ul class="ach_list">\n';
 		output += '<li>';
-		output += (craft_count >= 15) ? '<span class="ach_yes"><span class="ach">D.I.Y.</span> Achievement (craft 15 different items) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">D.I.Y.</span> Achievement (craft 15 different items) requirements not met</span> -- need ' + (15 - craft_count) + ' more';
+		output += (craft_count >= 15) ? getAchieveString('D.I.Y.', 'craft 15 different items', 1) :
+				getAchieveString('D.I.Y.', 'craft 15 different items', 0) + (15 - craft_count) + ' more';
 		output += '</li>\n<li>';
-		output += (craft_count >= 30) ? '<span class="ach_yes"><span class="ach">Artisan</span> Achievement (craft 30 different items) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Artisan</span> Achievement (craft 30 different items) requirements not met</span> -- need ' + (30 - craft_count) + ' more';
+		output += (craft_count >= 30) ? getAchieveString('Artisan', 'craft 30 different items', 1) :
+				getAchieveString('Artisan', 'craft 30 different items', 0) + (30 - craft_count) + ' more';
 		output += '</li>\n<li>';
-		output += (craft_count >= recipe_count) ? '<span class="ach_yes"><span class="ach">Craft Master</span> Achievement (craft every item) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Craft Master</span> Achievement (craft every item) requirements not met</span> -- need ' + (recipe_count - craft_count) + ' more';
+		output += (craft_count >= recipe_count) ? getAchieveString('Craft Master', 'craft every item', 1) :
+				getAchieveString('Craft Master', 'craft every item', 0) + (recipe_count - craft_count) + ' more';
 		output += '</li></ul>\n';
 		if (craft_count < recipe_count) {
 			output += '<span class="need">Left to craft:<ul>';
@@ -486,17 +502,17 @@ window.onload = function () {
 		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' has caught ' + count + ' total fish of ' + craft_count +
 				' different type(s); there are ' + recipe_count + ' total types.</span><ul class="ach_list">\n';
 		output += '<li>';
-		output += (count >= 100) ? '<span class="ach_yes"><span class="ach">Mother Catch</span> Achievement (catch 100 fish) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Mother Catch</span> Achievement (catch 100 fish) requirements not met</span> -- need ' + (100 - count) + ' more';
+		output += (count >= 100) ? getAchieveString('Mother Catch', 'catch 100 fish', 1) :
+				getAchieveString('Mother Catch', 'catch 100 fish', 0) + (100 - count) + ' more';
 		output += '</li>\n<li>';
-		output += (craft_count >= 10) ? '<span class="ach_yes"><span class="ach">Fisherman</span> Achievement (catch 10 different fish) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Fisherman</span> Achievement (catch 10 different fish) requirements not met</span> -- need ' + (10 - craft_count) + ' more';
+		output += (craft_count >= 10) ? getAchieveString('Fisherman', 'catch 10 different fish', 1) :
+				getAchieveString('Fisherman', 'catch 10 different fish', 0) + (10 - craft_count) + ' more';
 		output += '</li>\n<li>';
-		output += (craft_count >= 24) ? '<span class="ach_yes"><span class="ach">Ol\' Mariner</span> Achievement (catch 24 different fish) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Ol\' Mariner</span> Achievement (catch 24 different fish) requirements not met</span> -- need ' + (24 - craft_count) + ' more';
+		output += (craft_count >= 24) ? getAchieveString('Ol\' Mariner', 'catch 24 different fish', 1) :
+				getAchieveString('Ol\' Mariner', 'catch 24 different fish', 0) + (24 - craft_count) + ' more';
 		output += '</li>\n<li>';
-		output += (craft_count >= recipe_count) ? '<span class="ach_yes"><span class="ach">Master Angler</span> Achievement (catch every fish) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Master Angler</span> Achievement (catch every fish) requirements not met</span> -- need ' + (recipe_count - craft_count) + ' more';
+		output += (craft_count >= recipe_count) ? getAchieveString('Master Angler', 'catch every fish', 1) :
+				getAchieveString('Master Angler', 'catch every fish', 0) + (recipe_count - craft_count) + ' more';
 		output += '</li></ul>\n';
 		if (craft_count < recipe_count) {
 			need = [];
@@ -667,8 +683,8 @@ window.onload = function () {
 		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' has shipped  ' + craft_count +
 				' basic item(s); there are ' + recipe_count + ' total items.</span><ul class="ach_list">\n';
 		output += '<li>';
-		output += (craft_count >= recipe_count) ? '<span class="ach_yes"><span class="ach">Full Shipment</span> Achievement (ship every item) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Full Shipment</span> Achievement (ship every item) requirements not met</span> -- need ' + (recipe_count - craft_count) + ' more';
+		output += (craft_count >= recipe_count) ? getAchieveString('Full Shipment', 'ship every item', 1) :
+				getAchieveString('Full Shipment', 'ship every item', 0) + (recipe_count - craft_count) + ' more';
 		output += '</li></ul>\n';
 		if (craft_count < recipe_count) {
 			need = [];
@@ -764,13 +780,13 @@ window.onload = function () {
 		output += (max_ship > 0) ? '<span class="result">' + farmer + ' has shipped ' + max_crop + ' the most (' + max_ship + ').</span>' :
 				'<span class="result">' + farmer + ' has not shipped any crops yet.</span>';
 		output += '<ul class="ach_list"><li>\n';
-		output += (max_ship >= 300) ? '<span class="ach_yes"><span class="ach">Monoculture</span> Achievement (ship 300 of one crop) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Monoculture</span> Achievement (ship 300 of one crop) requirements not met</span> -- need ' + (300 - max_ship) + ' more ' + max_crop;
+		output += (max_ship >= 300) ? getAchieveString('Monoculture', 'ship 300 of one crop', 1) :
+				getAchieveString('Monoculture', 'ship 300 of one crop', 0) + (300 - max_ship) + ' more ' + max_crop;
 		output += '</li></ul>\n';
 		output += '<span class="result">' + farmer + ' has shipped 15 or more of each of ' + craft_count +
 				' different crop(s); there are ' + recipe_count + ' total crops.</span><ul class="ach_list">\n<li>';
-		output += (craft_count >= recipe_count) ? '<span class="ach_yes"><span class="ach">Polyculture</span> Achievement (ship 15 of each crop) requirements met</span>' :
-				'<span class="ach_no"><span class="ach">Polyculture</span> Achievement (ship 15 of each crop) requirements not met</span> -- need more of ' + (recipe_count - craft_count) + ' crops';
+		output += (craft_count >= recipe_count) ? getAchieveString('Polyculture', 'ship 15 of each crop', 1) :
+				getAchieveString('Polyculture', 'ship 15 of each crop', 0) + ' more of ' + (recipe_count - craft_count) + ' crops';
 		output += '</li></ul>\n';
 		if (craft_count < recipe_count) {
 			need = [];
@@ -792,6 +808,41 @@ window.onload = function () {
 		return output;
 	}
 
+/*	function parseSkills(xmlDoc) {
+		var output = '<h3>Skills</h3>\n',
+			skills = ["Farming", "Fishing",	"Foraging",	"Mining", "Combat"],
+			xp = {},
+			i = 0,
+			num,
+			count = 0,
+			need = [];
+			
+		$(xmlDoc).find('player > experiencePoints > int').each(function () {
+			// We need to skip the unused 6th entry (Luck)
+			if (i < 5) {
+				num = Number($(this).text());
+				xp[skills[i]] = num;
+				if (num < 15000) {
+					need.push('<li>' + skills[i] + ' -- need ' + (15000 - num) + ' more xp</li>\n');
+				} else {
+					count++;
+				}
+				i++;
+			}
+		});
+
+
+		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' has reached level 10 in ' + count + ' skills.</span><br />\n';
+		output += '<ul class="ach_list"><li>';
+		output += (count >= 1) ? getAchieveString('Singular Talent', 'level 10 in a skill', 1) :
+				getAchieveString('Singular Talent', 'level 10 in a skill', 0) + (1 - count) + 'g more';
+		output += '</li>\n<li>';
+		output += (count >= 5) ? getAchieveString('Master of the Five Ways', 'level 10 in every skill', 1) :
+				getAchieveString('Master of the Five Ways', 'level 10 in every skill', 0) + addCommas(5e4 - money) + 'g more';
+		output += '</li></ul>\n';
+		return output;
+	}
+*/
 /*
 	function parseX(xmlDoc) {
 		var output = '<h3></h3>\n',
