@@ -147,7 +147,7 @@ window.onload = function () {
 		}
 		output += '<span class="result">Spouse: ' + spouse + '</span><br />\n';
 		// not sure how to get the [] attribute selectors to recognize xsi:type as valid attribute name, so working around it
-		result = $(xmlDoc).find('locations > GameLocation > Characters > NPC').each(function () {
+		$(xmlDoc).find('locations > GameLocation > Characters > NPC').each(function () {
 			if ($(this).attr('xsi:type') === 'Child') {
 				count++;
 				child_name.push($(this).find('name').text());
@@ -292,7 +292,7 @@ window.onload = function () {
 			craft_count++;
 		});
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' knows  ' + known_count + ' recipe(s) and has cooked ' +
+		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' knows ' + known_count + ' recipe(s) and has cooked ' +
 			craft_count + ' of them; there are ' + recipe_count + ' total recipes.</span><ul class="ach_list">\n';
 		output += '<li>';
 		output += (craft_count >= 10) ? getAchieveString('Cook', 'cook 10 different recipes', 1) :
@@ -680,7 +680,7 @@ window.onload = function () {
 			}
 		});
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' has shipped  ' + craft_count +
+		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' has shipped ' + craft_count +
 				' basic item(s); there are ' + recipe_count + ' total items.</span><ul class="ach_list">\n';
 		output += '<li>';
 		output += (craft_count >= recipe_count) ? getAchieveString('Full Shipment', 'ship every item', 1) :
@@ -808,7 +808,7 @@ window.onload = function () {
 		return output;
 	}
 
-/*	function parseSkills(xmlDoc) {
+	function parseSkills(xmlDoc) {
 		var output = '<h3>Skills</h3>\n',
 			skills = ["Farming", "Fishing",	"Foraging",	"Mining", "Combat"],
 			xp = {},
@@ -816,14 +816,14 @@ window.onload = function () {
 			num,
 			count = 0,
 			need = [];
-			
+
 		$(xmlDoc).find('player > experiencePoints > int').each(function () {
 			// We need to skip the unused 6th entry (Luck)
 			if (i < 5) {
 				num = Number($(this).text());
 				xp[skills[i]] = num;
 				if (num < 15000) {
-					need.push('<li>' + skills[i] + ' -- need ' + (15000 - num) + ' more xp</li>\n');
+					need.push('<li>' + skills[i] + ' (' + (15000 - num) + ' more xp)</li>\n');
 				} else {
 					count++;
 				}
@@ -835,14 +835,373 @@ window.onload = function () {
 		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' has reached level 10 in ' + count + ' skills.</span><br />\n';
 		output += '<ul class="ach_list"><li>';
 		output += (count >= 1) ? getAchieveString('Singular Talent', 'level 10 in a skill', 1) :
-				getAchieveString('Singular Talent', 'level 10 in a skill', 0) + (1 - count) + 'g more';
+				getAchieveString('Singular Talent', 'level 10 in a skill', 0) + (1 - count) + ' more';
 		output += '</li>\n<li>';
 		output += (count >= 5) ? getAchieveString('Master of the Five Ways', 'level 10 in every skill', 1) :
-				getAchieveString('Master of the Five Ways', 'level 10 in every skill', 0) + addCommas(5e4 - money) + 'g more';
+				getAchieveString('Master of the Five Ways', 'level 10 in every skill', 0) + (5 - count) + ' more';
+		output += '</li></ul>\n';
+
+		if (need.length > 0) {
+			output += '<span class="need">Skills left:<ol>' + need.sort().join('') + '</ol></span>\n';
+		}
+
+		return output;
+	}
+
+	function parseMuseum(xmlDoc) {
+		var output = '<h3>Museum Collection</h3>\n',
+			artifacts = {
+				96: "Dwarf Scroll I",
+				97: "Dwarf Scroll II",
+				98: "Dwarf Scroll III",
+				99: "Dwarf Scroll IV",
+				100: "Chipped Amphora",
+				101: "Arrowhead",
+				103: "Ancient Doll",
+				104: "Elvish Jewelry",
+				105: "Chewing Stick",
+				106: "Ornamental Fan",
+				107: "Dinosaur Egg",
+				108: "Rare Disc",
+				109: "Ancient Sword",
+				110: "Rusty Spoon",
+				111: "Rusty Spur",
+				112: "Rusty Cog",
+				113: "Chicken Statue",
+				114: "Ancient Seed",
+				115: "Prehistoric Tool",
+				116: "Dried Starfish",
+				117: "Anchor",
+				118: "Glass Shards",
+				119: "Bone Flute",
+				120: "Prehistoric Handaxe",
+				121: "Dwarvish Helm",
+				122: "Dwarf Gadget",
+				123: "Ancient Drum",
+				124: "Golden Mask",
+				125: "Golden Relic",
+				126: "Strange Doll (Green)",
+				127: "Strange Doll (Yellow)",
+				579: "Prehistoric Scapula",
+				580: "Prehistoric Tibia",
+				581: "Prehistoric Skull",
+				582: "Skeletal Hand",
+				583: "Prehistoric Rib",
+				584: "Prehistoric Vertebra",
+				585: "Skeletal Tail",
+				586: "Nautilus Fossil",
+				587: "Amphibian Fossil",
+				588: "Palm Fossil",
+				589: "Trilobite"
+			},
+			artifact_count = Object.keys(artifacts).length,
+			minerals = {
+				60: "Emerald",
+				62: "Aquamarine",
+				64: "Ruby",
+				66: "Amethyst",
+				68: "Topaz",
+				70: "Jade",
+				72: "Diamond",
+				74: "Prismatic Shard",
+				80: "Quartz",
+				82: "Fire Quartz",
+				84: "Frozen Tear",
+				86: "Earth Crystal",
+				538: "Alamite",
+				539: "Bixite",
+				540: "Baryte",
+				541: "Aerinite",
+				542: "Calcite",
+				543: "Dolomite",
+				544: "Esperite",
+				545: "Fluorapatite",
+				546: "Geminite",
+				547: "Helvite",
+				548: "Jamborite",
+				549: "Jagoite",
+				550: "Kyanite",
+				551: "Lunarite",
+				552: "Malachite",
+				553: "Neptunite",
+				554: "Lemon Stone",
+				555: "Nekoite",
+				556: "Orpiment",
+				557: "Petrified Slime",
+				558: "Thunder Egg",
+				559: "Pyrite",
+				560: "Ocean Stone",
+				561: "Ghost Crystal",
+				562: "Tigerseye",
+				563: "Jasper",
+				564: "Opal",
+				565: "Fire Opal",
+				566: "Celestine",
+				567: "Marble",
+				568: "Sandstone",
+				569: "Granite",
+				570: "Basalt",
+				571: "Limestone",
+				572: "Soapstone",
+				573: "Hematite",
+				574: "Mudstone",
+				575: "Obsidian",
+				576: "Slate",
+				577: "Fairy Stone",
+				578: "Star Shards"
+			},
+			mineral_count = Object.keys(minerals).length,
+			museum_count = artifact_count + mineral_count,
+			donated = {},
+			donated_art = 0,
+			donated_min = 0,
+			donated_count = 0,
+			found = {},
+			found_art = 0,
+			found_min = 0,
+			need_art = [],
+			need_min = [],
+			id,
+			r,
+			farmer = $(xmlDoc).find('player > name').text();
+
+		$(xmlDoc).find('player > archaeologyFound > item').each(function () {
+			var id = $(this).find('key > int').text(),
+				num = Number($(this).find('value > ArrayOfInt > int').first().text());
+			if (artifacts.hasOwnProperty(id) && num > 0) {
+				found[id] = num;
+				found_art++;
+			}
+		});
+		$(xmlDoc).find('player > mineralsFound > item').each(function () {
+			var id = $(this).find('key > int').text(),
+				num = Number($(this).find('value > int').text());
+			if (minerals.hasOwnProperty(id) && num > 0) {
+				found[id] = num;
+				found_min++;
+			}
+		});
+		$(xmlDoc).find('locations > GameLocation').each(function () {
+			if ($(this).attr('xsi:type') === 'LibraryMuseum') {
+				$(this).find('museumPieces > item').each(function () {
+					var id = $(this).find('value > int').text();
+					if (artifacts.hasOwnProperty(id)) {
+						donated_art++;
+						donated[id] = 1;
+					} else if (minerals.hasOwnProperty(id)) {
+						donated_min++;
+						donated[id] = 1;
+					}
+				});
+			}
+		});
+
+		donated_count = donated_art + donated_min;
+		output += '<span class="result">' + farmer + ' has found ' + found_art + ' artifact(s) and has donated ' +
+			donated_art + ' of them; there are ' + artifact_count + ' total artifacts.</span><br />\n';
+		output += '<span class="result">' + farmer + ' has found ' + found_min + ' mineral(s) and has donated ' +
+			donated_min + ' of them; there are ' + mineral_count + ' total minerals.</span><ul class="ach_list">\n';
+		output += '<li>';
+		output += (donated_count >= 40) ? getAchieveString('Treasure Trove', 'donate 40 items', 1) :
+				getAchieveString('Treasure Trove', 'donate 40 items', 0) + (40 - donated_art - donated_min) + ' more';
+		output += '</li>\n<li>';
+		output += (donated_count >= museum_count) ? getAchieveString('A Complete Collection', 'donate every item', 1) :
+				getAchieveString('A Complete Collection', 'donate every item', 0) + (museum_count - donated_count) + ' more';
+		output += '</li>\n<li>';
+		output += (found_art >= artifact_count) ? getMilestoneString('All artifacts found', 1) :
+				getMilestoneString('All artifacts found', 0) + (artifact_count - found_art) + ' more';
+		output += '</li>\n<li>';
+		output += (found_min >= mineral_count) ? getMilestoneString('All minerals found', 1) :
+				getMilestoneString('All minerals found', 0) + (mineral_count - found_min) + ' more';
+		output += '</li></ul>\n';
+		// The following assumes it is impossible for an item to be donated without being marked found
+		if (donated_count < museum_count) {
+			for (id in artifacts) {
+				if (artifacts.hasOwnProperty(id)) {
+					r = artifacts[id];
+					if (!found.hasOwnProperty(id)) {
+						need_art.push('<li>' + r + ' (needs to be found and donated)</li>');
+					} else if (!donated.hasOwnProperty(id)) {
+						need_art.push('<li>' + r + ' (needs to be donated)</li>');
+					} 
+				}
+			}
+			for (id in minerals) {
+				if (minerals.hasOwnProperty(id)) {
+					r = minerals[id];
+					if (!found.hasOwnProperty(id)) {
+						need_min.push('<li>' + r + ' (needs to be found and donated)</li>');
+					} else if (!donated.hasOwnProperty(id)) {
+						need_min.push('<li>' + r + ' (needs to be donated)</li>');
+					}
+				}
+			}
+			output += '<span class="need">Items left:<ul>';
+			if (need_art.length > 0) {
+				output += '<li>Artifacts<ol>' + need_art.sort().join('') + '</ol></li>\n';
+			}
+			if (need_min.length > 0) {
+				output += '<li>Minerals<ol>' + need_min.sort().join('') + '</ol></li>\n';
+			}
+			output += '</ul></span>\n';
+		}
+
+		return output;
+	}
+
+	function parseMonsters(xmlDoc) {
+		/* Conditions & details from decompiled source StardewValley.Locations.AdventureGuild.gil()
+		 * Some monsters which may not currently be in game are included and we mimic that here too. */
+		var output = '<h3>Monster Hunting</h3>\n',
+			goals = {
+				"Slimes": 1000,
+				"Void Spirits": 150,
+				"Bats": 200,
+				"Skeletons": 50,
+				"Cave Insects": 125,
+				"Duggies": 30,
+				"Dust Sprites": 500
+			},
+			goal_count = Object.keys(goals).length,
+			categories = {
+				"Green Slime": "Slimes",
+				"Frost Jelly": "Slimes",
+				"Sludge": "Slimes",
+				"Shadow Brute": "Void Spirits",
+				"Shadow Shaman": "Void Spirits",
+				"Shadow Guy": "Void Spirits",
+				"Bat": "Bats",
+				"Frost Bat": "Bats",
+				"Lava Bat": "Bats",
+				"Skeleton": "Skeletons",
+				"Skeleton Mage": "Skeletons",
+				"Bug": "Cave Insects",
+				"Fly": "Cave Insects",
+				"Grub": "Cave Insects",
+				"Duggy": "Duggies",
+				"Dust Spirit": "Dust Sprites"
+			},
+			killed = [],
+			completed = 0,
+			need = [],
+			id,
+			mineLevel = Number($(xmlDoc).find('player > deepestMineLevel').text()),
+			farmer = $(xmlDoc).find('player > name').text();
+		
+		if (mineLevel <= 0) {
+			output += '<span class="result">' + farmer + ' has not yet explored the mines.</span><br />\n';
+		} else {
+			output += '<span class="result">' + farmer + ' has reached level ' + Math.min(mineLevel,120) + ' of the mines';
+			if (mineLevel > 120) {
+				output += ' and level ' + (mineLevel - 120) + ' of the Skull Cavern';
+			} else {
+				output += ' but has not yet explored the Skull Cavern';
+			}
+			output += '.</span><ul class="ach_list"><li>\n';
+		}
+		output += (mineLevel >= 120) ? getAchieveString('The Bottom', 'reach mine level 120', 1) :
+				getAchieveString('The Bottom', 'reach mine level 120', 0) + (120 - mineLevel) + ' more';
+		output += '</li></ul>\n';
+
+		$(xmlDoc).find('stats > specificMonstersKilled > item').each(function () {
+			var id = $(this).find('key > string').text(),
+				num = Number($(this).find('value > int').text()),
+				old = 0;
+			if (categories.hasOwnProperty(id) && num > 0) {
+				if (killed.hasOwnProperty(categories[id])) {
+					old = killed[categories[id]];
+				}
+				killed[categories[id]] = (old + num);
+			}
+		});
+		for (id in goals) {
+			if (goals.hasOwnProperty(id)) {
+				if (killed.hasOwnProperty(id)) {
+					if (killed[id] >= goals[id]) {
+						completed++;
+					} else {
+						need.push('<li>' + id + ' (need ' + (goals[id] - killed[id]) + ' more)</li>');
+					}
+				} else {
+					need.push('<li>' + id + ' (need ' + goals[id] + ' more)</li>');
+				}
+			}
+		}
+
+		output += '<span class="result">' + farmer + ' has completed ' + completed + ' of the ' + goal_count +
+				' Monster Eradication goals.</span><ul class="ach_list">\n';
+		output += '<li>';
+		output += (completed >= goal_count) ? getAchieveString('Protector of the Valley', 'all monster goals', 1) :
+				getAchieveString('Protector of the Valley', 'all monster goals', 0) + (goal_count - completed) + ' more';
+		output += '</li></ul>\n';
+		if (need.length > 0) {
+			output += '<span class="need">Goals left:<ol>' + need.sort().join('') + '</ol></span>\n';
+		}
+
+		return output;
+	}
+
+	function parseQuests(xmlDoc) {
+		var output = '<h3>Quests</h3>\n',
+			count = Number($(xmlDoc).find('stats > QuestsCompleted').text());
+
+		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' has completed ' + count + ' "Help Wanted" quests.</span><br />\n';
+		output += '<ul class="ach_list"><li>';
+		output += (count >= 10) ? getAchieveString('Gofer', 'complete 10 quests', 1) :
+				getAchieveString('Gofer', 'complete 10 quests', 0) + (10 - count) + ' more';
+		output += '</li>\n<li>';
+		output += (count >= 40) ? getAchieveString('A Big Help', 'complete 40 quests', 1) :
+				getAchieveString('A Big Help', 'complete 40 quests', 0) + (40 - count) + ' more';
 		output += '</li></ul>\n';
 		return output;
 	}
-*/
+	
+	function parseStardrops(xmlDoc) {
+		/* mailReceived identifiers from decompiled source of StardewValley.Utility.foundAllStardrops()
+		 * descriptions are made up on the fly. */
+		var output = '<h3>Stardrops</h3>\n',
+			count = 0,
+			id,
+			need = [],
+			received = {},
+			stardrops = {
+				'CF_Fair': 'Purchased at the Stardew Valley Fair for 2000 star tokens.',
+				'CF_Mines': 'Found in the chest on mine level 100.',
+				'CF_Spouse': 'Randomly given by spouse at 13/12 hearts.',
+				'CF_Sewer': 'Purchesed from Krobus in the Sewers for 20,000g.',
+				'CF_Statue': 'Received from the Old Master Cannoli statue in the Secret Woods in excahnge for a Sweet Gem Berry.',
+				'CF_Fish': 'Mailed by Willy after catching all the different fish.',
+				'museumComplete': 'Reward for completing the Museum collection.'
+			},
+			stardrop_count = Object.keys(stardrops).length;
+
+		$(xmlDoc).find('player > mailReceived > string').each(function () {
+			var id = $(this).text();
+			if (stardrops.hasOwnProperty(id)) {
+				count++;
+				received[id] = 1;
+			}
+		});
+		for (id in stardrops) {
+			if (stardrops.hasOwnProperty(id)) {
+				if (!received.hasOwnProperty(id)) {
+					need.push('<li>' + stardrops[id] + '</li>');
+				}
+			}
+		}
+
+		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' has received ' + count +
+				' of the ' + stardrop_count + ' stardrops.</span><br />\n';
+		output += '<ul class="ach_list"><li>';
+		output += (count >= stardrop_count) ? getAchieveString('Mystery Of The Stardrops', 'find every stardrop', 1) :
+				getAchieveString('Mystery Of The Stardrops', 'find every stardrop', 0) + (stardrop_count - count) + ' more';
+		output += '</li></ul>\n';
+		if (need.length > 0) {
+			output += '<span class="need">Stardrops left:<ol>' + need.sort().join('') + '</ol></span>\n';
+		}
+		return output;
+	}
+
 /*
 	function parseX(xmlDoc) {
 		var output = '<h3></h3>\n',
@@ -862,13 +1221,18 @@ window.onload = function () {
 
 			output += parseSummary(xmlDoc);
 			output += parseMoney(xmlDoc);
-			output += parseSocial(xmlDoc);
+			output += parseSkills(xmlDoc);
+			output += parseQuests(xmlDoc);
+			output += parseMonsters(xmlDoc);
+			output += parseStardrops(xmlDoc);
 			output += parseFamily(xmlDoc);
+			output += parseSocial(xmlDoc);
 			output += parseCooking(xmlDoc);
 			output += parseCrafting(xmlDoc);
 			output += parseFishing(xmlDoc);
 			output += parseBasicShipping(xmlDoc);
 			output += parseCropShipping(xmlDoc);
+			output += parseMuseum(xmlDoc);
 
 			//TODO: remaining achievments
 			// Joja & CC.
@@ -877,9 +1241,7 @@ window.onload = function () {
 			// Praire King achieves - there is no progress for them so may not bother
 			// Mystery of the Stardrops - must find all triggers (mail?)
 			// Monster eradication
-			// Skills
 			// Help Wanted
-			// Museum
 			// Bottom of the mines
 			//TODO: non-achieve milestones
 			// Additional friendships?

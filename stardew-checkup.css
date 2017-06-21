@@ -60,6 +60,7 @@ a:hover,a:active { color: #ffa000; }
 	list-style: none;
 	padding-left: 35px;
 	margin-top: 0px;
+	margin-bottom: 4px;
 }
 .result:before {
 	content: "\25c8 ";
