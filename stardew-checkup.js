@@ -25,19 +25,15 @@ window.onload = function () {
 	}
 
 	function getAchieveString(name, desc, yes) {
-		if (yes) {
-			return('<span class="ach_yes"><span class="ach">' + name + '</span> Achievement (' + desc + ') requirements met</span>');
-		} else {
-			return('<span class="ach_no"><span class="ach">' + name + '</span> Achievement (' + desc + ') requirements not met</span> -- need ');
-		}
+		var r = (yes) ? '<span class="ach_yes"><span class="ach">' + name + '</span> Achievement (' + desc + ') requirements met</span>' :
+					'<span class="ach_no"><span class="ach">' + name + '</span> Achievement (' + desc + ') requirements not met</span> -- need ';
+		return r;
 	}
 
 	function getMilestoneString(desc, yes) {
-		if (yes) {
-			return('<span class="ms_yes">' + desc + ' <span class="ach">(no associated achievement)</span> requirements met</span>');
-		} else {
-			return('<span class="ms_no">' + desc + ' <span class="ach">(no associated achievement)</span> requirements not met</span> -- need ');
-		}
+		var r = (yes) ? '<span class="ms_yes">' + desc + ' <span class="ach">(no associated achievement)</span> requirements met</span>' :
+					'<span class="ms_no">' + desc + ' <span class="ach">(no associated achievement)</span> requirements not met</span> -- need ';
+		return r;
 	}
 
 	// Individual chunks of save parsing.
@@ -99,8 +95,8 @@ window.onload = function () {
 			farmer = $(xmlDoc).find('player > name').text();
 
 		$(xmlDoc).find('player > friendships > item').each(function () {
-			var who = $(this).find('key > string').text(),
-				num = $(this).find('value > ArrayOfInt > int').first().text();
+			//var who = $(this).find('key > string').text(),
+			var num = $(this).find('value > ArrayOfInt > int').first().text();
 			if (num >= 2500) { count_10h++; }
 			if (num >= 1250) { count_5h++; }
 			// TODO: check for maxed out hearts on everyone
@@ -1023,7 +1019,7 @@ window.onload = function () {
 						need_art.push('<li>' + r + ' (needs to be found and donated)</li>');
 					} else if (!donated.hasOwnProperty(id)) {
 						need_art.push('<li>' + r + ' (needs to be donated)</li>');
-					} 
+					}
 				}
 			}
 			for (id in minerals) {
@@ -1087,11 +1083,11 @@ window.onload = function () {
 			id,
 			mineLevel = Number($(xmlDoc).find('player > deepestMineLevel').text()),
 			farmer = $(xmlDoc).find('player > name').text();
-		
+
 		if (mineLevel <= 0) {
 			output += '<span class="result">' + farmer + ' has not yet explored the mines.</span><br />\n';
 		} else {
-			output += '<span class="result">' + farmer + ' has reached level ' + Math.min(mineLevel,120) + ' of the mines';
+			output += '<span class="result">' + farmer + ' has reached level ' + Math.min(mineLevel, 120) + ' of the mines';
 			if (mineLevel > 120) {
 				output += ' and level ' + (mineLevel - 120) + ' of the Skull Cavern';
 			} else {
@@ -1155,7 +1151,7 @@ window.onload = function () {
 		output += '</li></ul>\n';
 		return output;
 	}
-	
+
 	function parseStardrops(xmlDoc) {
 		/* mailReceived identifiers from decompiled source of StardewValley.Utility.foundAllStardrops()
 		 * descriptions are made up on the fly. */
@@ -1239,10 +1235,6 @@ window.onload = function () {
 			// - CC bundles: locations > GameLocation [attr('xsi:type') == 'CommunityCenter'] > bundles (individual) & areasComplete
 			// - Joja? maybe mail
 			// Praire King achieves - there is no progress for them so may not bother
-			// Mystery of the Stardrops - must find all triggers (mail?)
-			// Monster eradication
-			// Help Wanted
-			// Bottom of the mines
 			//TODO: non-achieve milestones
 			// Additional friendships?
 			// Grandpa's Evaluation
