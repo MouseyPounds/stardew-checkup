@@ -58,7 +58,7 @@ window.onload = function () {
 
 		// Farmer & farm names are read as html() because they come from user input and might contain characters
 		// which must be escaped. This will happen with child names later too.
-		output += '<span class="result">Farmer ' + $(xmlDoc).find('player > name').html() + ' of '
+		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' of '
 			+ $(xmlDoc).find('player > farmName').html() + ' Farm ('
 			+ farmTypes[$(xmlDoc).find('whichFarm').text()] + ')</span><br />\n';
 		// Date originally used XXForSaveGame elements, but those were not always present on saves downloaded from upload.farm
@@ -146,14 +146,15 @@ window.onload = function () {
 			result = $(xmlDoc).find('player > spouse'),
 			children = '(None)',
 			child_name = [],
+			wedding = Number($(xmlDoc).find('countdownToWedding').text()),
 			houseUpgrades = $(xmlDoc).find('player > houseUpgradeLevel').text();
 		if (result.length > 0) {
-			spouse = result.text();
+			spouse = (wedding) ? result.text().slice(0,-7) : result.text();
 			count++;
 		} else {
 			needs.push('spouse');
 		}
-		output += '<span class="result">Spouse: ' + spouse + '</span><br />\n';
+		output += '<span class="result">Spouse: ' + spouse + ((wedding) ? ' -- wedding in ' + wedding + ' day(s)' : '') + '</span><br />\n';
 		// not sure how to get the [] attribute selectors to recognize xsi:type as valid attribute name, so working around it
 		$(xmlDoc).find('locations > GameLocation > Characters > NPC').each(function () {
 			if ($(this).attr('xsi:type') === 'Child') {
@@ -802,11 +803,11 @@ window.onload = function () {
 				if (poly_crops.hasOwnProperty(id)) {
 					r = poly_crops[id];
 					if (!crafted.hasOwnProperty(r)) {
-						need.push('<li>' + r + ' (15 more)</li>');
+						need.push('<li>' + r + ' -- 15 more</li>');
 					} else {
 						n = Number(crafted[r]);
 						if (n < 15) {
-							need.push('<li>' + r + ' (' + (15 - n) + ' more)</li>');
+							need.push('<li>' + r + ' --' + (15 - n) + ' more</li>');
 						}
 					}
 				}
@@ -831,7 +832,7 @@ window.onload = function () {
 				num = Number($(this).text());
 				xp[skills[i]] = num;
 				if (num < 15000) {
-					need.push('<li>' + skills[i] + ' (' + (15000 - num) + ' more xp)</li>\n');
+					need.push('<li>' + skills[i] + ' -- ' + (15000 - num) + ' more xp</li>\n');
 				} else {
 					count++;
 				}
@@ -1036,7 +1037,7 @@ window.onload = function () {
 						need.push('donated');
 					}
 					if (need.length > 0) {
-						need_art.push('<li>' + r + ' (not ' + need.join(" or ") + ')</li>');
+						need_art.push('<li>' + r + ' -- not ' + need.join(" or ") + '</li>');
 					}
 				}
 			}
@@ -1051,7 +1052,7 @@ window.onload = function () {
 						need.push('donated');
 					}
 					if (need.length > 0) {
-						need_min.push('<li>' + r + ' (not ' + need.join(" or ") + ')</li>');
+						need_min.push('<li>' + r + ' -- not ' + need.join(" or ") + '</li>');
 					}
 				}
 			}
@@ -1139,10 +1140,10 @@ window.onload = function () {
 					if (killed[id] >= goals[id]) {
 						completed++;
 					} else {
-						need.push('<li>' + id + ' (need ' + (goals[id] - killed[id]) + ' more)</li>');
+						need.push('<li>' + id + ' -- ' + (goals[id] - killed[id]) + ' more kills</li>');
 					}
 				} else {
-					need.push('<li>' + id + ' (need ' + goals[id] + ' more)</li>');
+					need.push('<li>' + id + ' -- ' + goals[id] + ' more kills</li>');
 				}
 			}
 		}
@@ -1162,7 +1163,7 @@ window.onload = function () {
 
 	function parseQuests(xmlDoc) {
 		var output = '<h3>Quests</h3>\n',
-			count = Number($(xmlDoc).find('stats > QuestsCompleted').text());
+			count = Number($(xmlDoc).find('stats > questsCompleted').text());
 
 		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has completed ' + count + ' "Help Wanted" quest(s).</span><br />\n';
 		output += '<ul class="ach_list"><li>';
@@ -1249,7 +1250,7 @@ window.onload = function () {
 			},
 			cc_have = 0,
 			cc_count = 6,
-			spouse = $(xmlDoc).find('player > spouse'), // might fail
+			spouse = $(xmlDoc).find('player > spouse'), // will trigger during 3 day engagement too
 			houseUpgrades = Number($(xmlDoc).find('player > houseUpgradeLevel').text()),
 			hasRustyKey = $(xmlDoc).find('player > hasRustyKey').text(),
 			hasSkullKey = $(xmlDoc).find('player > hasSkullKey').text(),
