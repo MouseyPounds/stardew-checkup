@@ -23,6 +23,11 @@ window.onload = function () {
 		return x.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",");
 	}
 
+	function capitalize(s) {
+		// from joelvh. See https://stackoverflow.com/questions/1026069/how-do-i-make-the-first-letter-of-a-string-uppercase-in-javascript
+		return s && s[0].toUpperCase() + s.slice(1);
+	}
+	
 	function getAchieveString(name, desc, yes) {
 		var r = (yes) ? '<span class="ach_yes"><span class="ach">' + name + '</span> Achievement (' + desc + ') requirements met</span>' :
 					'<span class="ach_no"><span class="ach">' + name + '</span> Achievement (' + desc + ') requirements not met</span> -- need ';
@@ -46,7 +51,6 @@ window.onload = function () {
 	// Each receives the xmlDoc object to parse and returns HTML to output.
 	function parseSummary(xmlDoc) {
 		var output = '<h3>Summary</h3>\n',
-			seasons = ['Spring', 'Summer', 'Fall', 'Winter'],
 			farmTypes = ['Standard', 'Riverland', 'Forest', 'Hill-top', 'Wilderness'],
 			playTime = Number($(xmlDoc).find('player > millisecondsPlayed').text()),
 			playHr = Math.floor(playTime / 36e5),
@@ -57,9 +61,9 @@ window.onload = function () {
 		output += '<span class="result">Farmer ' + $(xmlDoc).find('player > name').html() + ' of '
 			+ $(xmlDoc).find('player > farmName').html() + ' Farm ('
 			+ farmTypes[$(xmlDoc).find('whichFarm').text()] + ')</span><br />\n';
-		output += '<span class="result">Day ' + $(xmlDoc).find('player > dayOfMonthForSaveGame').text() + ' of '
-			+ seasons[$(xmlDoc).find('player > seasonForSaveGame').text()] + ', Year '
-			+ $(xmlDoc).find('player > yearForSaveGame').text() + '</span><br />\n';
+		// Date originally used XXForSaveGame elements, but those were not always present on saves downloaded from upload.farm
+		output += '<span class="result">Day ' + $(xmlDoc).find('dayOfMonth').text() + ' of ' +
+			capitalize($(xmlDoc).find('currentSeason').text()) + ', Year ' + $(xmlDoc).find('year').text() + '</span><br />\n';
 		// Playtime of < 1 min will be blank.
 		output += '<span class="result">Played for ';
 		if (playHr > 0) {
@@ -147,7 +151,7 @@ window.onload = function () {
 			spouse = result.text();
 			count++;
 		} else {
-			needs.push('Spouse');
+			needs.push('spouse');
 		}
 		output += '<span class="result">Spouse: ' + spouse + '</span><br />\n';
 		// not sure how to get the [] attribute selectors to recognize xsi:type as valid attribute name, so working around it
@@ -836,7 +840,7 @@ window.onload = function () {
 		});
 
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has reached level 10 in ' + count + ' skills.</span><br />\n';
+		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has reached level 10 in ' + count + ' skill(s).</span><br />\n';
 		output += '<ul class="ach_list"><li>';
 		output += (count >= 1) ? getAchieveString('Singular Talent', 'level 10 in a skill', 1) :
 				getAchieveString('Singular Talent', 'level 10 in a skill', 0) + (1 - count) + ' more';
@@ -965,6 +969,7 @@ window.onload = function () {
 			found_min = 0,
 			need_art = [],
 			need_min = [],
+			need = [],
 			id,
 			r,
 			farmer = $(xmlDoc).find('player > name').html();
@@ -1002,9 +1007,9 @@ window.onload = function () {
 
 		donated_count = donated_art + donated_min;
 		output += '<span class="result">' + farmer + ' has found ' + found_art + ' artifact(s) and has donated ' +
-			donated_art + ' of them; there are ' + artifact_count + ' total artifacts.</span><br />\n';
+			donated_art + '; there are ' + artifact_count + ' total artifacts.</span><br />\n';
 		output += '<span class="result">' + farmer + ' has found ' + found_min + ' mineral(s) and has donated ' +
-			donated_min + ' of them; there are ' + mineral_count + ' total minerals.</span><ul class="ach_list">\n';
+			donated_min + '; there are ' + mineral_count + ' total minerals.</span><ul class="ach_list">\n';
 		output += '<li>';
 		output += (donated_count >= 40) ? getAchieveString('Treasure Trove', 'donate 40 items', 1) :
 				getAchieveString('Treasure Trove', 'donate 40 items', 0) + (40 - donated_art - donated_min) + ' more';
@@ -1018,25 +1023,35 @@ window.onload = function () {
 		output += (found_min >= mineral_count) ? getMilestoneString('All minerals found', 1) :
 				getMilestoneString('All minerals found', 0) + (mineral_count - found_min) + ' more';
 		output += '</li></ul>\n';
-		// The following assumes it is impossible for an item to be donated without being marked found
-		if (donated_count < museum_count) {
+		// I've seen at least 1 save with an artifact donated that wasn't marked found, so we account for that.
+		if (donated_count < museum_count || (found_art + found_min) < museum_count) {
 			for (id in artifacts) {
 				if (artifacts.hasOwnProperty(id)) {
 					r = artifacts[id];
+					need = [];
 					if (!found.hasOwnProperty(id)) {
-						need_art.push('<li>' + r + ' (needs to be found and donated)</li>');
-					} else if (!donated.hasOwnProperty(id)) {
-						need_art.push('<li>' + r + ' (needs to be donated)</li>');
+						need.push('found');
+					}
+					if (!donated.hasOwnProperty(id)) {
+						need.push('donated');
+					}
+					if (need.length > 0) {
+						need_art.push('<li>' + r + ' (not ' + need.join(" or ") + ')</li>');
 					}
 				}
 			}
 			for (id in minerals) {
 				if (minerals.hasOwnProperty(id)) {
 					r = minerals[id];
+					need = [];
 					if (!found.hasOwnProperty(id)) {
-						need_min.push('<li>' + r + ' (needs to be found and donated)</li>');
-					} else if (!donated.hasOwnProperty(id)) {
-						need_min.push('<li>' + r + ' (needs to be donated)</li>');
+						need.push('found');
+					}
+					if (!donated.hasOwnProperty(id)) {
+						need.push('donated');
+					}
+					if (need.length > 0) {
+						need_min.push('<li>' + r + ' (not ' + need.join(" or ") + ')</li>');
 					}
 				}
 			}
@@ -1149,7 +1164,7 @@ window.onload = function () {
 		var output = '<h3>Quests</h3>\n',
 			count = Number($(xmlDoc).find('stats > QuestsCompleted').text());
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has completed ' + count + ' "Help Wanted" quests.</span><br />\n';
+		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has completed ' + count + ' "Help Wanted" quest(s).</span><br />\n';
 		output += '<ul class="ach_list"><li>';
 		output += (count >= 10) ? getAchieveString('Gofer', 'complete 10 quests', 1) :
 				getAchieveString('Gofer', 'complete 10 quests', 0) + (10 - count) + ' more';
@@ -1337,7 +1352,7 @@ window.onload = function () {
 		output += '<span class="result">The next evaluation will light ' + candles + ' candle(s).</span><br />\n';
 		output += '<ul class="ach_list"><li>';
 		output += (candles >= max_candles) ? getMilestoneString('Four candle evaluation', 1) :
-				getMilestoneString('Four candle evaluation', 0) + (12 - count) + ' more points';
+				getMilestoneString('Four candle evaluation', 0) + (12 - count) + ' more point(s)';
 		output += '</li></ul>\n';
 
 		output += '<span class="result">' + farmer + ' has earned a total of ' + addCommas(money) + 'g.</span><br />\n';
@@ -1428,7 +1443,7 @@ window.onload = function () {
 			need.push('a spouse');
 		}
 		if (houseUpgrades < 2) {
-			need.push((2 - houseUpgrades) + ' more upgrades');
+			need.push((2 - houseUpgrades) + ' more upgrade(s)');
 		}
 		output += (need.length === 0) ? getPointString(1, ' being married with at least 2 house upgrades', 0, 1) :
 				getPointString(1, ' being married with at least 2 house upgrades', 0, 0) + ' -- need ' + need.join(" and ");
