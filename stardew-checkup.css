@@ -12,7 +12,6 @@ html {
 	background-image:         linear-gradient(to bottom, #80a0f0, #c0ffff, #40c040); /* Standard syntax; must be last */
 }
 body {
-	/* background-color: #ffe0b0; */
 	margin: 15px;
 	color: #603000;
 }

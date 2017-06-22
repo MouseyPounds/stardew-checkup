@@ -1302,7 +1302,7 @@ window.onload = function () {
 		}
 		$(xmlDoc).find('player > friendships > item').each(function () {
 			var num = Number($(this).find('value > ArrayOfInt > int').first().text());
-			if (num >= 1975) { 
+			if (num >= 1975) {
 				heart_count++;
 			}
 		});
@@ -1336,7 +1336,7 @@ window.onload = function () {
 				' point(s) (details below); the maximum possible is ' + max_count + ' points.</span><br />\n';
 		output += '<span class="result">The next evaluation will light ' + candles + ' candle(s).</span><br />\n';
 		output += '<ul class="ach_list"><li>';
-		output += (candles >= 4) ? getMilestoneString('Four candle evaluation', 1) :
+		output += (candles >= max_candles) ? getMilestoneString('Four candle evaluation', 1) :
 				getMilestoneString('Four candle evaluation', 0) + (12 - count) + ' more points';
 		output += '</li></ul>\n';
 
@@ -1397,7 +1397,7 @@ window.onload = function () {
 		output += (playerLevel >= 25) ? getPointString(1, ' having 50 total skill levels', 1, 1) :
 				getPointString(1, ' having 50 total skill levels', 1, 0) + ' -- need ' + (50 - realPlayerLevel) + ' more';
 		output += '</li></ul>\n';
-		
+
 		output += '<span class="result">' + farmer + ' has ' + heart_count +
 				' relationship(s) of 1975+ friendship points (~8 hearts.)</span><br />\n';
 		output += '<ul class="ach_list"><li>';
@@ -1407,7 +1407,7 @@ window.onload = function () {
 		output += (heart_count >= 10) ? getPointString(1, ' having ~8&#x2665; with 10 people', 1, 1) :
 				getPointString(1, ' having ~8&#x2665; with 10 people', 1, 0) + ' -- need ' + (10 - heart_count) + ' more';
 		output += '</li></ul>\n';
-		
+
 		if (hasPet) {
 			output += '<span class="result">' + farmer + ' has a pet with ' + petLove + ' friendship points.</span><br />\n';
 		} else {
@@ -1416,7 +1416,7 @@ window.onload = function () {
 		}
 		output += '<ul class="ach_list"><li>';
 		output += (petLove >= 999) ? getPointString(1, ' having a pet with at least 999 friendship points', 0, 1) :
-				getPointString(1, ' having a pet with at least 999 friendship points', 0, 0) + ' -- need ' + 
+				getPointString(1, ' having a pet with at least 999 friendship points', 0, 0) + ' -- need ' +
 				need + (999 - petLove) + ' friendship points';
 		output += '</li></ul>\n';
 
@@ -1428,7 +1428,7 @@ window.onload = function () {
 			need.push('a spouse');
 		}
 		if (houseUpgrades < 2) {
-			need.push( (2 - houseUpgrades) + ' more upgrades');
+			need.push((2 - houseUpgrades) + ' more upgrades');
 		}
 		output += (need.length === 0) ? getPointString(1, ' being married with at least 2 house upgrades', 0, 1) :
 				getPointString(1, ' being married with at least 2 house upgrades', 0, 0) + ' -- need ' + need.join(" and ");
@@ -1459,12 +1459,12 @@ window.onload = function () {
 		$(document.getElementById('output-container')).hide();
 		$(document.getElementById('progress-container')).show();
 		$(document.getElementById('changelog')).hide();
-		reader.onloadstart = function(e) {
+		reader.onloadstart = function (e) {
 			prog.value = 20;
 		};
-		reader.onprogress = function(e) {
+		reader.onprogress = function (e) {
 			if (e.lengthComputable) {
-				var p = 20 + (e.loaded/e.total * 60);
+				var p = 20 + (e.loaded / e.total * 60);
 				prog.value = p;
 			}
 		};
@@ -1494,8 +1494,7 @@ window.onload = function () {
 			// - Joja? maybe mail
 			// Praire King achieves - there is no progress for them so may not bother
 			//TODO: non-achieve milestones
-			// Additional friendships?
-			// Grandpa's Evaluation
+			// maxing out friendships?
 
 			// End of checks
 			prog.value = 100;
