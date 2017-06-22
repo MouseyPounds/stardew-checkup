@@ -6,10 +6,8 @@
 
 <link rel="stylesheet" type="text/css" href="./stardew-checkup.css" />
 
-<!-- Local copy for development when Internet goes out. Remove for release -->
-<script src="../../jquery.min.js"></script>
-<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="./jquery-3.2.1.min.js"><\/script>')</script>
 <script src="./stardew-checkup.js"></script>
 
 </head>
@@ -17,19 +15,25 @@
 <div id="header" class="panel">
 <h1>Stardew Checkup</h1>
 <h2>About</h2>
-<p>This script checks a <a href="http://stardewvalley.net/">Stardew Valley</a> save file for various achievements and milestones and
-lets you know what is missing.</p>
-<p>The newest version of the script is available on GitHub Pages at <a href="https://mouseypounds.github.io/stardew-checkup/">https://mouseypounds.github.io/stardew-checkup/</a> and the source code repository is <a href="https://github.com/MouseyPounds/stardew-checkup">https://github.com/MouseyPounds/stardew-checkup</a>.</p>
-
+<p>This app checks a <a href="http://stardewvalley.net/">Stardew Valley</a> save file for various achievements and milestones and
+lets you know what is missing. Currently it checks for progress on 36 achievements (everything but the Community Center, its Joja Mart
+alternative, and the 2 Praire King minigame achieves) as well as Grandpa's evaluation.</p>
+<p>The app is written in Javascript and uses <a href="https://jquery.com/">jQuery</a>; it is hosted on GitHub Pages at <a href="https://mouseypounds.github.io/stardew-checkup/">https://mouseypounds.github.io/stardew-checkup/</a> and the source code repository is <a href="https://github.com/MouseyPounds/stardew-checkup">https://github.com/MouseyPounds/stardew-checkup</a>.</p>
 </div>
 
 <div id="input-container" class="panel">
 <h2>Save File</h2>
 <p>Select a save file to check: <input type="file" id="file_select" /></p>
-<p>Standard save file locations are:
+<p>Please use the full save file named with your farmer's name and a 9-digit ID number (e.g. <span class="path">Fred_14893307</span>); do not use the <span class="path">SaveGameInfo</span> file as it does not contain all the necessary information.
+<p>Default save file locations are:
 <ul><li>Windows: <span class="path">%AppData%\StardewValley\Saves\</span></li>
 <li>Mac OSX &amp; Linux: <span class="path">~/.config/StardewValley/Saves/</span></li>
-</ol>
+</ul>
+</div>
+
+<div id="progress-container" class="panel">
+<h2>Working...</h2>
+<progress id="progress" value="0" max="100"></progress>
 </div>
 
 <div id="output-container" class="panel">
@@ -41,7 +45,7 @@ lets you know what is missing.</p>
 <noscript><span class="error">Javascript appears to be unsupported by or disabled in your browser. Stardew Checkup will not work without it.</span></noscript>
 <h2>Changelog</h2>
 <ul>
-<li>20 June 2017 - v1.0 - Initial Release
+<li>21 June 2017 - v1.0 - Initial Release
 </ul>
 </div>
 

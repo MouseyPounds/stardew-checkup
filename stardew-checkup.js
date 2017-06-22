@@ -2,8 +2,7 @@
  * https://mouseypounds.github.io/stardew-checkup/
  */
 
-/*jslint browser:true */
-/*jslint plusplus: true */
+/*jslint indent: 4, maxerr: 50, passfail: false, browser: true, todo: true, plusplus: true */
 /*global $, FileReader */
 
 window.onload = function () {
@@ -36,6 +35,13 @@ window.onload = function () {
 		return r;
 	}
 
+	function getPointString(pts, desc, cum, yes) {
+		var c = (cum) ? ' more' : '',
+			r = (yes) ? '<span class="pt_yes"><span class="pts">+' + pts + c + '</span> has been earned for ' + desc + '</span>' :
+					'<span class="pt_no"><span class="pts"> (' + pts + c + ')</span> could be earned for ' + desc + '</span>';
+		return r;
+	}
+
 	// Individual chunks of save parsing.
 	// Each receives the xmlDoc object to parse and returns HTML to output.
 	function parseSummary(xmlDoc) {
@@ -46,8 +52,10 @@ window.onload = function () {
 			playHr = Math.floor(playTime / 36e5),
 			playMin = Math.floor((playTime % 36e5) / 6e4);
 
-		output += '<span class="result">Farmer ' + $(xmlDoc).find('player > name').text() + ' of '
-			+ $(xmlDoc).find('player > farmName').text() + ' Farm ('
+		// Farmer & farm names are read as html() because they come from user input and might contain characters
+		// which must be escaped. This will happen with child names later too.
+		output += '<span class="result">Farmer ' + $(xmlDoc).find('player > name').html() + ' of '
+			+ $(xmlDoc).find('player > farmName').html() + ' Farm ('
 			+ farmTypes[$(xmlDoc).find('whichFarm').text()] + ')</span><br />\n';
 		output += '<span class="result">Day ' + $(xmlDoc).find('player > dayOfMonthForSaveGame').text() + ' of '
 			+ seasons[$(xmlDoc).find('player > seasonForSaveGame').text()] + ', Year '
@@ -68,7 +76,7 @@ window.onload = function () {
 		var output = '<h3>Money</h3>\n',
 			money = Number($(xmlDoc).find('player > totalMoneyEarned').text());
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' has earned a total of ' + addCommas(money) + 'g.</span><br />\n';
+		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has earned a total of ' + addCommas(money) + 'g.</span><br />\n';
 		output += '<ul class="ach_list"><li>';
 		output += (money >= 15e3) ? getAchieveString('Greenhorn', 'earn 15,000g', 1) :
 				getAchieveString('Greenhorn', 'earn 15,000g', 0) + addCommas(15e3 - money) + 'g more';
@@ -92,7 +100,7 @@ window.onload = function () {
 		var output = '<h3>Social</h3>\n',
 			count_5h = 0,
 			count_10h = 0,
-			farmer = $(xmlDoc).find('player > name').text();
+			farmer = $(xmlDoc).find('player > name').html();
 
 		$(xmlDoc).find('player > friendships > item').each(function () {
 			//var who = $(this).find('key > string').text(),
@@ -101,27 +109,27 @@ window.onload = function () {
 			if (num >= 1250) { count_5h++; }
 			// TODO: check for maxed out hearts on everyone
 		});
-		output += '<span class="result">' + farmer + ' has ' + count_5h + ' relationships of 5+ hearts.</span><ul class="ach_list">\n';
+		output += '<span class="result">' + farmer + ' has ' + count_5h + ' relationship(s) of 5+ hearts.</span><ul class="ach_list">\n';
 		output += '<li>';
-		output += (count_5h >= 1) ? getAchieveString('A New Friend', '5&#x2764; with 1 person', 1) :
-				getAchieveString('A New Friend', '5&#x2764; with 1 person', 0) + (1 - count_5h) + ' more';
+		output += (count_5h >= 1) ? getAchieveString('A New Friend', '5&#x2665; with 1 person', 1) :
+				getAchieveString('A New Friend', '5&#x2665; with 1 person', 0) + (1 - count_5h) + ' more';
 		output += '</li>\n<li>';
-		output += (count_5h >= 4) ? getAchieveString('Cliques', '5&#x2764; with 4 people', 1) :
-				getAchieveString('Cliques', '5&#x2764; with 4 people', 0) + (4 - count_5h) + ' more\n';
+		output += (count_5h >= 4) ? getAchieveString('Cliques', '5&#x2665; with 4 people', 1) :
+				getAchieveString('Cliques', '5&#x2665; with 4 people', 0) + (4 - count_5h) + ' more\n';
 		output += '</li>\n<li>';
-		output += (count_5h >= 10) ? getAchieveString('Networking', '5&#x2764; with 10 people', 1) :
-				getAchieveString('Networking', '5&#x2764; with 10 people', 0) + (10 - count_5h) + ' more';
+		output += (count_5h >= 10) ? getAchieveString('Networking', '5&#x2665; with 10 people', 1) :
+				getAchieveString('Networking', '5&#x2665; with 10 people', 0) + (10 - count_5h) + ' more';
 		output += '</li>\n<li>';
-		output += (count_5h >= 20) ? getAchieveString('Popular', '5&#x2764; with 20 people', 1) :
-				getAchieveString('Popular', '5&#x2764; with 20 people', 0) + (20 - count_5h) + ' more';
+		output += (count_5h >= 20) ? getAchieveString('Popular', '5&#x2665; with 20 people', 1) :
+				getAchieveString('Popular', '5&#x2665; with 20 people', 0) + (20 - count_5h) + ' more';
 		output += '</li></ul>\n';
 		output += '<span class="result">' + farmer + ' has ' + count_10h + ' relationships of 10+ hearts.</span><ul class="ach_list">\n';
 		output += '<li>';
-		output += (count_10h >= 1) ? getAchieveString('Best Friends', '10&#x2764; with 1 person', 1) :
-				getAchieveString('Best Friends', '10&#x2764; with 1 person', 0) + (1 - count_10h) + ' more';
+		output += (count_10h >= 1) ? getAchieveString('Best Friends', '10&#x2665; with 1 person', 1) :
+				getAchieveString('Best Friends', '10&#x2665; with 1 person', 0) + (1 - count_10h) + ' more';
 		output += '</li>\n<li>';
-		output += (count_10h >= 8) ? getAchieveString('The Beloved Farmer', '10&#x2764; with 8 people', 1) :
-				getAchieveString('The Beloved Farmer', '10&#x2764; with 8 people', 0) + (8 - count_10h) + ' more';
+		output += (count_10h >= 8) ? getAchieveString('The Beloved Farmer', '10&#x2665; with 8 people', 1) :
+				getAchieveString('The Beloved Farmer', '10&#x2665; with 8 people', 0) + (8 - count_10h) + ' more';
 		output += '</li></ul>\n';
 		return output;
 	}
@@ -146,7 +154,7 @@ window.onload = function () {
 		$(xmlDoc).find('locations > GameLocation > Characters > NPC').each(function () {
 			if ($(this).attr('xsi:type') === 'Child') {
 				count++;
-				child_name.push($(this).find('name').text());
+				child_name.push($(this).find('name').html());
 			}
 		});
 		if (child_name.length) {
@@ -159,7 +167,7 @@ window.onload = function () {
 		}
 		output += '<span class="result">Children: ' + children + '</span><ul class="ach_list"><li>\n';
 		output += (count >= 3) ? getAchieveString('Full House', 'Married + 2 kids', 1) :
-				getAchieveString('Full House', 'Married + 2 kids', 0) + needs.join('; ');
+				getAchieveString('Full House', 'Married + 2 kids', 0) + needs.join(' and ');
 		output += '</li></ul>\n';
 
 		output += '<span class="result">Farmhouse has been upgraded ' + houseUpgrades + ' time(s); 3 upgrades are possible.</span><br /><ul class="ach_list">\n';
@@ -288,7 +296,7 @@ window.onload = function () {
 			craft_count++;
 		});
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' knows ' + known_count + ' recipe(s) and has cooked ' +
+		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' knows ' + known_count + ' recipe(s) and has cooked ' +
 			craft_count + ' of them; there are ' + recipe_count + ' total recipes.</span><ul class="ach_list">\n';
 		output += '<li>';
 		output += (craft_count >= 10) ? getAchieveString('Cook', 'cook 10 different recipes', 1) :
@@ -374,7 +382,7 @@ window.onload = function () {
 			}
 		});
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' knows ' + known_count + ' recipe(s) and has crafted ' +
+		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' knows ' + known_count + ' recipe(s) and has crafted ' +
 				craft_count + ' of them; there are ' + recipe_count + ' total recipes.</span><ul class="ach_list">\n';
 		output += '<li>';
 		output += (craft_count >= 15) ? getAchieveString('D.I.Y.', 'craft 15 different items', 1) :
@@ -487,7 +495,7 @@ window.onload = function () {
 		$(xmlDoc).find('player > fishCaught > item').each(function () {
 			var id = $(this).find('key > int').text(),
 				num = Number($(this).find('value > ArrayOfInt > int').first().text());
-			if (id !== 372 && num > 0) {
+			if (id !== '372' && num > 0) {
 				craft_count++;
 				// We are adding up the count ourselves, but the total is also stored in (stats > fishCaught) and (stats > FishCaught)
 				count += num;
@@ -495,7 +503,7 @@ window.onload = function () {
 			}
 		});
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' has caught ' + count + ' total fish of ' + craft_count +
+		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has caught ' + count + ' total fish of ' + craft_count +
 				' different type(s); there are ' + recipe_count + ' total types.</span><ul class="ach_list">\n';
 		output += '<li>';
 		output += (count >= 100) ? getAchieveString('Mother Catch', 'catch 100 fish', 1) :
@@ -676,7 +684,7 @@ window.onload = function () {
 			}
 		});
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' has shipped ' + craft_count +
+		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has shipped ' + craft_count +
 				' basic item(s); there are ' + recipe_count + ' total items.</span><ul class="ach_list">\n';
 		output += '<li>';
 		output += (craft_count >= recipe_count) ? getAchieveString('Full Shipment', 'ship every item', 1) :
@@ -751,7 +759,7 @@ window.onload = function () {
 			id,
 			r,
 			n,
-			farmer = $(xmlDoc).find('player > name').text();
+			farmer = $(xmlDoc).find('player > name').html();
 
 		$(xmlDoc).find('player > basicShipped > item').each(function () {
 			var id = $(this).find('key > int').text(),
@@ -828,7 +836,7 @@ window.onload = function () {
 		});
 
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' has reached level 10 in ' + count + ' skills.</span><br />\n';
+		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has reached level 10 in ' + count + ' skills.</span><br />\n';
 		output += '<ul class="ach_list"><li>';
 		output += (count >= 1) ? getAchieveString('Singular Talent', 'level 10 in a skill', 1) :
 				getAchieveString('Singular Talent', 'level 10 in a skill', 0) + (1 - count) + ' more';
@@ -959,7 +967,7 @@ window.onload = function () {
 			need_min = [],
 			id,
 			r,
-			farmer = $(xmlDoc).find('player > name').text();
+			farmer = $(xmlDoc).find('player > name').html();
 
 		$(xmlDoc).find('player > archaeologyFound > item').each(function () {
 			var id = $(this).find('key > int').text(),
@@ -1082,7 +1090,7 @@ window.onload = function () {
 			need = [],
 			id,
 			mineLevel = Number($(xmlDoc).find('player > deepestMineLevel').text()),
-			farmer = $(xmlDoc).find('player > name').text();
+			farmer = $(xmlDoc).find('player > name').html();
 
 		if (mineLevel <= 0) {
 			output += '<span class="result">' + farmer + ' has not yet explored the mines.</span><br />\n';
@@ -1141,7 +1149,7 @@ window.onload = function () {
 		var output = '<h3>Quests</h3>\n',
 			count = Number($(xmlDoc).find('stats > QuestsCompleted').text());
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' has completed ' + count + ' "Help Wanted" quests.</span><br />\n';
+		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has completed ' + count + ' "Help Wanted" quests.</span><br />\n';
 		output += '<ul class="ach_list"><li>';
 		output += (count >= 10) ? getAchieveString('Gofer', 'complete 10 quests', 1) :
 				getAchieveString('Gofer', 'complete 10 quests', 0) + (10 - count) + ' more';
@@ -1186,7 +1194,7 @@ window.onload = function () {
 			}
 		}
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').text() + ' has received ' + count +
+		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has received ' + count +
 				' of the ' + stardrop_count + ' stardrops.</span><br />\n';
 		output += '<ul class="ach_list"><li>';
 		output += (count >= stardrop_count) ? getAchieveString('Mystery Of The Stardrops', 'find every stardrop', 1) :
@@ -1198,22 +1206,271 @@ window.onload = function () {
 		return output;
 	}
 
-/*
-	function parseX(xmlDoc) {
-		var output = '<h3></h3>\n',
+	function parseGrandpa(xmlDoc) {
+		// Scoring details from StardewValley.Utility.getGradpaScore() & getGrandpaCandlesFromScore()
+		var output = '<h3>Grandpa\'s Evaluation</h3>\n',
+			farmer = $(xmlDoc).find('player > name').html(),
+			count = 0,
+			max_count = 21,
+			candles = 1,
+			max_candles = 4,
+			need = '',
+			money = Number($(xmlDoc).find('player > totalMoneyEarned').text()),
+			achieves = {
+				5: 'A Complete Collection',
+				26: 'Master Angler',
+				34: 'Full Shipment'
+			},
+			ach_count = 3,
+			ach_have = {},
+			cc_done = 0,
+			ccRooms = {
+				'ccBoilerRoom': "Boiler Room",
+				'ccCraftsRoom': "Crafts Room",
+				'ccPantry': "Pantry",
+				'ccFishTank': "Fish Tank",
+				'ccVault': "Vault",
+				'ccBulletin': "Bulletin Board"
+			},
+			cc_have = 0,
+			cc_count = 6,
+			spouse = $(xmlDoc).find('player > spouse'), // might fail
+			houseUpgrades = Number($(xmlDoc).find('player > houseUpgradeLevel').text()),
+			hasRustyKey = $(xmlDoc).find('player > hasRustyKey').text(),
+			hasSkullKey = $(xmlDoc).find('player > hasSkullKey').text(),
+			hasKeys = [],
+			heart_count = 0,
+			hasPet = 0,
+			petLove = 0,
+			realPlayerLevel = (Number($(xmlDoc).find('player > farmingLevel').text()) +
+								Number($(xmlDoc).find('player > miningLevel').text()) +
+								Number($(xmlDoc).find('player > combatLevel').text()) +
+								Number($(xmlDoc).find('player > foragingLevel').text()) +
+								Number($(xmlDoc).find('player > fishingLevel').text()) +
+								Number($(xmlDoc).find('player > luckLevel').text())),
+			playerLevel = realPlayerLevel / 2;
+
+		// Pre-calculating totals to put summary info up top.
+		if (money >= 1e6) {
+			count += 7;
+		} else if (money >= 5e5) {
+			count += 5;
+		} else if (money >= 3e5) {
+			count += 4;
+		} else if (money >= 2e5) {
+			count += 3;
+		} else if (money >= 1e5) {
+			count += 2;
+		} else if (money >= 5e4) {
+			count += 1;
+		}
+		$(xmlDoc).find('player > achievements > int').each(function () {
+			var id = $(this).text();
+			if (achieves.hasOwnProperty(id)) {
+				count++;
+				ach_have[id] = 1;
+			}
+		});
+		$(xmlDoc).find('player > eventsSeen > int').each(function () {
+			if ($(this).text() === '191393') {
+				cc_done = 1;
+			}
+		});
+		if (cc_done) {
+			count += 3;
+		} else {
+			$(xmlDoc).find('player > mailReceived > string').each(function () {
+				var id = $(this).text();
+				if (ccRooms.hasOwnProperty(id)) {
+					cc_have++;
+				}
+			});
+			if (cc_have >= cc_count) {
+				count++;
+			}
+		}
+		if (hasRustyKey === 'true') {
+			count++;
+			hasKeys.push('Rusty Key');
+		}
+		if (hasSkullKey === 'true') {
+			count++;
+			hasKeys.push('Skull Key');
+		}
+		if (spouse.length > 0 && houseUpgrades >= 2) {
+			count++;
+		}
+		$(xmlDoc).find('player > friendships > item').each(function () {
+			var num = Number($(this).find('value > ArrayOfInt > int').first().text());
+			if (num >= 1975) { 
+				heart_count++;
+			}
+		});
+		if (heart_count >= 10) {
+			count += 2;
+		} else if (heart_count >= 5) {
+			count += 1;
+		}
+		if (playerLevel >= 25) {
+			count += 2;
+		} else if (playerLevel >= 15) {
+			count += 1;
+		}
+		$(xmlDoc).find('locations > GameLocation > Characters > NPC').each(function () {
+			if ($(this).attr('xsi:type') === 'Cat' || $(this).attr('xsi:type') === 'Dog') {
+				hasPet = 1;
+				petLove = Number($(this).find('friendshipTowardFarmer').text());
+			}
+		});
+		if (petLove >= 999) {
+			count++;
+		}
+		if (count >= 12) {
+			candles = 4;
+		} else if (count >= 8) {
+			candles = 3;
+		} else if (count >= 4) {
+			candles = 2;
+		}
+		output += '<span class="result">' + farmer + ' has earned a total of ' + count +
+				' point(s) (details below); the maximum possible is ' + max_count + ' points.</span><br />\n';
+		output += '<span class="result">The next evaluation will light ' + candles + ' candle(s).</span><br />\n';
+		output += '<ul class="ach_list"><li>';
+		output += (candles >= 4) ? getMilestoneString('Four candle evaluation', 1) :
+				getMilestoneString('Four candle evaluation', 0) + (12 - count) + ' more points';
+		output += '</li></ul>\n';
+
+		output += '<span class="result">' + farmer + ' has earned a total of ' + addCommas(money) + 'g.</span><br />\n';
+		output += '<ul class="ach_list"><li>';
+		output += (money >= 5e4) ? getPointString(1, ' having at least 50,000g earnings', 0, 1) :
+				getPointString(1, ' having at least 50,000g earnings', 0, 0) + ' -- need ' + addCommas(5e4 - money) + 'g more';
+		output += '</li>\n<li>';
+		output += (money >= 1e5) ? getPointString(1, ' having at least 100,000g earnings', 1, 1) :
+				getPointString(1, ' having at least 100,000g earnings', 1, 0) + ' -- need ' + addCommas(1e5 - money) + 'g more';
+		output += '</li>\n<li>';
+		output += (money >= 2e5) ? getPointString(1, ' having at least 200,000g earnings', 1, 1) :
+				getPointString(1, ' having at least 200,000g earnings', 1, 0) + ' -- need ' + addCommas(2e5 - money) + 'g more';
+		output += '</li>\n<li>';
+		output += (money >= 3e5) ? getPointString(1, ' having at least 300,000g earnings', 1, 1) :
+				getPointString(1, ' having at least 300,000g earnings', 1, 0) + ' -- need ' + addCommas(3e5 - money) + 'g more';
+		output += '</li>\n<li>';
+		output += (money >= 5e5) ? getPointString(1, ' having at least 500,000g earnings', 1, 1) :
+				getPointString(1, ' having at least 500,000g earnings', 1, 0) + ' -- need ' + addCommas(5e5 - money) + 'g more';
+		output += '</li>\n<li>';
+		output += (money >= 1e6) ? getPointString(2, ' having at least 1,000,000g earnings', 1, 1) :
+				getPointString(2, ' having at least 1,000,000g earnings', 1, 0) + ' -- need ' + addCommas(1e6 - money) + 'g more';
+		output += '</li></ul>\n';
+
+		output += '<span class="result">' + farmer + ' has earned ' + Object.keys(ach_have).length +
+				' of the ' + ach_count + ' relevant achievments.</span><br />\n';
+		output += '<ul class="ach_list"><li>';
+		output += (ach_have.hasOwnProperty(5)) ? getPointString(1, ' having "A Complete Collection" Achievement', 0, 1) :
+				getPointString(1, ' having "A Complete Collection" Achievement', 0, 0);
+		output += '</li>\n<li>';
+		output += (ach_have.hasOwnProperty(26)) ? getPointString(1, ' having "Master Angler" Achievement', 0, 1) :
+				getPointString(1, ' having "Master Angler" Achievement', 0, 0);
+		output += '</li>\n<li>';
+		output += (ach_have.hasOwnProperty(34)) ? getPointString(1, ' having "Full Shipment" Achievement', 0, 1) :
+				getPointString(1, ' having "Full Shipment" Achievement', 0, 0);
+		output += '</li></ul>\n';
+
+		if (cc_done || cc_have >= cc_count) {
+			output += '<span class="result">' + farmer + ' has completed the Community Center restoration';
+			output += (cc_done) ? ' and attended the re-opening ceremony.' : ' but has not yet attended the re-opening ceremony.';
+			output += '</span><br />\n';
+		} else {
+			output += '<span class="result">' + farmer + ' has not completed the Community Center restoration.';
+		}
+		output += '<ul class="ach_list"><li>';
+		output += (cc_done || cc_have >= cc_count) ? getPointString(1, ' completing Community Center', 0, 1) :
+				getPointString(1, ' completing Community Center', 0, 0);
+		output += '</li>\n<li>';
+		output += (cc_done) ? getPointString(2, ' attending the Community Center re-opening', 0, 1) :
+				getPointString(2, ' attending the Community Center re-opening', 0, 0);
+		output += '</li></ul>\n';
+
+		output += '<span class="result">' + farmer + ' has ' + realPlayerLevel + ' total skill levels.</span><br />\n';
+		output += '<ul class="ach_list"><li>';
+		output += (playerLevel >= 15) ? getPointString(1, ' having 30 total skill levels', 0, 1) :
+				getPointString(1, ' having 30 total skill levels', 0, 0) + ' -- need ' + (30 - realPlayerLevel) + ' more';
+		output += '</li>\n<li>';
+		output += (playerLevel >= 25) ? getPointString(1, ' having 50 total skill levels', 1, 1) :
+				getPointString(1, ' having 50 total skill levels', 1, 0) + ' -- need ' + (50 - realPlayerLevel) + ' more';
+		output += '</li></ul>\n';
+		
+		output += '<span class="result">' + farmer + ' has ' + heart_count +
+				' relationship(s) of 1975+ friendship points (~8 hearts.)</span><br />\n';
+		output += '<ul class="ach_list"><li>';
+		output += (heart_count >= 5) ? getPointString(1, ' having ~8&#x2665; with 5 people', 0, 1) :
+				getPointString(1, ' having ~8&#x2665; with 5 people', 0, 0) + ' -- need ' + (5 - heart_count) + ' more';
+		output += '</li>\n<li>';
+		output += (heart_count >= 10) ? getPointString(1, ' having ~8&#x2665; with 10 people', 1, 1) :
+				getPointString(1, ' having ~8&#x2665; with 10 people', 1, 0) + ' -- need ' + (10 - heart_count) + ' more';
+		output += '</li></ul>\n';
+		
+		if (hasPet) {
+			output += '<span class="result">' + farmer + ' has a pet with ' + petLove + ' friendship points.</span><br />\n';
+		} else {
+			need = ' a pet and ';
+			output += '<span class="result">' + farmer + ' does not have a pet.</span><br />\n';
+		}
+		output += '<ul class="ach_list"><li>';
+		output += (petLove >= 999) ? getPointString(1, ' having a pet with at least 999 friendship points', 0, 1) :
+				getPointString(1, ' having a pet with at least 999 friendship points', 0, 0) + ' -- need ' + 
+				need + (999 - petLove) + ' friendship points';
+		output += '</li></ul>\n';
+
+		output += '<span class="result">' + farmer + ((spouse.length > 0) ? ' is' : ' is not') +
+				' married and has upgraded the farmhouse ' + houseUpgrades + ' time(s).</span><br />\n';
+		output += '<ul class="ach_list"><li>';
+		need = [];
+		if (spouse.length === 0) {
+			need.push('a spouse');
+		}
+		if (houseUpgrades < 2) {
+			need.push( (2 - houseUpgrades) + ' more upgrades');
+		}
+		output += (need.length === 0) ? getPointString(1, ' being married with at least 2 house upgrades', 0, 1) :
+				getPointString(1, ' being married with at least 2 house upgrades', 0, 0) + ' -- need ' + need.join(" and ");
+		output += '</li></ul>\n';
+
+		if (hasKeys.length > 0) {
+			output += '<span class="result">' + farmer + ' has acquired the ' + hasKeys.join(" and ") + '.</span><br />\n';
+		} else {
+			output += '<span class="result">' + farmer + ' has not acquired either the Rusty Key or Skull Key.</span><br />\n';
+		}
+		output += '<ul class="ach_list"><li>';
+		output += (hasRustyKey === 'true') ? getPointString(1, ' having the Rusty Key', 0, 1) :
+				getPointString(1, ' having the Rusty Key', 0, 0) + ' -- acquired after 60 museum donations';
+		output += '</li>\n<li>';
+		output += (hasSkullKey === 'true') ? getPointString(1, ' having the Skull Key', 0, 1) :
+				getPointString(1, ' having the Skull Key', 0, 0) + ' -- acquired on level 120 of the mines';
+		output += '</li></ul>\n';
+
 		return output;
 	}
-*/
+
 	function handleFileSelect(evt) {
 		var file = evt.target.files[0],
-			reader = new FileReader();
+			reader = new FileReader(),
+			prog = document.getElementById('progress');
 
+		prog.value = 0;
+		$(document.getElementById('output-container')).hide();
+		$(document.getElementById('progress-container')).show();
+		$(document.getElementById('changelog')).hide();
+		reader.onloadstart = function(e) {
+			prog.value = 20;
+		};
+		reader.onprogress = function(e) {
+			if (e.lengthComputable) {
+				var p = 20 + (e.loaded/e.total * 60);
+				prog.value = p;
+			}
+		};
 		reader.onload = function (e) {
-			$(document.getElementById('changelog')).hide();
-			$(document.getElementById('output-container')).show();
 			var output = "",
 				xmlDoc = $.parseXML(e.target.result);
-				//farmer = $(xmlDoc).find('player > name').text();
 
 			output += parseSummary(xmlDoc);
 			output += parseMoney(xmlDoc);
@@ -1229,6 +1486,7 @@ window.onload = function () {
 			output += parseBasicShipping(xmlDoc);
 			output += parseCropShipping(xmlDoc);
 			output += parseMuseum(xmlDoc);
+			output += parseGrandpa(xmlDoc);
 
 			//TODO: remaining achievments
 			// Joja & CC.
@@ -1240,10 +1498,12 @@ window.onload = function () {
 			// Grandpa's Evaluation
 
 			// End of checks
+			prog.value = 100;
+			$(document.getElementById('output-container')).show();
 			document.getElementById('out').innerHTML = output;
+			$(document.getElementById('progress-container')).hide();
 		};
 		reader.readAsText(file);
-
 	}
 	document.getElementById('file_select').addEventListener('change', handleFileSelect, false);
 

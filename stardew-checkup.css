@@ -28,6 +28,7 @@ a:hover,a:active { color: #ffa000; }
 }
 #input-container { display: none; }
 #output-container { display: none; }
+#progress-container { display: none; }
 .error {
 	font-weight: bold;
 	font-size: 150%;
@@ -42,14 +43,17 @@ a:hover,a:active { color: #ffa000; }
 .ach {
 	font-style: italic;
 }
-.ach_yes,.ms_yes {
+.pts {
+	font-weight: bold;
+}
+.ach_yes,.ms_yes,.pt_yes {
 	color: #004000;
 }
 .ach_yes:before,.ms_yes:before {
 	content: "\2714 ";
 	margin-right: 3px;
 }
-.ach_no,.ms_no {
+.ach_no,.ms_no,.pt_no {
 	color: #c00000;
 }
 .ach_no:before,.ms_no:before {
