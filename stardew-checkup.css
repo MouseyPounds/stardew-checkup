@@ -15,9 +15,9 @@ body {
 	margin: 15px;
 	color: #603000;
 }
-a:link { color: #d06000; }
-a:visited { color: #804000; }
-a:hover,a:active { color: #ffa000; }
+a:link, a:visited { color: #804000; }
+a:hover { color: #d08000; }
+a:active { color: #ffa000; }
 .panel {
 	background-color: #ffe0b0;
 	padding: 8px;

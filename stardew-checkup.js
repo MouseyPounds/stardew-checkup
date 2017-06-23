@@ -19,15 +19,15 @@ window.onload = function () {
 
 	// Utility functions
 	function addCommas(x) {
-		// from Jamie Taylor. See https://stackoverflow.com/questions/3883342/add-commas-to-a-number-in-jquery
+		// Jamie Taylor @ https://stackoverflow.com/questions/3883342/add-commas-to-a-number-in-jquery
 		return x.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",");
 	}
 
 	function capitalize(s) {
-		// from joelvh. See https://stackoverflow.com/questions/1026069/how-do-i-make-the-first-letter-of-a-string-uppercase-in-javascript
+		// joelvh @ https://stackoverflow.com/questions/1026069/how-do-i-make-the-first-letter-of-a-string-uppercase-in-javascript
 		return s && s[0].toUpperCase() + s.slice(1);
 	}
-	
+
 	function getAchieveString(name, desc, yes) {
 		var r = (yes) ? '<span class="ach_yes"><span class="ach">' + name + '</span> Achievement (' + desc + ') requirements met</span>' :
 					'<span class="ach_no"><span class="ach">' + name + '</span> Achievement (' + desc + ') requirements not met</span> -- need ';
@@ -45,6 +45,14 @@ window.onload = function () {
 			r = (yes) ? '<span class="pt_yes"><span class="pts">+' + pts + c + '</span> has been earned for ' + desc + '</span>' :
 					'<span class="pt_no"><span class="pts"> (' + pts + c + ')</span> could be earned for ' + desc + '</span>';
 		return r;
+	}
+	
+	function wikify(item) {
+		// removing egg colors & changing spaces to underscores
+		var trimmed = item.replace(' (White)', '');
+		trimmed = trimmed.replace(' (Brown)', '');
+		trimmed = trimmed.replace(/ /g, '_');
+		return ('<a href="http://stardewvalleywiki.com/' + trimmed + '">' + item + '</a>');
 	}
 
 	// Individual chunks of save parsing.
@@ -149,7 +157,7 @@ window.onload = function () {
 			wedding = Number($(xmlDoc).find('countdownToWedding').text()),
 			houseUpgrades = $(xmlDoc).find('player > houseUpgradeLevel').text();
 		if (result.length > 0) {
-			spouse = (wedding) ? result.text().slice(0,-7) : result.text();
+			spouse = (wedding) ? result.text().slice(0, -7) : result.text();
 			count++;
 		} else {
 			needs.push('spouse');
@@ -319,9 +327,9 @@ window.onload = function () {
 				if (recipes.hasOwnProperty(id)) {
 					r = recipes[id];
 					if (!known.hasOwnProperty(r)) {
-						need_k.push('<li>' + r + '</li>');
+						need_k.push('<li>' + wikify(r) + '</li>');
 					} else if (!crafted.hasOwnProperty(r)) {
-						need_c.push('<li>' + r + '</li>');
+						need_c.push('<li>' + wikify(r) + '</li>');
 					}
 				}
 			}
@@ -383,7 +391,7 @@ window.onload = function () {
 			if (num > 0) {
 				craft_count++;
 			} else {
-				need_c.push('<li>' + id + '</li>');
+				need_c.push('<li>' + wikify(id) + '</li>');
 			}
 		});
 
@@ -412,7 +420,7 @@ window.onload = function () {
 					if (recipes.hasOwnProperty(id)) {
 						r = recipes[id];
 						if (!known.hasOwnProperty(r)) {
-							need_k.push('<li>' + r + '</li>');
+							need_k.push('<li>' + wikify(r) + '</li>');
 						}
 					}
 				}
@@ -529,7 +537,7 @@ window.onload = function () {
 				if (recipes.hasOwnProperty(id)) {
 					r = recipes[id];
 					if (!known.hasOwnProperty(r)) {
-						need.push('<li>' + r + '</li>');
+						need.push('<li>' + wikify(r) + '</li>');
 					}
 				}
 			}
@@ -644,7 +652,7 @@ window.onload = function () {
 				432: "Truffle Oil",
 				433: "Coffee Bean",
 				436: "Goat Milk",
-				438: "L. Goat Milk",
+				438: "Large Goat Milk",
 				440: "Wool",
 				442: "Duck Egg",
 				444: "Duck Feather",
@@ -701,7 +709,7 @@ window.onload = function () {
 				if (recipes.hasOwnProperty(id)) {
 					r = recipes[id];
 					if (!crafted.hasOwnProperty(r)) {
-						need.push('<li>' + r + '</li>');
+						need.push('<li>' + wikify(r) + '</li>');
 					}
 				}
 			}
@@ -803,11 +811,11 @@ window.onload = function () {
 				if (poly_crops.hasOwnProperty(id)) {
 					r = poly_crops[id];
 					if (!crafted.hasOwnProperty(r)) {
-						need.push('<li>' + r + ' -- 15 more</li>');
+						need.push('<li>' + wikify(r) + ' -- 15 more</li>');
 					} else {
 						n = Number(crafted[r]);
 						if (n < 15) {
-							need.push('<li>' + r + ' --' + (15 - n) + ' more</li>');
+							need.push('<li>' + wikify(r) + ' --' + (15 - n) + ' more</li>');
 						}
 					}
 				}
@@ -832,7 +840,7 @@ window.onload = function () {
 				num = Number($(this).text());
 				xp[skills[i]] = num;
 				if (num < 15000) {
-					need.push('<li>' + skills[i] + ' -- ' + (15000 - num) + ' more xp</li>\n');
+					need.push('<li>' + wikify(skills[i]) + ' -- ' + (15000 - num) + ' more xp</li>\n');
 				} else {
 					count++;
 				}
@@ -889,8 +897,8 @@ window.onload = function () {
 				123: "Ancient Drum",
 				124: "Golden Mask",
 				125: "Golden Relic",
-				126: "Strange Doll (Green)",
-				127: "Strange Doll (Yellow)",
+				126: "Strange Doll (green)",
+				127: "Strange Doll (yellow)",
 				579: "Prehistoric Scapula",
 				580: "Prehistoric Tibia",
 				581: "Prehistoric Skull",
@@ -1037,7 +1045,7 @@ window.onload = function () {
 						need.push('donated');
 					}
 					if (need.length > 0) {
-						need_art.push('<li>' + r + ' -- not ' + need.join(" or ") + '</li>');
+						need_art.push('<li>' + wikify(r) + ' -- not ' + need.join(" or ") + '</li>');
 					}
 				}
 			}
@@ -1052,7 +1060,7 @@ window.onload = function () {
 						need.push('donated');
 					}
 					if (need.length > 0) {
-						need_min.push('<li>' + r + ' -- not ' + need.join(" or ") + '</li>');
+						need_min.push('<li>' + wikify(r) + ' -- not ' + need.join(" or ") + '</li>');
 					}
 				}
 			}
