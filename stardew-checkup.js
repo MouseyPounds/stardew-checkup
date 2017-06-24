@@ -1079,7 +1079,8 @@ window.onload = function () {
 
 	function parseMonsters(xmlDoc) {
 		/* Conditions & details from decompiled source StardewValley.Locations.AdventureGuild.gil()
-		 * Some monsters which may not currently be in game are included and we mimic that here too. */
+		 * The game counts some monsters which are not currently available; we will count them too
+		 * just in case they are in someone's save file, but not list them in the details. */
 		var output = '<h3>Monster Hunting</h3>\n',
 			goals = {
 				"Slimes": 1000,
@@ -1097,17 +1098,26 @@ window.onload = function () {
 				"Sludge": "Slimes",
 				"Shadow Brute": "Void Spirits",
 				"Shadow Shaman": "Void Spirits",
-				"Shadow Guy": "Void Spirits",
+				"Shadow Guy": "Void Spirits", // not in released game
 				"Bat": "Bats",
 				"Frost Bat": "Bats",
 				"Lava Bat": "Bats",
 				"Skeleton": "Skeletons",
-				"Skeleton Mage": "Skeletons",
+				"Skeleton Mage": "Skeletons", // not in released game
 				"Bug": "Cave Insects",
-				"Fly": "Cave Insects",
+				"Fly": "Cave Insects", // wiki calls this "Cave Fly"
 				"Grub": "Cave Insects",
 				"Duggy": "Duggies",
 				"Dust Spirit": "Dust Sprites"
+			},
+			monsters = {
+				"Slimes": ["Green Slime", "Frost Jelly", "Sludge"],
+				"Void Spirits": ["Shadow Brute", "Shadow Shaman"],
+				"Bats": ["Bat", "Frost Bat", "Lava Bat"],
+				"Skeletons": ["Skeleton"],
+				"Cave Insects": ["Bug", "Cave Fly", "Grub"],
+				"Duggies": ["Duggy"],
+				"Dust Sprites": ["Dust Spirit"]
 			},
 			killed = [],
 			completed = 0,
@@ -1148,10 +1158,12 @@ window.onload = function () {
 					if (killed[id] >= goals[id]) {
 						completed++;
 					} else {
-						need.push('<li>' + id + ' -- ' + (goals[id] - killed[id]) + ' more kills</li>');
+						need.push('<li>' + id + ' -- kill ' + (goals[id] - killed[id]) + ' more of: ' +
+							monsters[id].map(wikify).join(', ') + '</li>');
 					}
 				} else {
-					need.push('<li>' + id + ' -- ' + goals[id] + ' more kills</li>');
+					need.push('<li>' + id + ' -- kill ' + goals[id] + ' more of: ' +
+						monsters[id].map(wikify).join(', ') + '</li>');
 				}
 			}
 		}
@@ -1470,6 +1482,129 @@ window.onload = function () {
 		output += (hasSkullKey === 'true') ? getPointString(1, ' having the Skull Key', 0, 1) :
 				getPointString(1, ' having the Skull Key', 0, 0) + ' -- acquired on level 120 of the mines';
 		output += '</li></ul>\n';
+
+		return output;
+	}
+
+	function parseBundles(xmlDoc) {
+		// Bundle info from Data\Bundles.xnb & StardewValley.Locations.CommunityCenter class
+		var output = '<h3>Community Center / Joja Mart</h3>\n',
+			farmer = $(xmlDoc).find('player > name').html(),
+			isJojaMember = 0,
+			room = {
+				0: {
+					'name': 'Pantry',
+					'bundles': {
+						0: 'Spring Crops',
+						1: 'Summer Crops',
+						2: 'Fall Crops',
+						3: 'Quality Crops',
+						4: 'Animal',
+						5: 'Artisan'
+					}
+				},
+				1: {
+					'name': 'Crafts Room',
+					'bundles': {
+						13: 'Spring Foraging',
+						14: 'Summer Foraging',
+						15: 'Fall Foraging',
+						16: 'Winter Foraging',
+						17: 'Construction',
+						19: 'Exotic Foraging'
+					}
+				},
+				2: {
+					'name': 'Fish Tank',
+					'bundles': {
+						6: 'River Fish',
+						7: 'Lake Fish',
+						8: 'Ocean Fish',
+						9: 'Night Fishing',
+						10: 'Specialty Fish',
+						11: 'Crab Pot'
+					}
+				},
+				3: {
+					'name': 'Boiler Room',
+					'bundles': {
+						20: "Blacksmith's",
+						21: "Geologist's",
+						22: "Adventurer's"
+					}
+				},
+				4: {
+					'name': 'Vault',
+					'bundles': {
+						23: '2,500g',
+						24: '5.000g',
+						25: '10,000g',
+						26: '25,000g'
+					}
+				},
+				5: {
+					'name': 'Bulletin Board',
+					'bundles': {
+						31: "Chef's",
+						32: 'Field Research',
+						33: "Enchanter's",
+						34: 'Dye',
+						35: 'Fodder'
+					}
+				}
+			},
+			needed = {
+				0: 4,
+				1: 4,
+				2: 4,
+				3: 3,
+				4: 5,
+				5: 6,
+				6: 4,
+				7: 4,
+				8: 4,
+				9: 3,
+				10: 4,
+				11: 5,
+				13: 4,
+				14: 3,
+				15: 4,
+				16: 4,
+				17: 4,
+				19: 5,
+				20: 3,
+				21: 4,
+				22: 2,
+				23: 1,
+				24: 1,
+				25: 1,
+				26: 1,
+				31: 6,
+				32: 4,
+				33: 4,
+				34: 6,
+				35: 3
+			},
+			ccMail = {
+				'ccBoilerRoom': 3,
+				'ccCraftsRoom': 1,
+				'ccPantry': 0,
+				'ccFishTank': 2,
+				'ccVault': 4,
+				'ccBulletin': 5
+			},
+			ccCount = 6,
+			ccEvent = '191393',
+			jojaMail = {
+				'jojaBoilerRoom': 3,
+				'jojaCraftsRoom': 1,
+				'jojaPantry': 0,
+				'jojaFishTank': 2,
+				'jojaVault': 4
+			},
+			jojaCount = 5,
+			jojaEvent = '502261',
+			done = {};
 
 		return output;
 	}
