@@ -29,30 +29,38 @@ window.onload = function () {
 	}
 
 	function getAchieveString(name, desc, yes) {
-		var r = (yes) ? '<span class="ach_yes"><span class="ach">' + name + '</span> Achievement (' + desc + ') requirements met</span>' :
-					'<span class="ach_no"><span class="ach">' + name + '</span> Achievement (' + desc + ') requirements not met</span> -- need ';
-		return r;
+		if (desc.length > 0) {
+			desc = '(' + desc + ') ';
+		}
+		return (yes) ? '<span class="ach_yes"><span class="ach">' + name + '</span> Achievement ' + desc + 'requirements met</span>' :
+					'<span class="ach_no"><span class="ach">' + name + '</span> Achievement ' + desc + 'requirements not met</span> -- need ';
+	}
+
+	function getAchieveImpossibleString(name, desc) {
+		if (desc.length > 0) {
+			desc = '(' + desc + ') ';
+		}
+		return '<span class="ach_no"><span class="ach">' + name + '</span> Achievement ' + desc + 'cannot be completed on this save</span>';
 	}
 
 	function getMilestoneString(desc, yes) {
-		var r = (yes) ? '<span class="ms_yes">' + desc + ' <span class="ach">(no associated achievement)</span> requirements met</span>' :
+		return (yes) ? '<span class="ms_yes">' + desc + ' <span class="ach">(no associated achievement)</span> requirements met</span>' :
 					'<span class="ms_no">' + desc + ' <span class="ach">(no associated achievement)</span> requirements not met</span> -- need ';
-		return r;
 	}
 
 	function getPointString(pts, desc, cum, yes) {
-		var c = (cum) ? ' more' : '',
-			r = (yes) ? '<span class="pt_yes"><span class="pts">+' + pts + c + '</span> has been earned for ' + desc + '</span>' :
+		var c = (cum) ? ' more' : '';
+		return (yes) ? '<span class="pt_yes"><span class="pts">+' + pts + c + '</span> has been earned for ' + desc + '</span>' :
 					'<span class="pt_no"><span class="pts"> (' + pts + c + ')</span> could be earned for ' + desc + '</span>';
-		return r;
 	}
-	
-	function wikify(item) {
+
+	function wikify(item, page) {
 		// removing egg colors & changing spaces to underscores
 		var trimmed = item.replace(' (White)', '');
 		trimmed = trimmed.replace(' (Brown)', '');
 		trimmed = trimmed.replace(/ /g, '_');
-		return ('<a href="http://stardewvalleywiki.com/' + trimmed + '">' + item + '</a>');
+		return (page) ? ('<a href="http://stardewvalleywiki.com/' + page + '#' + trimmed + '">' + item + '</a>') :
+					('<a href="http://stardewvalleywiki.com/' + trimmed + '">' + item + '</a>');
 	}
 
 	// Individual chunks of save parsing.
@@ -1135,8 +1143,9 @@ window.onload = function () {
 			} else {
 				output += ' but has not yet explored the Skull Cavern';
 			}
-			output += '.</span><ul class="ach_list"><li>\n';
+			output += '.</span><br />';
 		}
+		output += '<ul class="ach_list"><li>\n';
 		output += (mineLevel >= 120) ? getAchieveString('The Bottom', 'reach mine level 120', 1) :
 				getAchieveString('The Bottom', 'reach mine level 120', 0) + (120 - mineLevel) + ' more';
 		output += '</li></ul>\n';
@@ -1198,7 +1207,7 @@ window.onload = function () {
 
 	function parseStardrops(xmlDoc) {
 		/* mailReceived identifiers from decompiled source of StardewValley.Utility.foundAllStardrops()
-		 * descriptions are made up on the fly. */
+		 * descriptions are not from anywhere else and are just made up. */
 		var output = '<h3>Stardrops</h3>\n',
 			count = 0,
 			id,
@@ -1209,7 +1218,7 @@ window.onload = function () {
 				'CF_Mines': 'Found in the chest on mine level 100.',
 				'CF_Spouse': 'Randomly given by spouse at 13/12 hearts.',
 				'CF_Sewer': 'Purchesed from Krobus in the Sewers for 20,000g.',
-				'CF_Statue': 'Received from the Old Master Cannoli statue in the Secret Woods in excahnge for a Sweet Gem Berry.',
+				'CF_Statue': 'Received from the Old Master Cannoli statue in the Secret Woods in exchange for a Sweet Gem Berry.',
 				'CF_Fish': 'Mailed by Willy after catching all the different fish.',
 				'museumComplete': 'Reward for completing the Museum collection.'
 			},
@@ -1488,7 +1497,7 @@ window.onload = function () {
 
 	function parseBundles(xmlDoc) {
 		// Bundle info from Data\Bundles.xnb & StardewValley.Locations.CommunityCenter class
-		var output = '<h3>Community Center / Joja Mart</h3>\n',
+		var output = '<h3>Community Center / Joja Community Development</h3>\n',
 			farmer = $(xmlDoc).find('player > name').html(),
 			isJojaMember = 0,
 			room = {
@@ -1536,8 +1545,8 @@ window.onload = function () {
 				4: {
 					'name': 'Vault',
 					'bundles': {
-						23: '2,500g',
-						24: '5.000g',
+						23: ' 2,500g',
+						24: ' 5,000g',
 						25: '10,000g',
 						26: '25,000g'
 					}
@@ -1553,7 +1562,8 @@ window.onload = function () {
 					}
 				}
 			},
-			needed = {
+			bundleHave = {},
+			bundleCount = { // number of items in each bundle
 				0: 4,
 				1: 4,
 				2: 4,
@@ -1594,7 +1604,10 @@ window.onload = function () {
 				'ccBulletin': 5
 			},
 			ccCount = 6,
+			ccHave = 0,
 			ccEvent = '191393',
+			project = ['Greenhouse', 'Bridge', 'Panning', 'Minecarts', 'Bus'],
+			price = ['35,000g', '25,000g', '20,000g', '15,000g', '40,000g'],
 			jojaMail = {
 				'jojaBoilerRoom': 3,
 				'jojaCraftsRoom': 1,
@@ -1603,8 +1616,155 @@ window.onload = function () {
 				'jojaVault': 4
 			},
 			jojaCount = 5,
+			jojaHave = 0,
 			jojaEvent = '502261',
-			done = {};
+			eventToCheck = '',
+			hasSeenCeremony = 0,
+			done = {},
+			hybrid = 0,
+			id,
+			r,
+			b,
+			temp,
+			bundleNeed = [],
+			need = [];
+
+		$(xmlDoc).find('locations > GameLocation').each(function () {
+			if ($(this).attr('xsi:type') === 'CommunityCenter') {
+				// First check basic completion
+				temp = 0;
+				$(this).find('areasComplete > boolean').each(function () {
+					if ($(this).text() === 'true') {
+						ccHave++;
+						done[temp] = 1;
+					}
+					temp++;
+				});
+				// Now look at bundles. Getting an item count but not which items are placed
+				$(this).find('bundles > item').each(function () {
+					id = $(this).find('key > int').text();
+					bundleHave[id] = 0;
+					$(this).find('ArrayOfBoolean > boolean').each(function () {
+						if ($(this).text() === 'true') {
+							bundleHave[id]++;
+						}
+					});
+				});
+			}
+		});
+		$(xmlDoc).find('player > mailReceived > string').each(function () {
+			var id = $(this).text();
+			if (id === 'JojaMember') {
+				isJojaMember = 1;
+			} else if (jojaMail.hasOwnProperty(id)) {
+				jojaHave++;
+				done[jojaMail[id]] = 1;
+			}
+		});
+		if (ccHave > 0 && jojaHave > 0) {
+			// Hybrid situation. Calculate remaining projects but ignore Bulletin Board
+			hybrid = 1;
+			jojaCount -= ccHave;
+			if (done.hasOwnProperty(ccMail.ccBulletin)) {
+				jojaCount++;
+			}
+		}
+		eventToCheck = (isJojaMember) ? jojaEvent : ccEvent;
+		$(xmlDoc).find('player > eventsSeen > int').each(function () {
+			if ($(this).text() === eventToCheck) {
+				hasSeenCeremony = 1;
+			}
+		});
+
+		// There are reports that a hybrid playthrough will not trigger the Joja achieve, but in my
+		// test runs, the ceremony still played (and the achievement trigger is part of the ceremony).
+		// We will give out a warning if the player is doing Joja after some CC completion just in case.
+		// We will also pretend that the Joja achieve is impossible if player has not joined them yet but
+		// has done some CC rooms even though this may not be strictly true.
+		if (isJojaMember) {
+			if (hybrid) {
+				output += '<span class="result">' + farmer + ' completed ' + ccHave +
+					' Community Center room(s) and then became a Joja member.</span><br />\n';
+				output += '<span class="result">' + farmer + ' has since completed ' + jojaHave + ' of the remaining ' +
+					jojaCount + ' projects on the Community Development Form.</span><br />\n';
+			} else {
+				output += '<span class="result">' + farmer + ' is a Joja member and has completed ' + jojaHave +
+					' of the ' + jojaCount + ' projects on the Community Development Form.</span><br />\n';
+			}
+			output += '<span class="result">' + farmer + ((hasSeenCeremony) ? ' has' : ' has not') +
+					' attended the completion ceremony</span><br />\n<ul class="ach_list"><li>';
+			output += getAchieveImpossibleString('Local Legend', 'restore the Pelican Town Community Center');
+			output += '</li><li>\n';
+			if (hybrid > 0) {
+				output += '<span class="warn">Warning: Some have reported that the Joja achievement will not trigger in a hybrid situation like this.</span></li><li>\n';
+			}
+			if (!hasSeenCeremony) {
+				if (jojaHave < jojaCount) {
+					temp = (jojaCount - jojaHave) + ' more project(s) and the ceremony';
+					for (id in jojaMail) {
+						if (jojaMail.hasOwnProperty(id)) {
+							if (!done.hasOwnProperty(jojaMail[id])) {
+								need.push('<li> Purchase ' + project[jojaMail[id]] + ' project for ' + price[jojaMail[id]] + '</li>');
+							}
+						}
+					}
+				} else {
+					temp = ' to attend the ceremony';
+				}
+				need.push('<li>Attend the completion ceremony at the Joja Warehouse</li>');
+			}
+			output += (jojaHave >= jojaCount && hasSeenCeremony) ? getAchieveString('Joja Co. Member Of The Year', '', 1) :
+					getAchieveString('Joja Co. Member Of The Year', '', 0) + temp;
+			output += '</li></ul>\n';
+		} else {
+			output += '<span class="result">' + farmer + ' is not a Joja member and has completed ' + ccHave +
+					' of the ' + ccCount + ' Community Center rooms.</span><br />\n';
+			output += '<span class="result">' + farmer + ((hasSeenCeremony) ? ' has' : ' has not') +
+					' attended the completion ceremony</span><br />\n<ul class="ach_list"><li>';
+			if (ccHave === 0) {
+				output += getAchieveString('Joja Co. Member Of The Year', '', 0) + 'to become a Joja member and purchase all community development perks';
+			/* removed this explanation as unnecessarily confusing even though Joja achieve might still be possible
+			} else if (ccHave < ccCount) {
+				output += getAchieveString('Joja Co. Member Of The Year', '', 0) + 'to become a Joja member and purchase all community development perks; doing so would cause <span = "ach">Local Legend</span> to be uncompletable';
+			*/
+			} else {
+				output += getAchieveImpossibleString('Joja Co. Member Of The Year', 'become a Joja member and purchase all community development perks');
+			}
+			output += '</li><li>\n';
+			if (!hasSeenCeremony) {
+				if (ccHave < ccCount) {
+					temp = (ccCount - ccHave) + ' more room(s) and the ceremony';
+					for (id in ccMail) {
+						if (ccMail.hasOwnProperty(id)) {
+							r = ccMail[id];
+							if (!done.hasOwnProperty(r)) {
+								bundleNeed = [];
+								if (room.hasOwnProperty(r)) {
+									for (b in room[r].bundles) {
+										if (room[r].bundles.hasOwnProperty(b)) {
+											if (bundleHave[b] < bundleCount[b]) {
+												bundleNeed.push('<li>' + room[r].bundles[b] + ' Bundle -- ' +
+													(bundleCount[b] - bundleHave[b]) + ' more item(s)</li>');
+											}
+										}
+									}
+								}
+								need.push('<li> ' + wikify(room[r].name, 'Bundles') + '<ol>' + bundleNeed.sort().join('') + '</ol></li>');
+							}
+						}
+					}
+				} else {
+					temp = ' to attend the ceremony';
+				}
+				need.push('<li>Attend the re-opening ceremony at the Community Center</li>');
+			}
+			output += (ccHave >= ccCount && hasSeenCeremony) ? getAchieveString('Local Legend', '', 1) :
+					getAchieveString('Local Legend', '', 0) + temp;
+			output += '</li></ul>\n';
+		}
+		if (need.length > 0) {
+			output += '<span class="need">Left to do:<ol>' + need.sort().join('') + '</ol></span>\n';
+		}
 
 		return output;
 	}
@@ -1645,6 +1805,7 @@ window.onload = function () {
 			output += parseBasicShipping(xmlDoc);
 			output += parseCropShipping(xmlDoc);
 			output += parseMuseum(xmlDoc);
+			output += parseBundles(xmlDoc);
 			output += parseGrandpa(xmlDoc);
 
 			//TODO: remaining achievments

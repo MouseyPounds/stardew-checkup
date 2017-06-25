@@ -39,7 +39,7 @@ a:active { color: #ffa000; }
 #footer {
 	text-align: center;
 }
-.ach {
+.ach,.warn {
 	font-style: italic;
 }
 .pts {
@@ -61,9 +61,10 @@ a:active { color: #ffa000; }
 }
 .ach_list {
 	list-style: none;
-	padding-left: 35px;
+	padding-left: 50px;
 	margin-top: 0px;
 	margin-bottom: 4px;
+	text-indent: -15px;
 }
 .result:before {
 	content: "\25c8 ";
@@ -72,7 +73,7 @@ a:active { color: #ffa000; }
 .result {
 	padding-left: 15px;
 }
-.need:before {
+.need:before,.warn:before {
 	content: "! ";
 	font-weight: bold;
 	margin-right: 3px;
