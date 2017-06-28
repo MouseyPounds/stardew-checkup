@@ -2,7 +2,7 @@
  * https://mouseypounds.github.io/stardew-checkup/
  */
 
-/*jslint indent: 4, maxerr: 50, passfail: false, browser: true, todo: true, plusplus: true */
+/*jslint indent: 4, maxerr: 50, passfail: false, browser: true, regexp: true, plusplus: true */
 /*global $, FileReader */
 
 window.onload = function () {
@@ -123,11 +123,11 @@ window.onload = function () {
 			farmer = $(xmlDoc).find('player > name').html();
 
 		$(xmlDoc).find('player > friendships > item').each(function () {
-			//var who = $(this).find('key > string').text(),
+			// 'who' will be useful if we expand to checking for max hearts on everyone
+			//who = $(this).find('key > string').text(),
 			var num = $(this).find('value > ArrayOfInt > int').first().text();
 			if (num >= 2500) { count_10h++; }
 			if (num >= 1250) { count_5h++; }
-			// TODO: check for maxed out hearts on everyone
 		});
 		output += '<span class="result">' + farmer + ' has ' + count_5h + ' relationship(s) of 5+ hearts.</span><ul class="ach_list">\n';
 		output += '<li>';
@@ -1769,6 +1769,23 @@ window.onload = function () {
 		return output;
 	}
 
+	function createTOC() {
+		var text,
+			id,
+			list = "<ul>";
+		$("h2, h3").each(function () {
+			if ($(this).is(":visible")) {
+				text = $(this).text();
+				id = 'sec_' + text.toLowerCase();
+				id = id.replace(/[^\w*]/g, '_');
+				$(this).attr('id', id);
+				list += '<li><a href="#' + id + '">' + text + '</a></li>\n';
+			}
+		});
+		list += '</ul>';
+		document.getElementById('TOC-details').innerHTML = list;
+	}
+
 	function handleFileSelect(evt) {
 		var file = evt.target.files[0],
 			reader = new FileReader(),
@@ -1808,19 +1825,13 @@ window.onload = function () {
 			output += parseBundles(xmlDoc);
 			output += parseGrandpa(xmlDoc);
 
-			//TODO: remaining achievments
-			// Joja & CC.
-			// - CC bundles: locations > GameLocation [attr('xsi:type') == 'CommunityCenter'] > bundles (individual) & areasComplete
-			// - Joja? maybe mail
-			// Praire King achieves - there is no progress for them so may not bother
-			//TODO: non-achieve milestones
-			// maxing out friendships?
-
 			// End of checks
 			prog.value = 100;
-			$(document.getElementById('output-container')).show();
 			document.getElementById('out').innerHTML = output;
+			$(document.getElementById('output-container')).show();
 			$(document.getElementById('progress-container')).hide();
+			createTOC();
+			$(document.getElementById('TOC')).show();
 		};
 		reader.readAsText(file);
 	}

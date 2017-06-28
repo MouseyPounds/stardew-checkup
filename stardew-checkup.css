@@ -18,12 +18,18 @@ body {
 a:link, a:visited { color: #804000; }
 a:hover { color: #d08000; }
 a:active { color: #ffa000; }
+h3 {
+	margin: 20px 0 4px;
+}
 .panel {
 	background-color: #ffe0b0;
-	padding: 8px;
+	padding: 8px 10% 8px 12px;
 	margin: 5px;
 	border: 5px solid #804000;
 	border-radius: 15px;
+}
+#footer {
+	padding-right: 12px;
 }
 #input-container { display: none; }
 #output-container { display: none; }
@@ -81,11 +87,51 @@ a:active { color: #ffa000; }
 .need {
 	margin-left: 38px;
 }
-.need > ul{
+.need > ul {
 	margin-left: 48px;
 	margin-top: 0px;
 }
-.need > ol{
+.need > ol {
 	margin-left: 48px;
 	margin-top: 0px;
+}
+#TOC {
+	position: fixed;
+	right: 0;
+	top: 0;
+	padding: 0;
+	max-height: 90%;
+	max-width: 200px;
+	overflow: auto;
+	background-color: #eecc99;
+	box-shadow: -2px 2px 25px #603000;
+}
+#TOC, #TOC-details {
+	display:none;
+}
+#TOC:hover #TOC-details {
+	display:block;
+}
+#TOC > h1, #TOC li a {
+	padding: 5px 10px;
+	display: block;
+}
+#TOC > h1 {
+	margin: 0;
+	font-size: 18px;
+	line-height: 24px;
+	background-color: #804000;
+	color: #eecc99;
+}
+#TOC ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+#TOC li a {
+	color: #60300;
+	text-decoration: none;
+}
+#TOC li a:hover {
+	background-color: #ffe0b0;
 }
