@@ -1661,7 +1661,7 @@ window.onload = function () {
 				done[jojaMail[id]] = 1;
 			}
 		});
-		if (ccHave > 0 && jojaHave > 0) {
+		if (ccHave > 0 && isJojaMember) {
 			// Hybrid situation. Calculate remaining projects but ignore Bulletin Board
 			hybrid = 1;
 			jojaCount -= ccHave;
