@@ -63,6 +63,11 @@ window.onload = function () {
 					('<a href="http://stardewvalleywiki.com/' + trimmed + '">' + item + '</a>');
 	}
 
+	function wikimap(item, index, arr) {
+		// Wrapper to allow wikify to be used within an array map without misinterpreting the 2nd and 3rd arguments.
+		return wikify(item);
+	}
+	
 	// Individual chunks of save parsing.
 	// Each receives the xmlDoc object to parse and returns HTML to output.
 	function parseSummary(xmlDoc) {
@@ -1168,11 +1173,11 @@ window.onload = function () {
 						completed++;
 					} else {
 						need.push('<li>' + id + ' -- kill ' + (goals[id] - killed[id]) + ' more of: ' +
-							monsters[id].map(wikify).join(', ') + '</li>');
+							monsters[id].map(wikimap).join(', ') + '</li>');
 					}
 				} else {
 					need.push('<li>' + id + ' -- kill ' + goals[id] + ' more of: ' +
-						monsters[id].map(wikify).join(', ') + '</li>');
+						monsters[id].map(wikimap).join(', ') + '</li>');
 				}
 			}
 		}
@@ -1217,7 +1222,7 @@ window.onload = function () {
 				'CF_Fair': 'Purchased at the Stardew Valley Fair for 2000 star tokens.',
 				'CF_Mines': 'Found in the chest on mine level 100.',
 				'CF_Spouse': 'Randomly given by spouse at 13/12 hearts.',
-				'CF_Sewer': 'Purchesed from Krobus in the Sewers for 20,000g.',
+				'CF_Sewer': 'Purchased from Krobus in the Sewers for 20,000g.',
 				'CF_Statue': 'Received from the Old Master Cannoli statue in the Secret Woods in exchange for a Sweet Gem Berry.',
 				'CF_Fish': 'Mailed by Willy after catching all the different fish.',
 				'museumComplete': 'Reward for completing the Museum collection.'
