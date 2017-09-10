@@ -7,7 +7,7 @@ This app checks a Stardew Valley save file for various achievements and mileston
 The app is written in Javascript and uses jQuery it is hosted on GitHub Pages at https://mouseypounds.github.io/stardew-checkup/ and the source code repository is https://github.com/MouseyPounds/stardew-checkup. It is released under the MIT license.
 
 Changelog
-*  8 Sept 2017 - v1.4 - Minor bugfixes
+* 10 Sept 2017 - v1.4 - Minor bugfixes
 * 28 June 2017 - v1.3 - Added navigation links along right side (only visible after a save is loaded)
 * 27 June 2017 - v1.2 - Community Center bundle & Joja Mart form progress
 * 23 June 2017 - v1.1 - Added wiki links for needed item lists

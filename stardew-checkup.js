@@ -446,6 +446,7 @@ window.onload = function () {
 
 	function parseFishing(xmlDoc) {
 		// Note, Clam (372) will show up in the save, but it is category "Basic -23" and is ignored for achievements.
+		// Also, it is possible to catch Void Mayo (308) in the Witch's Swamp; this should be ignored too.
 		var output = '<h3>Fishing</h3>\n',
 			recipes = {
 				// "Fish" category
@@ -521,7 +522,7 @@ window.onload = function () {
 		$(xmlDoc).find('player > fishCaught > item').each(function () {
 			var id = $(this).find('key > int').text(),
 				num = Number($(this).find('value > ArrayOfInt > int').first().text());
-			if (id !== '372' && num > 0) {
+			if (id !== '372' && id !== '308' && num > 0) {
 				craft_count++;
 				// We are adding up the count ourselves, but the total is also stored in (stats > fishCaught) and (stats > FishCaught)
 				count += num;
