@@ -125,15 +125,60 @@ window.onload = function () {
 		var output = '<h3>Social</h3>\n',
 			count_5h = 0,
 			count_10h = 0,
+			points = {},
+			list_fam = [],
+			list_bach = [],
+			list_other = [],
 			farmer = $(xmlDoc).find('player > name').html();
 
 		$(xmlDoc).find('player > friendships > item').each(function () {
-			// 'who' will be useful if we expand to checking for max hearts on everyone
-			//who = $(this).find('key > string').text(),
+			var who = $(this).find('key > string').text();
 			var num = $(this).find('value > ArrayOfInt > int').first().text();
 			if (num >= 2500) { count_10h++; }
 			if (num >= 1250) { count_5h++; }
+			points[who] = num;
 		});
+
+		$(xmlDoc).find('locations > GameLocation').each(function () {
+			$(this).find('characters > NPC').each(function () {
+				// Filter out animals and monsters
+				if ($(this).attr('xsi:type') === 'Horse' || $(this).attr('xsi:type') === 'Cat' || $(this).attr('xsi:type') === 'Dog' ||
+					$(this).attr('xsi:type') === 'Fly' || $(this).attr('xsi:type') === 'Grub' || $(this).attr('xsi:type') === 'GreenSlime') {
+					return;
+				}
+				var who = $(this).find('name').text();
+				// Filter out those who can't gain friendship. This might fail in non-English files.
+				if (who === 'Gunther' || who === 'Mister Qi' || who === 'Marlon' || who === 'Bouncer' || who === 'Henchman') { return; }
+				var isDatable = ($(this).find('datable').text() === 'true');
+				var isDating = ($(this).find('datingFarmer').text() === 'true');
+				var isDivorced = ($(this).find('divorcedFromFarmer').text() === 'true');
+				var daysMarried = $(this).find('daysMarried').text();
+				var pts = 0;
+				if (points.hasOwnProperty(who)) { pts = points[who]; }
+				var hearts = Math.floor(pts/250);
+				var entry = '<li>' + who + ': ' + hearts + '&#x2665; (' + pts + ' points) -- ';
+
+				if ((daysMarried > 0) && !isDivorced) { // 13-heart max spouse
+					(pts >= 3250) ? entry += 'MAX</li>' : entry += ' need ' + (3250 - pts) + ' more</li>';
+					list_fam.push(entry);
+				} else if (isDatable) {
+					if (!isDating) { // 8-heart max only
+						(pts >= 2000) ? entry += 'MAX (no bouquet)</li>' : entry += ' need ' + (2000 - pts) + ' more</li>';
+					} else { // 10-heart max
+						(pts >= 2500) ? entry += 'MAX</li>' : entry += ' need ' + (2500 - pts) + ' more</li>';
+					}
+					list_bach.push(entry);
+				} else {
+					(pts >= 2500) ? entry += 'MAX</li>' : entry += ' need ' + (2500 - pts) + ' more</li>';
+					if ($(this).attr('xsi:type') === 'Child') {
+						list_fam.push(entry);
+					} else {
+						list_other.push(entry);
+					}
+				}
+			});
+		});
+
 		output += '<span class="result">' + farmer + ' has ' + count_5h + ' relationship(s) of 5+ hearts.</span><ul class="ach_list">\n';
 		output += '<li>';
 		output += (count_5h >= 1) ? getAchieveString('A New Friend', '5&#x2665; with 1 person', 1) :
@@ -156,6 +201,18 @@ window.onload = function () {
 		output += (count_10h >= 8) ? getAchieveString('The Beloved Farmer', '10&#x2665; with 8 people', 1) :
 				getAchieveString('The Beloved Farmer', '10&#x2665; with 8 people', 0) + (8 - count_10h) + ' more';
 		output += '</li></ul>\n';
+		output += '<span class="need">Individual Friendship Progress<ul>';
+		if (list_fam.length > 0) {
+			output += '<li>Family<ol>' + list_fam.sort().join('') + '</ol></li>\n';
+		}
+		if (list_bach.length > 0) {
+			output += '<li>Datable Villagers<ol>' + list_bach.sort().join('') + '</ol></li>\n';
+		}
+		if (list_other.length > 0) {
+			output += '<li>Other Villagers<ol>' + list_other.sort().join('') + '</ol></li>\n';
+		}
+		output += '</ul></span>\n';
+
 		return output;
 	}
 
