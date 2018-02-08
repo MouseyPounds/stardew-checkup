@@ -79,9 +79,9 @@ window.onload = function () {
 
 		// Farmer & farm names are read as html() because they come from user input and might contain characters
 		// which must be escaped. This will happen with child names later too.
-		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' of '
-			+ $(xmlDoc).find('player > farmName').html() + ' Farm ('
-			+ farmTypes[$(xmlDoc).find('whichFarm').text()] + ')</span><br />\n';
+		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' of ' + 
+			$(xmlDoc).find('player > farmName').html() + ' Farm (' + 
+			farmTypes[$(xmlDoc).find('whichFarm').text()] + ')</span><br />\n';
 		// Date originally used XXForSaveGame elements, but those were not always present on saves downloaded from upload.farm
 		output += '<span class="result">Day ' + $(xmlDoc).find('dayOfMonth').text() + ' of ' +
 			capitalize($(xmlDoc).find('currentSeason').text()) + ', Year ' + $(xmlDoc).find('year').text() + '</span><br />\n';
@@ -156,20 +156,22 @@ window.onload = function () {
 				var pts = 0;
 				if (points.hasOwnProperty(who)) { pts = points[who]; }
 				var hearts = Math.floor(pts/250);
-				var entry = '<li>' + who + ': ' + hearts + '&#x2665; (' + pts + ' points) -- ';
+				var entry = '<li>';
+				entry += ($(this).attr('xsi:type') === 'Child') ? who + ' (' + wikify('Child', 'Children') + ')' : wikify(who);
+				entry += ': ' + hearts + '&#x2665; (' + pts + ' points) -- ';
 
 				if ((daysMarried > 0) && !isDivorced) { // 13-heart max spouse
-					(pts >= 3250) ? entry += 'MAX</li>' : entry += ' need ' + (3250 - pts) + ' more</li>';
+					entry += (pts >= 3250) ? 'MAX</li>' : ' need ' + (3250 - pts) + ' more</li>';
 					list_fam.push(entry);
 				} else if (isDatable) {
 					if (!isDating) { // 8-heart max only
-						(pts >= 2000) ? entry += 'MAX (no bouquet)</li>' : entry += ' need ' + (2000 - pts) + ' more</li>';
+						entry += (pts >= 2000) ? 'MAX (no bouquet)</li>' : ' need ' + (2000 - pts) + ' more</li>';
 					} else { // 10-heart max
-						(pts >= 2500) ? entry += 'MAX</li>' : entry += ' need ' + (2500 - pts) + ' more</li>';
+						entry += (pts >= 2500) ? 'MAX</li>' : ' need ' + (2500 - pts) + ' more</li>';
 					}
 					list_bach.push(entry);
 				} else {
-					(pts >= 2500) ? entry += 'MAX</li>' : entry += ' need ' + (2500 - pts) + ' more</li>';
+					entry += (pts >= 2500) ? 'MAX</li>' : ' need ' + (2500 - pts) + ' more</li>';
 					if ($(this).attr('xsi:type') === 'Child') {
 						list_fam.push(entry);
 					} else {
@@ -899,8 +901,11 @@ window.onload = function () {
 	function parseSkills(xmlDoc) {
 		var output = '<h3>Skills</h3>\n',
 			skills = ["Farming", "Fishing",	"Foraging",	"Mining", "Combat"],
+			next_level = [100,380,770,1300,2150,3300,4800,6900,10000,15000],
 			xp = {},
 			i = 0,
+			j,
+			level = 10,
 			num,
 			count = 0,
 			need = [];
@@ -910,8 +915,16 @@ window.onload = function () {
 			if (i < 5) {
 				num = Number($(this).text());
 				xp[skills[i]] = num;
+				// The current skill levels are also stored separately in 'player > fishingLevel' (and similar)
 				if (num < 15000) {
-					need.push('<li>' + wikify(skills[i]) + ' -- ' + (15000 - num) + ' more xp</li>\n');
+					for (j = 0; j < 10; j++) {
+						if (next_level[j] > num) {
+							level = j;
+							break;
+						}
+					}
+					need.push('<li>' + wikify(skills[i]) + ' (level ' + level + ') -- need ' + 
+						addCommas(next_level[level] - num) + ' more xp to next level and ' + addCommas(15000 - num) + ' more xp to max</li>\n');
 				} else {
 					count++;
 				}
