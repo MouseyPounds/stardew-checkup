@@ -132,7 +132,7 @@ window.onload = function () {
 			farmer = $(xmlDoc).find('player > name').html();
 
 		$(xmlDoc).find('player > friendships > item').each(function () {
-			var who = $(this).find('key > string').text();
+			var who = $(this).find('key > string').html();
 			var num = $(this).find('value > ArrayOfInt > int').first().text();
 			if (num >= 2500) { count_10h++; }
 			if (num >= 1250) { count_5h++; }
