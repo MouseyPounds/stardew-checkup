@@ -156,7 +156,8 @@ window.onload = function () {
 				'Kent': [ [3, 100] ],
 				'Lewis': [ [6, 639373] ],
 				'Linus': [ ['0.2', 502969] ],
-				'Pierre': [ [6, 16] ]
+				'Pierre': [ [6, 16] ],
+				'Robin': [ [6, 33] ]
 			};
 
 		$(xmlDoc).find('player > friendships > item').each(function () {
