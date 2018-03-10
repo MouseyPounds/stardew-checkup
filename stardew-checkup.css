@@ -61,9 +61,12 @@ h3 {
 .ach_no,.ms_no,.pt_no {
 	color: #c00000;
 }
-.ach_no:before,.ms_no:before {
+.ach_no:before,.ach_imp:before,.ms_no:before,.ms_imp:before {
 	content: "\2718 ";
 	margin-right: 3px;
+}
+.ach_imp,.ms_imp,.pt_imp {
+	color: #888;
 }
 .ach_list {
 	list-style: none;

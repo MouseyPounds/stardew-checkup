@@ -40,7 +40,7 @@ window.onload = function () {
 		if (desc.length > 0) {
 			desc = '(' + desc + ') ';
 		}
-		return '<span class="ach_no"><span class="ach">' + name + '</span> Achievement ' + desc + 'cannot be completed on this save</span>';
+		return '<span class="ach_imp"><span class="ach">' + name + '</span> Achievement ' + desc + 'cannot be completed on this save</span>';
 	}
 
 	function getMilestoneString(desc, yes) {
@@ -129,7 +129,35 @@ window.onload = function () {
 			list_fam = [],
 			list_bach = [],
 			list_other = [],
-			farmer = $(xmlDoc).find('player > name').html();
+			farmer = $(xmlDoc).find('player > name').html(),
+			eventsSeen = {},
+			// <NPC>: [ [<numHearts>, <id>], ... ]
+			eventList = {
+				'Abigail': [ [2, 1], [4, 2], [6, 4], [8, 3], [10, 901756] ],
+				'Alex': [ [2, 20], [4, 2481135], [5, 21], [6, 2119820], [8, 288847], [10, 911526] ],
+				'Elliott': [ [2, 39], [4, 40], [6, 423502], [8, 1848481], [10, 43] ],
+				'Emily': [ [2, 471942], [4, 463391], [6, 917409], [8, 2123243], [10, 2123343] ],
+				'Haley': [ [2, 11], [4, 12], [6, 13], [8, 14], [10, 15] ],
+				'Harvey': [ [2, 56], [4, 57], [6, 58], [8, 571102], [10, 528052] ],
+				'Leah': [ [2, 50], [4, 51], [6, 52], [8, '53|584059'], [10, 54] ], // 53 art show, 584059 online
+				'Maru': [ [2, 6], [4, 7], [6, 8], [8, 9], [10, 10] ],
+				'Penny': [ [2, 34], [4, 35], [6, 36], [8, 181928], [10, 38] ],
+				'Sam': [ [2, 44], [3, 733330], [4, 46], [6, 45], [8, 4081148], [10, 233104] ],
+				'Sebastian': [ [2, 2794460], [4, 384883], [6, 27], [8, 29], [10, 384882] ],
+				'Shane': [ [2, 611944], [4, 3910674], [6, 3910975], ['6.8', 3910974], [7, 831125], [8, 3900074], [10, 9581348] ],
+				'Caroline': [ [6, 17] ],
+				'Clint': [ [3, 97], [6, 101] ],
+				'Demetrius': [ [6, 25] ],
+				'Dwarf': [ ['0.2', 691039] ],
+				'Evelyn': [ [4, 19] ],
+				'George': [ [6, 18] ],
+				'Gus': [ [4, 96] ],
+				'Jodi': [ [4, '94|95'] ], // 94 y1, 95 y2
+				'Kent': [ [3, 100] ],
+				'Lewis': [ [6, 639373] ],
+				'Linus': [ ['0.2', 502969] ],
+				'Pierre': [ [6, 16] ]
+			};
 
 		$(xmlDoc).find('player > friendships > item').each(function () {
 			var who = $(this).find('key > string').html();
@@ -137,6 +165,10 @@ window.onload = function () {
 			if (num >= 2500) { count_10h++; }
 			if (num >= 1250) { count_5h++; }
 			points[who] = num;
+		});
+
+		$(xmlDoc).find('player > eventsSeen > int').each(function () {
+			eventsSeen[$(this).text()] = 1;
 		});
 
 		$(xmlDoc).find('locations > GameLocation').each(function () {
@@ -159,23 +191,50 @@ window.onload = function () {
 				var entry = '<li>';
 				entry += ($(this).attr('xsi:type') === 'Child') ? who + ' (' + wikify('Child', 'Children') + ')' : wikify(who);
 				entry += ': ' + hearts + '&#x2665; (' + pts + ' points) -- ';
+				
+				// Check events
+				var eventInfo = '';
+				if (eventList.hasOwnProperty(who)) {
+					eventInfo += '<ul><li>Event(s) seen: ';
+					eventList[who].forEach( function(arr) {
+						var seen = false;
+						var neg = 'no';
+						String(arr[1]).split('|').forEach( function(e) {
+							if (eventsSeen.hasOwnProperty(e)) {
+								seen = true;
+							}
+						});
+						// 2 events can be permanently missed; those checks are hardcoded here
+						if ((arr[1] === 101 && (eventsSeen.hasOwnProperty(2123243) || eventsSeen.hasOwnProperty(2123343))) || 
+							(arr[1] === 733330 && Number($(xmlDoc).find('stats > daysPlayed').text()) > 56) ) {
+								neg = 'imp';
+							}
+							
+						eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + arr[0] + '&#x2665;' + '</span>]';
+					});
+					eventInfo += '</li></ul>';
+				}
 
 				if ((daysMarried > 0) && !isDivorced) { // 13-heart max spouse
-					entry += (pts >= 3250) ? 'MAX</li>' : ' need ' + (3250 - pts) + ' more</li>';
-					list_fam.push(entry);
+					entry += (pts >= 3250) ? '<span class="ms_yes">MAX</span></li>' :
+						'<span class="ms_no">need ' + (3250 - pts) + ' more</span></li>';
+					list_fam.push(entry + eventInfo);
 				} else if (isDatable) {
 					if (!isDating) { // 8-heart max only
-						entry += (pts >= 2000) ? 'MAX (no bouquet)</li>' : ' need ' + (2000 - pts) + ' more</li>';
+						entry += (pts >= 2000) ? '<span class="ms_yes">MAX (no bouquet)</span></li>' :
+							'<span class="ms_no">need ' + (2000 - pts) + ' more</span></li>';
 					} else { // 10-heart max
-						entry += (pts >= 2500) ? 'MAX</li>' : ' need ' + (2500 - pts) + ' more</li>';
+						entry += (pts >= 2500) ? '<span class="ms_yes">MAX</span></li>' :
+							'<span class="ms_no">need ' + (2500 - pts) + ' more</span></li>';
 					}
-					list_bach.push(entry);
+					list_bach.push(entry + eventInfo);
 				} else {
-					entry += (pts >= 2500) ? 'MAX</li>' : ' need ' + (2500 - pts) + ' more</li>';
+					entry += (pts >= 2500) ? '<span class="ms_yes">MAX</span></li>' :
+						'<span class="ms_no">need ' + (2500 - pts) + ' more</span></li>';
 					if ($(this).attr('xsi:type') === 'Child') {
-						list_fam.push(entry);
+						list_fam.push(entry + eventInfo);
 					} else {
-						list_other.push(entry);
+						list_other.push(entry + eventInfo);
 					}
 				}
 			});
