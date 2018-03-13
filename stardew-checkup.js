@@ -205,9 +205,9 @@ window.onload = function () {
 								seen = true;
 							}
 						});
-						// 2 events can be permanently missed; those checks are hardcoded here
+						// checks for events which can be permanently missed; 1st is Clint 6H, second is Sam 3H
 						if ((arr[1] === 101 && (eventsSeen.hasOwnProperty(2123243) || eventsSeen.hasOwnProperty(2123343))) || 
-							(arr[1] === 733330 && Number($(xmlDoc).find('stats > daysPlayed').text()) > 56) ) {
+							(arr[1] === 733330 && Number($(xmlDoc).find('stats > daysPlayed').text()) > 84) ) {
 								neg = 'imp';
 							}
 							
