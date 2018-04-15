@@ -54,6 +54,10 @@ window.onload = function () {
 					'<span class="pt_no"><span class="pts"> (' + pts + c + ')</span> could be earned for ' + desc + '</span>';
 	}
 
+	function getPointImpossibleString(pts, desc) {
+		return '<span class="pt_imp"><span class="pts">+' + pts + '</span> cannot be earned for ' + desc + ' on this save</span>';
+	}
+
 	function wikify(item, page) {
 		// removing egg colors & changing spaces to underscores
 		var trimmed = item.replace(' (White)', '');
@@ -1167,6 +1171,9 @@ window.onload = function () {
 		output += (donated_count >= 40) ? getAchieveString('Treasure Trove', 'donate 40 items', 1) :
 				getAchieveString('Treasure Trove', 'donate 40 items', 0) + (40 - donated_art - donated_min) + ' more';
 		output += '</li>\n<li>';
+		output += (donated_count >= 60) ? getMilestoneString('Donate enough items (60) to get the Rusty Key', 1) :
+				getMilestoneString('Donate enough items (60) to get the Rusty Key', 0) + (60 - donated_art - donated_min) + ' more';
+		output += '</li>\n<li>';
 		output += (donated_count >= museum_count) ? getAchieveString('A Complete Collection', 'donate every item', 1) :
 				getAchieveString('A Complete Collection', 'donate every item', 0) + (museum_count - donated_count) + ' more';
 		output += '</li>\n<li>';
@@ -1415,6 +1422,7 @@ window.onload = function () {
 			},
 			cc_have = 0,
 			cc_count = 6,
+			isJojaMember = 0,
 			spouse = $(xmlDoc).find('player > spouse'), // will trigger during 3 day engagement too
 			houseUpgrades = Number($(xmlDoc).find('player > houseUpgradeLevel').text()),
 			hasRustyKey = $(xmlDoc).find('player > hasRustyKey').text(),
@@ -1462,7 +1470,9 @@ window.onload = function () {
 		} else {
 			$(xmlDoc).find('player > mailReceived > string').each(function () {
 				var id = $(this).text();
-				if (ccRooms.hasOwnProperty(id)) {
+				if (id === 'JojaMember') {
+					isJojaMember = 1;
+				} else if (ccRooms.hasOwnProperty(id)) {
 					cc_have++;
 				}
 			});
@@ -1555,20 +1565,29 @@ window.onload = function () {
 				getPointString(1, ' having "Full Shipment" Achievement', 0, 0);
 		output += '</li></ul>\n';
 
-		if (cc_done || cc_have >= cc_count) {
-			output += '<span class="result">' + farmer + ' has completed the Community Center restoration';
-			output += (cc_done) ? ' and attended the re-opening ceremony.' : ' but has not yet attended the re-opening ceremony.';
-			output += '</span><br />\n';
+		if (isJojaMember) {
+			output += '<span class="result">' + farmer + ' has purchased a Joja membership and cannot restore the Community Center';
+			output += '<ul class="ach_list"><li>';
+			output += getPointImpossibleString(1, ' completing Community Center');
+			output += '</li>\n<li>';
+			output += getPointImpossibleString(2, ' attending the Community Center re-opening');
+			output += '</li></ul>\n';
 		} else {
-			output += '<span class="result">' + farmer + ' has not completed the Community Center restoration.';
+			if (cc_done || cc_have >= cc_count) {
+				output += '<span class="result">' + farmer + ' has completed the Community Center restoration';
+				output += (cc_done) ? ' and attended the re-opening ceremony.' : ' but has not yet attended the re-opening ceremony.';
+				output += '</span><br />\n';
+			} else {
+				output += '<span class="result">' + farmer + ' has not completed the Community Center restoration.';
+			}
+			output += '<ul class="ach_list"><li>';
+			output += (cc_done || cc_have >= cc_count) ? getPointString(1, ' completing Community Center', 0, 1) :
+					getPointString(1, ' completing Community Center', 0, 0);
+			output += '</li>\n<li>';
+			output += (cc_done) ? getPointString(2, ' attending the Community Center re-opening', 0, 1) :
+					getPointString(2, ' attending the Community Center re-opening', 0, 0);
+			output += '</li></ul>\n';
 		}
-		output += '<ul class="ach_list"><li>';
-		output += (cc_done || cc_have >= cc_count) ? getPointString(1, ' completing Community Center', 0, 1) :
-				getPointString(1, ' completing Community Center', 0, 0);
-		output += '</li>\n<li>';
-		output += (cc_done) ? getPointString(2, ' attending the Community Center re-opening', 0, 1) :
-				getPointString(2, ' attending the Community Center re-opening', 0, 0);
-		output += '</li></ul>\n';
 
 		output += '<span class="result">' + farmer + ' has ' + realPlayerLevel + ' total skill levels.</span><br />\n';
 		output += '<ul class="ach_list"><li>';
