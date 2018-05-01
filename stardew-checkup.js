@@ -79,7 +79,8 @@ window.onload = function () {
 			farmTypes = ['Standard', 'Riverland', 'Forest', 'Hill-top', 'Wilderness'],
 			playTime = Number($(xmlDoc).find('player > millisecondsPlayed').text()),
 			playHr = Math.floor(playTime / 36e5),
-			playMin = Math.floor((playTime % 36e5) / 6e4);
+			playMin = Math.floor((playTime % 36e5) / 6e4),
+			saveIs1_3 = $(xmlDoc).find('hasApplied1_3_UpdateChanges').text();
 
 		// Farmer & farm names are read as html() because they come from user input and might contain characters
 		// which must be escaped. This will happen with child names later too.
@@ -98,6 +99,7 @@ window.onload = function () {
 			output += playMin + ' min ';
 		}
 		output += '</span><br />\n';
+		output += '<span class="result">Save is ' + ((saveIs1_3 === 'true') ? '' : 'not ') + ' from version 1.3 or later</span><br />\n';
 		return output;
 	}
 
@@ -134,6 +136,7 @@ window.onload = function () {
 			list_bach = [],
 			list_other = [],
 			farmer = $(xmlDoc).find('player > name').html(),
+			saveIs1_3 = $(xmlDoc).find('hasApplied1_3_UpdateChanges').text(),
 			eventsSeen = {},
 			// <NPC>: [ [<numHearts>, <id>], ... ]
 			eventList = {
@@ -164,13 +167,23 @@ window.onload = function () {
 				'Robin': [ [6, 33] ]
 			};
 
-		$(xmlDoc).find('player > friendships > item').each(function () {
-			var who = $(this).find('key > string').html();
-			var num = $(this).find('value > ArrayOfInt > int').first().text();
-			if (num >= 2500) { count_10h++; }
-			if (num >= 1250) { count_5h++; }
-			points[who] = num;
-		});
+		if (saveIs1_3 === 'true') {
+			$(xmlDoc).find('player> friendshipData > item').each(function () {
+				var who = $(this).find('key > string').html();
+				var num = $(this).find('value > Friendship > Points').text();
+				if (num >= 2500) { count_10h++; }
+				if (num >= 1250) { count_5h++; }
+				points[who] = num;
+			});
+		} else {
+			$(xmlDoc).find('player> friendships > item').each(function () {
+				var who = $(this).find('key > string').html();
+				var num = $(this).find('value > ArrayOfInt > int').first().text();
+				if (num >= 2500) { count_10h++; }
+				if (num >= 1250) { count_5h++; }
+				points[who] = num;
+			});
+		}
 
 		$(xmlDoc).find('player > eventsSeen > int').each(function () {
 			eventsSeen[$(this).text()] = 1;
@@ -1398,6 +1411,7 @@ window.onload = function () {
 		// Scoring details from StardewValley.Utility.getGradpaScore() & getGrandpaCandlesFromScore()
 		var output = '<h3>Grandpa\'s Evaluation</h3>\n',
 			farmer = $(xmlDoc).find('player > name').html(),
+			saveIs1_3 = $(xmlDoc).find('hasApplied1_3_UpdateChanges').text(),
 			count = 0,
 			max_count = 21,
 			candles = 1,
@@ -1491,12 +1505,17 @@ window.onload = function () {
 		if (spouse.length > 0 && houseUpgrades >= 2) {
 			count++;
 		}
-		$(xmlDoc).find('player > friendships > item').each(function () {
-			var num = Number($(this).find('value > ArrayOfInt > int').first().text());
-			if (num >= 1975) {
-				heart_count++;
-			}
-		});
+		if (saveIs1_3 === 'true') {
+			$(xmlDoc).find('player> friendshipData > item').each(function () {
+				var num = Number($(this).find('value > Friendship > Points').text());
+				if (num >= 1975) { heart_count++; }
+			});
+		} else {
+			$(xmlDoc).find('player> friendships > item').each(function () {
+				var num = Number($(this).find('value > ArrayOfInt > int').first().text());
+				if (num >= 1975) { heart_count++; }
+			});
+		}
 		if (heart_count >= 10) {
 			count += 2;
 		} else if (heart_count >= 5) {
