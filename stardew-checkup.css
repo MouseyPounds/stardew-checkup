@@ -45,7 +45,7 @@ h3 {
 #footer {
 	text-align: center;
 }
-.ach,.warn {
+.ach,.warn,.note {
 	font-style: italic;
 }
 .pts {

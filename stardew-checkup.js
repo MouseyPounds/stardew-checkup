@@ -137,8 +137,10 @@ window.onload = function () {
 			list_other = [],
 			farmer = $(xmlDoc).find('player > name').html(),
 			saveIs1_3 = $(xmlDoc).find('hasApplied1_3_UpdateChanges').text(),
+			spouse = $(xmlDoc).find('player > spouse').text(),
 			eventsSeen = {},
 			// <NPC>: [ [<numHearts>, <id>], ... ]
+			// if numHearts starts with 'a', this is content added in patch 1.3
 			eventList = {
 				'Abigail': [ [2, 1], [4, 2], [6, 4], [8, 3], [10, 901756] ],
 				'Alex': [ [2, 20], [4, 2481135], [5, 21], [6, 2119820], [8, 288847], [10, 911526] ],
@@ -159,12 +161,15 @@ window.onload = function () {
 				'Evelyn': [ [4, 19] ],
 				'George': [ [6, 18] ],
 				'Gus': [ [4, 96] ],
+				'Jas': [ ['a8', 3910979] ],
 				'Jodi': [ [4, '94|95'] ], // 94 y1, 95 y2
 				'Kent': [ [3, 100] ],
 				'Lewis': [ [6, 639373] ],
-				'Linus': [ ['0.2', 502969] ],
+				'Linus': [ ['0.2', 502969], ['a8', 371652] ],
+				'Pam': [ ['a9', 503180] ],
 				'Pierre': [ [6, 16] ],
-				'Robin': [ [6, 33] ]
+				'Robin': [ [6, 33] ],
+				'Willy': [ ['a6', 711130] ]
 			};
 
 		if (saveIs1_3 === 'true') {
@@ -200,6 +205,7 @@ window.onload = function () {
 				// Filter out those who can't gain friendship. This might fail in non-English files.
 				if (who === 'Gunther' || who === 'Mister Qi' || who === 'Marlon' || who === 'Bouncer' || who === 'Henchman') { return; }
 				var isDatable = ($(this).find('datable').text() === 'true');
+				// These next 3 fields are no longer present in version 1.3. Instead this info is part of the friendshipData structure
 				var isDating = ($(this).find('datingFarmer').text() === 'true');
 				var isDivorced = ($(this).find('divorcedFromFarmer').text() === 'true');
 				var daysMarried = $(this).find('daysMarried').text();
@@ -211,29 +217,38 @@ window.onload = function () {
 				entry += ': ' + hearts + '&#x2665; (' + pts + ' points) -- ';
 				
 				// Check events
+				// We want to only make an Event list item if there are actually events for this NPC and now that there is different
+				// content for different versions, this is much harder without lame hardcoded checks.
 				var eventInfo = '';
 				if (eventList.hasOwnProperty(who)) {
-					eventInfo += '<ul><li>Event(s) seen: ';
-					eventList[who].forEach( function(arr) {
-						var seen = false;
-						var neg = 'no';
-						String(arr[1]).split('|').forEach( function(e) {
-							if (eventsSeen.hasOwnProperty(e)) {
-								seen = true;
+					if (saveIs1_3 === 'true' || (who !== 'Jas' && who != 'Pam' && who != 'Willy')) {
+						eventInfo += '<ul><li>Event(s) seen: ';
+						eventList[who].forEach( function(arr) {
+							var seen = false;
+							var neg = 'no';
+							String(arr[1]).split('|').forEach( function(e) {
+								if (eventsSeen.hasOwnProperty(e)) {
+									seen = true;
+								}
+							});
+							// checks for events which can be permanently missed; 1st is Clint 6H, second is Sam 3H
+							if ((arr[1] === 101 && (eventsSeen.hasOwnProperty(2123243) || eventsSeen.hasOwnProperty(2123343))) || 
+								(arr[1] === 733330 && Number($(xmlDoc).find('stats > daysPlayed').text()) > 84) ) {
+									neg = 'imp';
+								}
+							if (String(arr[0]).substr(0,1) === 'a') {
+								if (saveIs1_3 === 'true') {
+									var id = arr[0].substr(1);
+									eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + id + '&#x2665;' + '</span>]';
+								}
+							} else {
+								eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + arr[0] + '&#x2665;' + '</span>]';
 							}
 						});
-						// checks for events which can be permanently missed; 1st is Clint 6H, second is Sam 3H
-						if ((arr[1] === 101 && (eventsSeen.hasOwnProperty(2123243) || eventsSeen.hasOwnProperty(2123343))) || 
-							(arr[1] === 733330 && Number($(xmlDoc).find('stats > daysPlayed').text()) > 84) ) {
-								neg = 'imp';
-							}
-							
-						eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + arr[0] + '&#x2665;' + '</span>]';
-					});
-					eventInfo += '</li></ul>';
+						eventInfo += '</li></ul>';
+					}
 				}
-
-				if ((daysMarried > 0) && !isDivorced) { // 13-heart max spouse
+				if (who === spouse) { // 13-heart max spouse
 					entry += (pts >= 3250) ? '<span class="ms_yes">MAX</span></li>' :
 						'<span class="ms_no">need ' + (3250 - pts) + ' more</span></li>';
 					list_fam.push(entry + eventInfo);
@@ -517,7 +532,7 @@ window.onload = function () {
 							"Crystalarium", "Charcoal Kiln", "Lightning Rod", "Recycling Machine", "Tapper", "Worm Bin",
 							"Slime Egg-Press", "Slime Incubator", "Warp Totem: Beach", "Warp Totem: Mountains", "Warp Totem: Farm",
 							"Rain Totem", "Tub o' Flowers", "Wicked Statue", "Flute Block", "Drum Block" ],
-			recipe_count = recipes.length,
+			recipe_count,
 			recipeTranslate = {
 				"Oil Of Garlic": "Oil of Garlic"
 			},
@@ -527,8 +542,13 @@ window.onload = function () {
 			need_k = [],
 			need_c = [],
 			id,
+			saveIs1_3 = $(xmlDoc).find('hasApplied1_3_UpdateChanges').text(),
 			r;
 
+		if (saveIs1_3 === 'true') {
+			recipes.push('Wood Sign', 'Stone Sign', 'Garden Pot', 'Wedding Ring');
+		}
+		recipe_count = recipes.length;
 		$(xmlDoc).find('player > craftingRecipes > item').each(function () {
 			var id = $(this).find('key > string').text(),
 				num = $(this).find('value > int').text();
@@ -647,14 +667,21 @@ window.onload = function () {
 				795: "Void Salmon",
 				796: "Slimejack"
 			},
-			recipe_count = Object.keys(recipes).length,
+			recipe_count,
 			count = 0,
 			craft_count = 0, // for fish types
 			known = [],
 			need = [],
 			id,
+			saveIs1_3 = $(xmlDoc).find('hasApplied1_3_UpdateChanges').text(),
 			r;
 
+		if (saveIs1_3 === 'true') {
+			recipes[798] = 'Midnight Squid';
+			recipes[799] = 'Spook Fish';
+			recipes[800] = 'Blob Fish';
+		}
+		recipe_count = Object.keys(recipes).length;
 		$(xmlDoc).find('player > fishCaught > item').each(function () {
 			var id = $(this).find('key > int').text(),
 				num = Number($(this).find('value > ArrayOfInt > int').first().text());
@@ -678,8 +705,14 @@ window.onload = function () {
 		output += (craft_count >= 24) ? getAchieveString('Ol\' Mariner', 'catch 24 different fish', 1) :
 				getAchieveString('Ol\' Mariner', 'catch 24 different fish', 0) + (24 - craft_count) + ' more';
 		output += '</li>\n<li>';
-		output += (craft_count >= recipe_count) ? getAchieveString('Master Angler', 'catch every fish', 1) :
-				getAchieveString('Master Angler', 'catch every fish', 0) + (recipe_count - craft_count) + ' more';
+		// Count currently sorta hardcoded; will need to be changed back to recipe_count if the achieve changes
+		output += (craft_count >= Math.min(59, recipe_count)) ? getAchieveString('Master Angler', 'catch every fish', 1) :
+				getAchieveString('Master Angler', 'catch every fish', 0) + (Math.min(59, recipe_count) - craft_count) + ' more';
+		if (saveIs1_3 === 'true') {
+			output += ' <span class="note">(Note: In current beta, Master Angler triggers after 59 different fish are caught.)</span></li>\n<li>';
+			output += (craft_count >= recipe_count) ? getMilestoneString('Actually catch every fish', 1) :
+				getMilestoneString('Actually catch every fish', 0) + (recipe_count - craft_count) + ' more';
+		}
 		output += '</li></ul>\n';
 		if (craft_count < recipe_count) {
 			need = [];
@@ -1943,6 +1976,57 @@ window.onload = function () {
 		return output;
 	}
 
+	function parseSecretNotes(xmlDoc) {
+		var output = '<h3>Secret Notes</h3>\n',
+			farmer = $(xmlDoc).find('player > name').html(),
+			saveIs1_3 = $(xmlDoc).find('hasApplied1_3_UpdateChanges').text(),
+			hasSeenKrobus = false,
+			hasMagnifyingGlass = false,
+			notes = {},
+			need = [],
+			found_notes = 0,
+			note_count = 23;
+
+
+		if (saveIs1_3 === 'true') {
+			// Check Krobus event, then check for magnifier, then check number of notes
+			// Eventually, should see if there is a way to check if notes were "completed"
+			$(xmlDoc).find('player > eventsSeen > int').each(function () {
+				if ($(this).text() === '520702') {
+					hasSeenKrobus = true;
+					return false;
+				}
+			});
+			output += '<span class="result">' + farmer + ' has ' + (hasSeenKrobus ? '' : 'not ') + ' seen Krobus at the Bus Stop.</span><br />\n';
+			if ($(xmlDoc).find('player > hasMagnifyingGlass').text() === 'true') {
+				hasMagnifyingGlass = true;
+			}
+			output += '<span class="result">' + farmer + ' has ' + (hasMagnifyingGlass ? '' : 'not ') + ' found the Magnifying Glass.</span><br />\n';
+			$(xmlDoc).find('player > secretNotesSeen > int').each(function () {
+				notes[$(this).text()] = true;
+				found_notes++;
+			});
+			output += '<span class="result">' + farmer + ' has found ' + found_notes + ' secret note(s); there are ' +
+				note_count + ' total notes.</span><br />\n';
+			output += '<ul class="ach_list"><li>';
+			output += (found_notes >= note_count) ? getMilestoneString('Found all the secret notes', 1) :
+					getMilestoneString('Found all the secret notes', 0) + (note_count - found_notes) + ' more';
+			output += '</li></ul>\n';
+			if (found_notes < note_count) {
+				for (var i = 1; i <= note_count; i++) {
+					if (!notes.hasOwnProperty(i)) {
+						need.push('<li>' + wikify('Secret Note ' + i, 'Secret Notes') + '</li>');
+					}
+				}
+				if (need.length > 0) {
+					output += '<span class="need">Left to find:<ol>' + need.join('') + '</ol></span>\n';
+				}
+			}
+			return output;
+		}
+		return '';
+	}
+
 	function createTOC() {
 		var text,
 			id,
@@ -1996,6 +2080,7 @@ window.onload = function () {
 			output += parseBasicShipping(xmlDoc);
 			output += parseCropShipping(xmlDoc);
 			output += parseMuseum(xmlDoc);
+			output += parseSecretNotes(xmlDoc);
 			output += parseBundles(xmlDoc);
 			output += parseGrandpa(xmlDoc);
 
