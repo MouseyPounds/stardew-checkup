@@ -546,7 +546,8 @@ window.onload = function () {
 			r;
 
 		if (saveIs1_3 === 'true') {
-			recipes.push('Wood Sign', 'Stone Sign', 'Garden Pot', 'Wedding Ring');
+			// Wedding Ring is specifically excluded in StardewValley.Stats.checkForCraftingAchievments() so it is not listed here.
+			recipes.push('Wood Sign', 'Stone Sign', 'Garden Pot');
 		}
 		recipe_count = recipes.length;
 		$(xmlDoc).find('player > craftingRecipes > item').each(function () {
