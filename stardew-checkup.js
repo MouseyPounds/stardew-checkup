@@ -2007,11 +2007,11 @@ window.onload = function () {
 				notes[$(this).text()] = true;
 				found_notes++;
 			});
-			output += '<span class="result">' + farmer + ' has found ' + found_notes + ' secret note(s); there are ' +
+			output += '<span class="result">' + farmer + ' has read ' + found_notes + ' secret note(s); there are ' +
 				note_count + ' total notes.</span><br />\n';
 			output += '<ul class="ach_list"><li>';
-			output += (found_notes >= note_count) ? getMilestoneString('Found all the secret notes', 1) :
-					getMilestoneString('Found all the secret notes', 0) + (note_count - found_notes) + ' more';
+			output += (found_notes >= note_count) ? getMilestoneString('Read all the secret notes', 1) :
+					getMilestoneString('Read all the secret notes', 0) + (note_count - found_notes) + ' more';
 			output += '</li></ul>\n';
 			if (found_notes < note_count) {
 				for (var i = 1; i <= note_count; i++) {
@@ -2020,7 +2020,7 @@ window.onload = function () {
 					}
 				}
 				if (need.length > 0) {
-					output += '<span class="need">Left to find:<ol>' + need.join('') + '</ol></span>\n';
+					output += '<span class="need">Left to read:<ol>' + need.join('') + '</ol></span>\n';
 				}
 			}
 			return output;
