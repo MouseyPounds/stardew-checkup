@@ -137,7 +137,8 @@ window.onload = function () {
 			list_other = [],
 			farmer = $(xmlDoc).find('player > name').html(),
 			saveIs1_3 = $(xmlDoc).find('hasApplied1_3_UpdateChanges').text(),
-			spouse = $(xmlDoc).find('player > spouse').text(),
+			spouse = $(xmlDoc).find('player > spouse').text(), // this may need adjustment due to multiplayer farmhand marriage
+			dating = {},
 			eventsSeen = {},
 			// <NPC>: [ [<numHearts>, <id>], ... ]
 			// if numHearts starts with 'a', this is content added in patch 1.3
@@ -179,6 +180,11 @@ window.onload = function () {
 				if (num >= 2500) { count_10h++; }
 				if (num >= 1250) { count_5h++; }
 				points[who] = num;
+				var relStatus = $(this).find('value > Friendship > Status').text();
+				// Spouse shows a status of 'Married'
+				if (relStatus === 'Dating') {
+					dating[who] = true;
+				}
 			});
 		} else {
 			$(xmlDoc).find('player> friendships > item').each(function () {
@@ -206,9 +212,9 @@ window.onload = function () {
 				if (who === 'Gunther' || who === 'Mister Qi' || who === 'Marlon' || who === 'Bouncer' || who === 'Henchman') { return; }
 				var isDatable = ($(this).find('datable').text() === 'true');
 				// These next 3 fields are no longer present in version 1.3. Instead this info is part of the friendshipData structure
-				var isDating = ($(this).find('datingFarmer').text() === 'true');
-				var isDivorced = ($(this).find('divorcedFromFarmer').text() === 'true');
-				var daysMarried = $(this).find('daysMarried').text();
+				var isDating;
+				//var isDivorced = ($(this).find('divorcedFromFarmer').text() === 'true');
+				//var daysMarried = $(this).find('daysMarried').text();
 				var pts = 0;
 				if (points.hasOwnProperty(who)) { pts = points[who]; }
 				var hearts = Math.floor(pts/250);
@@ -220,6 +226,7 @@ window.onload = function () {
 				// We want to only make an Event list item if there are actually events for this NPC and now that there is different
 				// content for different versions, this is much harder without lame hardcoded checks.
 				var eventInfo = '';
+				isDating = ($(this).find('datingFarmer').text() === 'true' || dating.hasOwnProperty(who));
 				if (eventList.hasOwnProperty(who)) {
 					if (saveIs1_3 === 'true' || (who !== 'Jas' && who != 'Pam' && who != 'Willy')) {
 						eventInfo += '<ul><li>Event(s) seen: ';
@@ -245,6 +252,9 @@ window.onload = function () {
 								eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + arr[0] + '&#x2665;' + '</span>]';
 							}
 						});
+						if (isDating) {
+							eventInfo += ' [<span class="ms_yes">&#x1f490</span>]';
+						}
 						eventInfo += '</li></ul>';
 					}
 				}
@@ -253,12 +263,12 @@ window.onload = function () {
 						'<span class="ms_no">need ' + (3250 - pts) + ' more</span></li>';
 					list_fam.push(entry + eventInfo);
 				} else if (isDatable) {
-					if (!isDating) { // 8-heart max only
-						entry += (pts >= 2000) ? '<span class="ms_yes">MAX (no bouquet)</span></li>' :
-							'<span class="ms_no">need ' + (2000 - pts) + ' more</span></li>';
-					} else { // 10-heart max
+					if (isDating) {
 						entry += (pts >= 2500) ? '<span class="ms_yes">MAX</span></li>' :
 							'<span class="ms_no">need ' + (2500 - pts) + ' more</span></li>';
+					} else {
+						entry += (pts >= 2000) ? '<span class="ms_yes">MAX</span></li>' :
+							'<span class="ms_no">need ' + (2000 - pts) + ' more</span></li>';
 					}
 					list_bach.push(entry + eventInfo);
 				} else {
