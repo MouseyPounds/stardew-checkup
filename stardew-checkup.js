@@ -138,6 +138,8 @@ window.onload = function () {
 			farmer = $(xmlDoc).find('player > name').html(),
 			saveIs1_3 = $(xmlDoc).find('hasApplied1_3_UpdateChanges').text(),
 			spouse = $(xmlDoc).find('player > spouse').text(), // this may need adjustment due to multiplayer farmhand marriage
+			countdown = Number($(xmlDoc).find('countdownToWedding').text()),
+			relStatus = {},
 			dating = {},
 			eventsSeen = {},
 			// <NPC>: [ [<numHearts>, <id>], ... ]
@@ -180,11 +182,7 @@ window.onload = function () {
 				if (num >= 2500) { count_10h++; }
 				if (num >= 1250) { count_5h++; }
 				points[who] = num;
-				var relStatus = $(this).find('value > Friendship > Status').text();
-				// Spouse shows a status of 'Married'
-				if (relStatus === 'Dating') {
-					dating[who] = true;
-				}
+				relStatus[who] = $(this).find('value > Friendship > Status').text();
 			});
 		} else {
 			$(xmlDoc).find('player> friendships > item').each(function () {
@@ -211,22 +209,31 @@ window.onload = function () {
 				// Filter out those who can't gain friendship. This might fail in non-English files.
 				if (who === 'Gunther' || who === 'Mister Qi' || who === 'Marlon' || who === 'Bouncer' || who === 'Henchman') { return; }
 				var isDatable = ($(this).find('datable').text() === 'true');
-				// These next 3 fields are no longer present in version 1.3. Instead this info is part of the friendshipData structure
-				var isDating;
-				//var isDivorced = ($(this).find('divorcedFromFarmer').text() === 'true');
-				//var daysMarried = $(this).find('daysMarried').text();
+				// Faking status for pre 1.2. Note: bouquet emoji = &#x1f490;
+				if (!saveIs1_3) {
+					if ($(this).find('divorcedFromFarmer').text() === 'true') {
+						relStatus[who] = 'Divorced';
+					} else if (countdown > 0 && who === spouse.slice(0,-7)) {
+						relStatus[who] = 'Engaged';
+					} else if ($(this).find('daysMarried').text() > 0) {
+						relStatus[who] = 'Married';
+					} else if ($(this).find('datingFarmer').text() === 'true') {
+						relStatus[who] = 'Dating';
+					} else {
+						relStatus[who] = 'Friendly';
+					}
+				}
 				var pts = 0;
 				if (points.hasOwnProperty(who)) { pts = points[who]; }
 				var hearts = Math.floor(pts/250);
 				var entry = '<li>';
 				entry += ($(this).attr('xsi:type') === 'Child') ? who + ' (' + wikify('Child', 'Children') + ')' : wikify(who);
-				entry += ': ' + hearts + '&#x2665; (' + pts + ' points) -- ';
+				entry += ': ' + relStatus[who] + ', ' + hearts + '&#x2665; (' + pts + ' points) -- ';
 				
 				// Check events
 				// We want to only make an Event list item if there are actually events for this NPC and now that there is different
 				// content for different versions, this is much harder without lame hardcoded checks.
 				var eventInfo = '';
-				isDating = ($(this).find('datingFarmer').text() === 'true' || dating.hasOwnProperty(who));
 				if (eventList.hasOwnProperty(who)) {
 					if (saveIs1_3 === 'true' || (who !== 'Jas' && who != 'Pam' && who != 'Willy')) {
 						eventInfo += '<ul><li>Event(s) seen: ';
@@ -252,24 +259,20 @@ window.onload = function () {
 								eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + arr[0] + '&#x2665;' + '</span>]';
 							}
 						});
-						if (isDating) {
-							eventInfo += ' [<span class="ms_yes">&#x1f490</span>]';
-						}
 						eventInfo += '</li></ul>';
 					}
 				}
-				if (who === spouse) { // 13-heart max spouse
+				if (who === spouse) {
 					entry += (pts >= 3250) ? '<span class="ms_yes">MAX</span></li>' :
 						'<span class="ms_no">need ' + (3250 - pts) + ' more</span></li>';
 					list_fam.push(entry + eventInfo);
 				} else if (isDatable) {
-					if (isDating) {
-						entry += (pts >= 2500) ? '<span class="ms_yes">MAX</span></li>' :
-							'<span class="ms_no">need ' + (2500 - pts) + ' more</span></li>';
-					} else {
-						entry += (pts >= 2000) ? '<span class="ms_yes">MAX</span></li>' :
-							'<span class="ms_no">need ' + (2000 - pts) + ' more</span></li>';
+					var max = 2000;
+					if (relStatus[who] === 'Dating') {
+						max = 2500;
 					}
+					entry += (pts >= max) ? '<span class="ms_yes">MAX</span></li>' :
+						'<span class="ms_no">need ' + (max - pts) + ' more</span></li>';
 					list_bach.push(entry + eventInfo);
 				} else {
 					entry += (pts >= 2500) ? '<span class="ms_yes">MAX</span></li>' :
@@ -565,6 +568,9 @@ window.onload = function () {
 				num = $(this).find('value > int').text();
 			if (recipeTranslate.hasOwnProperty(id)) {
 				id = recipeTranslate[id];
+			}
+			if (id === 'Wedding Ring') {
+				return true;
 			}
 			known[id] = num;
 			known_count++;
