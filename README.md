@@ -7,6 +7,8 @@ This app checks a Stardew Valley save file for various achievements and mileston
 The app is written in Javascript and uses jQuery it is hosted on GitHub Pages at https://mouseypounds.github.io/stardew-checkup/ and the source code repository is https://github.com/MouseyPounds/stardew-checkup. It is released under the MIT license.
 
 Changelog
+* 10 May  2018 - v1.9.2 - Friendship status, including "guesses" for 1.2
+*  4 May  2018 - v1.9.1 - Additional support for version 1.3 features (work in progress.)
 *  1 May  2018 - v1.9 - Basic support for version 1.3 (fix friendship parsing). New content support will come later.
 * 14 Apr  2018 - v1.8 - Rusty Key counter on museum summary and minor formatting changes
 *  9 Mar  2018 - v1.7 - Added "heart events" to Social friendship summary
