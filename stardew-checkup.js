@@ -1398,7 +1398,10 @@ window.onload = function () {
 
 	function parseQuests(xmlDoc) {
 		var output = '<h3>Quests</h3>\n',
-			count = Number($(xmlDoc).find('stats > questsCompleted').text());
+			// Every player has his own quest count; using find('stats > questsCompleted') will hit all of them.
+			// To restrict to the host we could use .first() but we will make sure to look under 'SaveGame > player'.
+			// Other players would be under 'farmhand'
+			count = Number($(xmlDoc).find('SaveGame > player > stats > questsCompleted').text());
 
 		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has completed ' + count + ' "Help Wanted" quest(s).</span><br />\n';
 		output += '<ul class="ach_list"><li>';
