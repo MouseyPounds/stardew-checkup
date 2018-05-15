@@ -247,7 +247,7 @@ window.onload = function () {
 							});
 							// checks for events which can be permanently missed; 1st is Clint 6H, second is Sam 3H
 							if ((arr[1] === 101 && (eventsSeen.hasOwnProperty(2123243) || eventsSeen.hasOwnProperty(2123343))) || 
-								(arr[1] === 733330 && Number($(xmlDoc).find('stats > daysPlayed').text()) > 84) ) {
+								(arr[1] === 733330 && Number($(xmlDoc).find('stats > daysPlayed').first().text()) > 84) ) {
 									neg = 'imp';
 								}
 							if (String(arr[0]).substr(0,1) === 'a') {
@@ -1356,6 +1356,7 @@ window.onload = function () {
 				getAchieveString('The Bottom', 'reach mine level 120', 0) + (120 - mineLevel) + ' more';
 		output += '</li></ul>\n';
 
+		// May break on multiplayer saves
 		$(xmlDoc).find('stats > specificMonstersKilled > item').each(function () {
 			var id = $(this).find('key > string').text(),
 				num = Number($(this).find('value > int').text()),
@@ -1399,9 +1400,9 @@ window.onload = function () {
 	function parseQuests(xmlDoc) {
 		var output = '<h3>Quests</h3>\n',
 			// Every player has his own quest count; using find('stats > questsCompleted') will hit all of them.
-			// To restrict to the host we could use .first() but we will make sure to look under 'SaveGame > player'.
-			// Other players would be under 'farmhand'
-			count = Number($(xmlDoc).find('SaveGame > player > stats > questsCompleted').text());
+			// In 1.3, the host's stats are under 'SaveGame > player > stats' & other players are under 'farmhand > stats'
+			// But in 1.2, they are in 'SaveGame > stats'. The most compatible seems to be using .first()
+			count = Number($(xmlDoc).find('stats > questsCompleted').first().text());
 
 		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has completed ' + count + ' "Help Wanted" quest(s).</span><br />\n';
 		output += '<ul class="ach_list"><li>';
