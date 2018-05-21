@@ -141,6 +141,8 @@ window.onload = function () {
 			countdown = Number($(xmlDoc).find('countdownToWedding').text()),
 			relStatus = {},
 			dating = {},
+			dumped_Girls = 0,
+			dumped_Guys = 0,
 			eventsSeen = {},
 			// <NPC>: [ [<numHearts>, <id>], ... ]
 			// if numHearts starts with 'a', this is content added in patch 1.3
@@ -176,7 +178,16 @@ window.onload = function () {
 			};
 
 		if (saveIs1_3 === 'true') {
-			$(xmlDoc).find('player> friendshipData > item').each(function () {
+			$(xmlDoc).find('player > activeDialogueEvents > item').each(function () {
+				var which = $(this).find('key > string').text();
+				var num = Number($(this).find('value > int').text());
+				if (which === 'dumped_Girls') {
+					dumped_Girls = num;
+				} else if (which === 'dumped_Guys') {
+					dumped_Guys = num;
+				}
+			});
+			$(xmlDoc).find('player > friendshipData > item').each(function () {
 				var who = $(this).find('key > string').html();
 				var num = $(this).find('value > Friendship > Points').text();
 				if (num >= 2500) { count_10h++; }
@@ -185,7 +196,7 @@ window.onload = function () {
 				relStatus[who] = $(this).find('value > Friendship > Status').text();
 			});
 		} else {
-			$(xmlDoc).find('player> friendships > item').each(function () {
+			$(xmlDoc).find('player > friendships > item').each(function () {
 				var who = $(this).find('key > string').html();
 				var num = $(this).find('value > ArrayOfInt > int').first().text();
 				if (num >= 2500) { count_10h++; }
@@ -209,6 +220,7 @@ window.onload = function () {
 				// Filter out those who can't gain friendship. This might fail in non-English files.
 				if (who === 'Gunther' || who === 'Mister Qi' || who === 'Marlon' || who === 'Bouncer' || who === 'Henchman') { return; }
 				var isDatable = ($(this).find('datable').text() === 'true');
+				var isGirl = ($(this).find('gender').text() === '1');
 				// Faking status for pre 1.2. Note: bouquet emoji = &#x1f490;
 				if (!saveIs1_3) {
 					if ($(this).find('divorcedFromFarmer').text() === 'true') {
@@ -223,6 +235,12 @@ window.onload = function () {
 						relStatus[who] = 'Friendly';
 					}
 				}
+				// Overriding status for the confrontation events
+				if (dumped_Girls > 0 && isDatable && isGirl) {
+					relStatus[who] = 'Angry (' + dumped_Girls + ' more day(s))';
+				} else if (dumped_Guys > 0 && isDatable && !isGirl) {
+					relStatus[who] = 'Angry (' + dumped_Guys + ' more day(s))';
+				} 
 				var pts = 0;
 				if (points.hasOwnProperty(who)) { pts = points[who]; }
 				var hearts = Math.floor(pts/250);
@@ -1338,8 +1356,14 @@ window.onload = function () {
 			need = [],
 			id,
 			mineLevel = Number($(xmlDoc).find('player > deepestMineLevel').text()),
+			hasSkullKey = $(xmlDoc).find('player > hasSkullKey').text(),
 			farmer = $(xmlDoc).find('player > name').html();
 
+		// Deepest mine level is separately tracked for each player and is sometimes off in multiplayer.
+		// To work around this we will use presence of skull key to override the level & bump it to 120.
+		if (hasSkullKey === 'true') {
+			mineLevel = Math.max(120, mineLevel);
+		}
 		if (mineLevel <= 0) {
 			output += '<span class="result">' + farmer + ' has not yet explored the mines.</span><br />\n';
 		} else {
