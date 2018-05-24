@@ -281,8 +281,9 @@ window.onload = function () {
 					}
 				}
 				if (who === spouse) {
-					entry += (pts >= 3250) ? '<span class="ms_yes">MAX</span></li>' :
-						'<span class="ms_no">need ' + (3250 - pts) + ' more</span></li>';
+					// Spouse Stardrop threshold is 3375 from StardewValley.NPC.checkAction() so that's our max instead of 3250
+					entry += (pts >= 3375) ? '<span class="ms_yes">MAX</span></li>' :
+						'<span class="ms_no">need ' + (3375 - pts) + ' more</span></li>';
 					list_fam.push(entry + eventInfo);
 				} else if (isDatable) {
 					var max = 2000;
@@ -1450,7 +1451,7 @@ window.onload = function () {
 			stardrops = {
 				'CF_Fair': 'Purchased at the Stardew Valley Fair for 2000 star tokens.',
 				'CF_Mines': 'Found in the chest on mine level 100.',
-				'CF_Spouse': 'Randomly given by spouse at 13/12 hearts.',
+				'CF_Spouse': 'Given by spouse at 13.5 hearts (3375 points).',
 				'CF_Sewer': 'Purchased from Krobus in the Sewers for 20,000g.',
 				'CF_Statue': 'Received from the Old Master Cannoli statue in the Secret Woods in exchange for a Sweet Gem Berry.',
 				'CF_Fish': 'Mailed by Willy after catching all the different fish.',
