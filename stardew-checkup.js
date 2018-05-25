@@ -143,6 +143,7 @@ window.onload = function () {
 			dating = {},
 			dumped_Girls = 0,
 			dumped_Guys = 0,
+			hasSpouseStardrop = false,
 			eventsSeen = {},
 			// <NPC>: [ [<numHearts>, <id>], ... ]
 			// if numHearts starts with 'a', this is content added in patch 1.3
@@ -208,7 +209,12 @@ window.onload = function () {
 		$(xmlDoc).find('player > eventsSeen > int').each(function () {
 			eventsSeen[$(this).text()] = 1;
 		});
-
+		$(xmlDoc).find('player > mailReceived > string').each(function () {
+			if($(this).text() === 'CF_Spouse') {
+				hasSpouseStardrop = true;
+				return false;
+			}
+		});
 		$(xmlDoc).find('locations > GameLocation').each(function () {
 			$(this).find('characters > NPC').each(function () {
 				// Filter out animals and monsters
@@ -281,9 +287,10 @@ window.onload = function () {
 					}
 				}
 				if (who === spouse) {
-					// Spouse Stardrop threshold is 3375 from StardewValley.NPC.checkAction() so that's our max instead of 3250
-					entry += (pts >= 3375) ? '<span class="ms_yes">MAX</span></li>' :
-						'<span class="ms_no">need ' + (3375 - pts) + ' more</span></li>';
+					// Spouse Stardrop threshold is 3375 from StardewValley.NPC.checkAction()
+					var max = hasSpouseStardrop ? 3250 : 3375;
+					entry += (pts >= max) ? '<span class="ms_yes">MAX (can still decay)</span></li>' :
+						'<span class="ms_no">need ' + (max - pts) + ' more</span></li>';
 					list_fam.push(entry + eventInfo);
 				} else if (isDatable) {
 					var max = 2000;
@@ -2030,17 +2037,25 @@ window.onload = function () {
 			hasMagnifyingGlass = false,
 			notes = {},
 			need = [],
+			rewards = {},
 			found_notes = 0,
-			note_count = 23;
+			found_rewards = 0,
+			note_count = 23,
+			reward_start = 13,
+			hasStoneJunimo = false,
+			reward_count = note_count - reward_start + 1,
+			reward_re = new RegExp('SecretNote(\\d+)_done');
 
 
 		if (saveIs1_3 === 'true') {
 			// Check Krobus event, then check for magnifier, then check number of notes
-			// Eventually, should see if there is a way to check if notes were "completed"
+			// Also checking for one of the reward events here, so we no longer use "return false" to end early.
 			$(xmlDoc).find('player > eventsSeen > int').each(function () {
 				if ($(this).text() === '520702') {
 					hasSeenKrobus = true;
-					return false;
+				} else if ($(this).text() === '2120303') {
+					rewards[23] = true;
+					found_rewards++;
 				}
 			});
 			output += '<span class="result">' + farmer + ' has ' + (hasSeenKrobus ? '' : 'not ') + ' seen Krobus at the Bus Stop.</span><br />\n';
@@ -2068,6 +2083,75 @@ window.onload = function () {
 					output += '<span class="need">Left to read:<ol>' + need.join('') + '</ol></span>\n';
 				}
 			}
+			// Most rewards are noted by SecretNoteXX_done mail items
+			$(xmlDoc).find('player > mailReceived > string').each(function () {
+				var match = reward_re.exec($(this).text());
+				if (match != null) {
+					rewards[match[1]] = true;
+					found_rewards++;
+				} else if ($(this).text() === 'gotPearl') {
+					rewards[15] = true;
+					found_rewards++;
+					} else if ($(this).text() === 'junimoPlush') {
+					rewards[13] = true;
+					found_rewards++;
+					} else if ($(this).text() === 'TH_Tunnel') {
+					// Qi quest we just check for the start. Full completion is 'TH_Lumberpile'
+					rewards[22] = true;
+					found_rewards++;
+				}
+			});
+			// Stone Junimo is a giant pain in the ass. Seems to not have any confirmation, so
+			// we have to search for it. But we also want to avoid the buried one, which is under:
+			// locations > GameLocation "Town" > objects > item > value > Object ; the key is Vector2 > <X>57</X><Y>16</Y>
+			$(xmlDoc).find('Item > name').each(function () {
+				if ($(this).text() === "Stone Junimo") {
+					// Found one in storage somewhere. We good.
+					hasStoneJunimo = true;
+					return false;
+				}
+			});
+			if (!hasStoneJunimo) {
+				$(xmlDoc).find('Object > name').each(function () {
+					if ($(this).text() === "Stone Junimo") {
+						var loc = $(this).parents('GameLocation').children('name').text();
+						if (loc === 'Town') {
+							var x = $(this).parents('item').find('key > Vector2 > X').text();
+							var y = $(this).parents('item').find('key > Vector2 > Y').text();
+							if (x !== '57' || y !== '16') {
+								hasStoneJunimo = true;
+								return false;
+							}
+						} else {
+							hasStoneJunimo = true;
+							return false;
+						}
+					}
+				});
+			}
+			if (hasStoneJunimo) {
+				rewards[14] = true;
+				found_rewards++;
+			}
+			output += '<span class="result">' + farmer + ' has found the rewards from  ' + found_rewards + ' secret note(s); there are ' +
+				reward_count + ' total rewards.</span><br />\n';
+			output += '<ul class="ach_list"><li>';
+			output += (found_rewards >= reward_count) ? getMilestoneString('Find all the secret note rewards', 1) :
+					getMilestoneString('Find all the secret note rewards', 0) + (reward_count - found_rewards) + ' more';
+			output += '</li></ul>\n';
+			if (found_rewards < reward_count) {
+				need = [];
+				for (var i = reward_start; i <= note_count; i++) {
+					if (!rewards.hasOwnProperty(i)) {
+						need.push('<li> Reward from ' + wikify('Secret Note ' + i, 'Secret Notes') + '</li>');
+					}
+				}
+				if (need.length > 0) {
+					output += '<span class="need">Left to find:<ol>' + need.join('') + '</ol></span>\n';
+				}
+			}
+
+
 			return output;
 		}
 		return '';
