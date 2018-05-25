@@ -2035,9 +2035,11 @@ window.onload = function () {
 			saveIs1_3 = $(xmlDoc).find('hasApplied1_3_UpdateChanges').text(),
 			hasSeenKrobus = false,
 			hasMagnifyingGlass = false,
+			isJojaMember = false,
 			notes = {},
 			need = [],
 			rewards = {},
+			reward_skip = {},
 			found_notes = 0,
 			found_rewards = 0,
 			note_count = 23,
@@ -2099,35 +2101,42 @@ window.onload = function () {
 					// Qi quest we just check for the start. Full completion is 'TH_Lumberpile'
 					rewards[22] = true;
 					found_rewards++;
+				} else if ($(this).text() === 'JojaMember') {
+					isJojaMember = true;
 				}
 			});
-			// Stone Junimo is a giant pain in the ass. Seems to not have any confirmation, so
-			// we have to search for it. But we also want to avoid the buried one, which is under:
+			// Stone Junimo is a giant pain in the ass. Seems to not have any confirmation and also doesn't work if Joja Member.
+			// We have to search for it, but we also want to avoid counting the buried one, which is under:
 			// locations > GameLocation "Town" > objects > item > value > Object ; the key is Vector2 > <X>57</X><Y>16</Y>
-			$(xmlDoc).find('Item > name').each(function () {
-				if ($(this).text() === "Stone Junimo") {
-					// Found one in storage somewhere. We good.
-					hasStoneJunimo = true;
-					return false;
-				}
-			});
-			if (!hasStoneJunimo) {
-				$(xmlDoc).find('Object > name').each(function () {
+			if (!isJojaMember) {
+				$(xmlDoc).find('Item > name').each(function () {
 					if ($(this).text() === "Stone Junimo") {
-						var loc = $(this).parents('GameLocation').children('name').text();
-						if (loc === 'Town') {
-							var x = $(this).parents('item').find('key > Vector2 > X').text();
-							var y = $(this).parents('item').find('key > Vector2 > Y').text();
-							if (x !== '57' || y !== '16') {
+						// Found one in storage somewhere. We good.
+						hasStoneJunimo = true;
+						return false;
+					}
+				});
+				if (!hasStoneJunimo) {
+					$(xmlDoc).find('Object > name').each(function () {
+						if ($(this).text() === "Stone Junimo") {
+							var loc = $(this).parents('GameLocation').children('name').text();
+							if (loc === 'Town') {
+								var x = $(this).parents('item').find('key > Vector2 > X').text();
+								var y = $(this).parents('item').find('key > Vector2 > Y').text();
+								if (x !== '57' || y !== '16') {
+									hasStoneJunimo = true;
+									return false;
+								}
+							} else {
 								hasStoneJunimo = true;
 								return false;
 							}
-						} else {
-							hasStoneJunimo = true;
-							return false;
 						}
-					}
-				});
+					});
+				}
+			} else {
+				reward_count--;
+				reward_skip[14] = true;
 			}
 			if (hasStoneJunimo) {
 				rewards[14] = true;
@@ -2142,7 +2151,7 @@ window.onload = function () {
 			if (found_rewards < reward_count) {
 				need = [];
 				for (var i = reward_start; i <= note_count; i++) {
-					if (!rewards.hasOwnProperty(i)) {
+					if (!reward_skip.hasOwnProperty(i) && !rewards.hasOwnProperty(i)) {
 						need.push('<li> Reward from ' + wikify('Secret Note ' + i, 'Secret Notes') + '</li>');
 					}
 				}
