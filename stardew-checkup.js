@@ -2046,8 +2046,7 @@ window.onload = function () {
 			reward_start = 13,
 			hasStoneJunimo = false,
 			reward_count = note_count - reward_start + 1,
-			reward_re = new RegExp('SecretNote(\\d+)_done');
-
+			reward_re;
 
 		if (saveIs1_3 === 'true') {
 			// Check Krobus event, then check for magnifier, then check number of notes
@@ -2085,7 +2084,8 @@ window.onload = function () {
 					output += '<span class="need">Left to read:<ol>' + need.join('') + '</ol></span>\n';
 				}
 			}
-			// Most rewards are noted by SecretNoteXX_done mail items
+			// Most rewards are noted by SecretNoteXX_done mail items. the one for note 21 starts with lower-case s though.
+			reward_re = new RegExp('[Ss]ecretNote(\\d+)_done');
 			$(xmlDoc).find('player > mailReceived > string').each(function () {
 				var match = reward_re.exec($(this).text());
 				if (match != null) {
