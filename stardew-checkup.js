@@ -237,8 +237,10 @@ window.onload = function () {
 						relStatus[who] = 'Married';
 					} else if ($(this).find('datingFarmer').text() === 'true') {
 						relStatus[who] = 'Dating';
-					} else {
+					} else if (points.hasOwnProperty(who)) { 
 						relStatus[who] = 'Friendly';
+					} else {
+						relStatus[who] = 'Unmet';
 					}
 				}
 				// Overriding status for the confrontation events
@@ -249,6 +251,7 @@ window.onload = function () {
 				} 
 				var pts = 0;
 				if (points.hasOwnProperty(who)) { pts = points[who]; }
+				if (!relStatus.hasOwnProperty(who)) { relStatus[who] = "Unmet"; }
 				var hearts = Math.floor(pts/250);
 				var entry = '<li>';
 				entry += ($(this).attr('xsi:type') === 'Child') ? who + ' (' + wikify('Child', 'Children') + ')' : wikify(who);
