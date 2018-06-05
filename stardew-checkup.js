@@ -376,14 +376,15 @@ window.onload = function () {
 					eventInfo += '</li></ul>';
 				}
 			}
+			var max;
 			if (who === spouse) {
 				// Spouse Stardrop threshold is 3375 from StardewValley.NPC.checkAction()
-				var max = hasSpouseStardrop ? 3250 : 3375;
+				max = hasSpouseStardrop ? 3250 : 3375;
 				entry += (pts >= max) ? '<span class="ms_yes">MAX (can still decay)</span></li>' :
 					'<span class="ms_no">need ' + (max - pts) + ' more</span></li>';
 				list_fam.push(entry + eventInfo);
 			} else if (npc[who].isDatable) {
-				var max = 2000;
+				max = 2000;
 				if (npc[who].relStatus === 'Dating') {
 					max = 2500;
 				}
@@ -948,6 +949,7 @@ window.onload = function () {
 		 * For now, we will simply assume it matches the Collections page and hardcode everything there
 		 * using wiki page http://stardewvalleywiki.com/Collections as a guideline. */
 		var output = '<h3>Basic Shipping</h3>\n',
+			table = [],
 			recipes = {
 				16: "Wild Horseradish",
 				18: "Daffodil",
@@ -1075,7 +1077,21 @@ window.onload = function () {
 				769: "Void Essence",
 				771: "Fiber",
 				787: "Battery Pack"
-			},
+			};
+			
+		table[0] = parsePlayerBasicShipping($(xmlDoc).find('SaveGame > player'), saveInfo, recipes);
+		if (saveInfo.numPlayers > 1) {
+			$(xmlDoc).find('farmhand').each(function () {
+				table.push(parsePlayerBasicShipping($(this), saveInfo, recipes));
+			});
+		}
+		output += printTranspose(table);
+		return output;
+	}
+	
+	function parsePlayerBasicShipping(player, saveInfo, recipes) {
+		// Much of the logic was ported from the crafting function which is why the variables are weirdly named
+		var output = '',
 			recipe_count = Object.keys(recipes).length,
 			crafted = {},
 			craft_count = 0,
@@ -1083,7 +1099,7 @@ window.onload = function () {
 			id,
 			r;
 
-		$(xmlDoc).find('player > basicShipped > item').each(function () {
+		$(player).find('basicShipped > item').each(function () {
 			var id = $(this).find('key > int').text(),
 				num = $(this).find('value > int').text();
 			if (recipes.hasOwnProperty(id) && num > 0) {
@@ -1092,8 +1108,8 @@ window.onload = function () {
 			}
 		});
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has shipped ' + craft_count +
-				' basic item(s); there are ' + recipe_count + ' total items.</span><ul class="ach_list">\n';
+		output += '<span class="result">' + $(player).children('name').html() + ' has shipped ' + craft_count +
+				' of ' + recipe_count + ' basic items.</span><ul class="ach_list">\n';
 		output += '<li>';
 		output += (craft_count >= recipe_count) ? getAchieveString('Full Shipment', 'ship every item', 1) :
 				getAchieveString('Full Shipment', 'ship every item', 0) + (recipe_count - craft_count) + ' more';
@@ -1110,13 +1126,14 @@ window.onload = function () {
 			}
 			output += '<span class="need">Left to ship:<ol>' + need.sort().join('') + '</ol></span>\n';
 		}
-		return output;
+		return [output];
 	}
 
 	function parseCropShipping(xmlDoc, saveInfo) {
 		// Relevant IDs were pulled from decompiled source - StardewValley.Stats.checkForShippingAchievments()
 		// Note that there are 5 more "crops" for Monoculture than there are for Polyculture
 		var output = '<h3>Crop Shipping</h3>\n',
+			table = [],
 			poly_crops = {
 				// Some, but not all of "Basic -75" category (All veg except fiddlehead)
 				24: "Parsnip",
@@ -1150,7 +1167,6 @@ window.onload = function () {
 				// Others
 				433: "Coffee Bean"
 			},
-			recipe_count = Object.keys(poly_crops).length,
 			mono_extras = {
 				// Ancient Fruit and 4 of the "Basic -80" flowers
 				454: "Ancient Fruit",
@@ -1158,7 +1174,22 @@ window.onload = function () {
 				593: "Summer Spangle",
 				595: "Fairy Rose",
 				597: "Blue Jazz"
-			},
+			};
+			
+		table[0] = parsePlayerCropShipping($(xmlDoc).find('SaveGame > player'), saveInfo, poly_crops, mono_extras);
+		if (saveInfo.numPlayers > 1) {
+			$(xmlDoc).find('farmhand').each(function () {
+				table.push(parsePlayerCropShipping($(this), saveInfo, poly_crops, mono_extras));
+			});
+		}
+		output += printTranspose(table);
+		return output;
+	}
+	
+	function parsePlayerCropShipping(player, saveInfo, poly_crops, mono_extras) {
+		// Much of the logic was ported from the crafting function which is why the variables are weirdly named
+		var output = '',
+			recipe_count = Object.keys(poly_crops).length,
 			crafted = {},
 			craft_count = 0,
 			max_ship = 0,
@@ -1167,9 +1198,9 @@ window.onload = function () {
 			id,
 			r,
 			n,
-			farmer = $(xmlDoc).find('player > name').html();
+			farmer = $(player).children('name').html();
 
-		$(xmlDoc).find('player > basicShipped > item').each(function () {
+		$(player).find('basicShipped > item').each(function () {
 			var id = $(this).find('key > int').text(),
 				num = Number($(this).find('value > int').text());
 			if (poly_crops.hasOwnProperty(id)) {
@@ -1195,8 +1226,8 @@ window.onload = function () {
 		output += (max_ship >= 300) ? getAchieveString('Monoculture', 'ship 300 of one crop', 1) :
 				getAchieveString('Monoculture', 'ship 300 of one crop', 0) + (300 - max_ship) + ' more ' + max_crop;
 		output += '</li></ul>\n';
-		output += '<span class="result">' + farmer + ' has shipped 15 or more of each of ' + craft_count +
-				' different crop(s); there are ' + recipe_count + ' total crops.</span><ul class="ach_list">\n<li>';
+		output += '<span class="result">' + farmer + ' has shipped 15 items from ' + craft_count + ' of ' +
+				recipe_count + ' different crops.</span><ul class="ach_list">\n<li>';
 		output += (craft_count >= recipe_count) ? getAchieveString('Polyculture', 'ship 15 of each crop', 1) :
 				getAchieveString('Polyculture', 'ship 15 of each crop', 0) + ' more of ' + (recipe_count - craft_count) + ' crops';
 		output += '</li></ul>\n';
@@ -1217,7 +1248,7 @@ window.onload = function () {
 			}
 			output += '<span class="need">Left to ship:<ol>' + need.sort().join('') + '</ol></span>\n';
 		}
-		return output;
+		return [output];
 	}
 
 	function parseSkills(xmlDoc, saveInfo) {
@@ -2213,7 +2244,8 @@ window.onload = function () {
 			reward_start = 13,
 			hasStoneJunimo = false,
 			reward_count = note_count - reward_start + 1,
-			reward_re;
+			reward_re,
+			i;
 
 		if (saveInfo.is1_3) {
 			// Check Krobus event, then check for magnifier, then check number of notes
@@ -2242,7 +2274,7 @@ window.onload = function () {
 					getMilestoneString('Read all the secret notes', 0) + (note_count - found_notes) + ' more';
 			output += '</li></ul>\n';
 			if (found_notes < note_count) {
-				for (var i = 1; i <= note_count; i++) {
+				for (i = 1; i <= note_count; i++) {
 					if (!notes.hasOwnProperty(i)) {
 						need.push('<li>' + wikify('Secret Note ' + i, 'Secret Notes') + '</li>');
 					}
@@ -2255,7 +2287,7 @@ window.onload = function () {
 			reward_re = new RegExp('[Ss]ecretNote(\\d+)_done');
 			$(xmlDoc).find('player > mailReceived > string').each(function () {
 				var match = reward_re.exec($(this).text());
-				if (match != null) {
+				if (match !== null) {
 					rewards[match[1]] = true;
 					found_rewards++;
 				} else if ($(this).text() === 'gotPearl') {
@@ -2317,7 +2349,7 @@ window.onload = function () {
 			output += '</li></ul>\n';
 			if (found_rewards < reward_count) {
 				need = [];
-				for (var i = reward_start; i <= note_count; i++) {
+				for (i = reward_start; i <= note_count; i++) {
 					if (!reward_skip.hasOwnProperty(i) && !rewards.hasOwnProperty(i)) {
 						need.push('<li> Reward from ' + wikify('Secret Note ' + i, 'Secret Notes') + '</li>');
 					}
