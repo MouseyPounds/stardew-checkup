@@ -115,9 +115,11 @@ table.output {
 	width: 100%;
 	table-layout: fixed;
 }
+.output td {
+	vertical-align: top;
+}
 tr td:not(:first-child) {
 	border-left: 1px solid;
-	vertical-align: top;
 }
 #TOC {
 	position: fixed;

@@ -186,70 +186,10 @@ window.onload = function () {
 	function parseSocial(xmlDoc, saveInfo) {
 		var output = '<h3>Social</h3>\n',
 			table = [],
-			player = $(xmlDoc).find('SaveGame > player'),
 			countdown = Number($(xmlDoc).find('countdownToWedding').text()),
 			daysPlayed = Number($(xmlDoc).find('stats > daysPlayed').first().text()),
 			spouse = $(xmlDoc).find('player > spouse').text(), // only used for 1.2 engagement checking
-			npc = {};
-
-		// Search locations for NPCs. They could be hardcoded, but this is somewhat more mod-friendly and it also
-		// lets us to grab children and search out relationship status for version 1.2 saves.
-		$(xmlDoc).find('locations > GameLocation').each(function () {
-			$(this).find('characters > NPC').each(function () {
-				// Filter out animals and monsters
-				if ($(this).attr('xsi:type') === 'Horse' || $(this).attr('xsi:type') === 'Cat' || $(this).attr('xsi:type') === 'Dog' ||
-					$(this).attr('xsi:type') === 'Fly' || $(this).attr('xsi:type') === 'Grub' || $(this).attr('xsi:type') === 'GreenSlime') {
-					return;
-				}
-				var who = $(this).find('name').text();
-				// Filter out those who can't gain friendship. This might fail in non-English files.
-				if (who === 'Gunther' || who === 'Mister Qi' || who === 'Marlon' || who === 'Bouncer' || who === 'Henchman') { return; }
-				npc[who] = {};
-				npc[who].isDatable = ($(this).find('datable').text() === 'true');
-				npc[who].isGirl = ($(this).find('gender').text() === '1');
-				npc[who].isChild = ($(this).attr('xsi:type') === 'Child');
-				if (!saveInfo.is1_3) {
-					if ($(this).find('divorcedFromFarmer').text() === 'true') {
-						npc[who].relStatus = 'Divorced';
-					} else if (countdown > 0 && who === spouse.slice(0,-7)) {
-						npc[who].relStatus = 'Engaged';
-					} else if ($(this).find('daysMarried').text() > 0) {
-						npc[who].relStatus = 'Married';
-					} else if ($(this).find('datingFarmer').text() === 'true') {
-						npc[who].relStatus = 'Dating';
-					} else {
-						npc[who].relStatus = 'Friendly';
-					}
-				}
-			});
-		});
-		table[0] = parsePlayerSocial(player, saveInfo, npc, countdown, daysPlayed);
-		if (saveInfo.numPlayers > 1) {
-			$(xmlDoc).find('farmhand').each(function () {
-				table.push(parsePlayerSocial($(this), saveInfo, npc, countdown, daysPlayed));
-			});
-		}
-		output += printTranspose(table);
-		return output;
-	}
-
-	function parsePlayerSocial(player, saveInfo, npc, countdown, daysPlayed) {
-		var output = '',
-			rows = [],
-			count_5h = 0,
-			count_10h = 0,
-			points = {},
-			list_fam = [],
-			list_bach = [],
-			list_other = [],
-			farmer = $(player).children('name').html(),
-			spouse = $(player).children('spouse').text(),
-			relStatus = {},
-			dating = {},
-			dumped_Girls = 0,
-			dumped_Guys = 0,
-			hasSpouseStardrop = false,
-			eventsSeen = {},
+			npc = {},
 			// <NPC>: [ [<numHearts>, <id>], ... ]
 			// if numHearts starts with 'a', this is content added in patch 1.3
 			eventList = {
@@ -282,6 +222,66 @@ window.onload = function () {
 				'Robin': [ [6, 33] ],
 				'Willy': [ ['a6', 711130] ]
 			};
+
+
+		// Search locations for NPCs. They could be hardcoded, but this is somewhat more mod-friendly and it also
+		// lets us to grab children and search out relationship status for version 1.2 saves.
+		$(xmlDoc).find('locations > GameLocation').each(function () {
+			$(this).find('characters > NPC').each(function () {
+				// Filter out animals and monsters
+				if ($(this).attr('xsi:type') === 'Horse' || $(this).attr('xsi:type') === 'Cat' || $(this).attr('xsi:type') === 'Dog' ||
+					$(this).attr('xsi:type') === 'Fly' || $(this).attr('xsi:type') === 'Grub' || $(this).attr('xsi:type') === 'GreenSlime') {
+					return;
+				}
+				var who = $(this).find('name').text();
+				// Filter out those who can't gain friendship. This might fail in non-English files.
+				if (who === 'Gunther' || who === 'Mister Qi' || who === 'Marlon' || who === 'Bouncer' || who === 'Henchman') { return; }
+				npc[who] = {};
+				npc[who].isDatable = ($(this).find('datable').text() === 'true');
+				npc[who].isGirl = ($(this).find('gender').text() === '1');
+				npc[who].isChild = ($(this).attr('xsi:type') === 'Child');
+				if (!saveInfo.is1_3) {
+					if ($(this).find('divorcedFromFarmer').text() === 'true') {
+						npc[who].relStatus = 'Divorced';
+					} else if (countdown > 0 && who === spouse.slice(0,-7)) {
+						npc[who].relStatus = 'Engaged';
+					} else if ($(this).find('daysMarried').text() > 0) {
+						npc[who].relStatus = 'Married';
+					} else if ($(this).find('datingFarmer').text() === 'true') {
+						npc[who].relStatus = 'Dating';
+					} else {
+						npc[who].relStatus = 'Friendly';
+					}
+				}
+			});
+		});
+		table[0] = parsePlayerSocial($(xmlDoc).find('SaveGame > player'), saveInfo, npc, eventList, countdown, daysPlayed);
+		if (saveInfo.numPlayers > 1) {
+			$(xmlDoc).find('farmhand').each(function () {
+				table.push(parsePlayerSocial($(this), saveInfo, npc, eventList, countdown, daysPlayed));
+			});
+		}
+		output += printTranspose(table);
+		return output;
+	}
+
+	function parsePlayerSocial(player, saveInfo, npc, eventList, countdown, daysPlayed) {
+		var output = '',
+			rows = [],
+			count_5h = 0,
+			count_10h = 0,
+			points = {},
+			list_fam = [],
+			list_bach = [],
+			list_other = [],
+			farmer = $(player).children('name').html(),
+			spouse = $(player).children('spouse').text(),
+			relStatus = {},
+			dating = {},
+			dumped_Girls = 0,
+			dumped_Guys = 0,
+			hasSpouseStardrop = false,
+			eventsSeen = {};
 		if (saveInfo.is1_3) {
 			$(player).find('activeDialogueEvents > item').each(function () {
 				var which = $(this).find('key > string').text();
@@ -443,10 +443,9 @@ window.onload = function () {
 	function parseFamily(xmlDoc, saveInfo) {
 		var output = '<h3>Home and Family</h3>\n',
 			table = [],
-			player = $(xmlDoc).find('SaveGame > player'),
 			wedding = Number($(xmlDoc).find('countdownToWedding').text());
 
-		table[0] = parsePlayerFamily(player, saveInfo, wedding, true);
+		table[0] = parsePlayerFamily($(xmlDoc).find('SaveGame > player'), saveInfo, wedding, true);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
 				table.push(parsePlayerFamily($(this), saveInfo, wedding, false));
@@ -530,9 +529,8 @@ window.onload = function () {
 	}
 
 	function parseCooking(xmlDoc, saveInfo) {
-		/* cookingRecipes is keyed by name, but recipesCooked is keyed by ObjectInformation ID.
-		 * Also, some cookingRecipes names are different from the names in ObjectInformation (e.g. Cookies vs Cookie) */
 		var output = '<h3>Cooking</h3>\n',
+			table = [],
 			recipes = {
 				194: "Fried Egg",
 				195: "Omelet",
@@ -606,7 +604,6 @@ window.onload = function () {
 				731: "Maple Bar",
 				732: "Crab Cakes"
 			},
-			recipe_count = Object.keys(recipes).length,
 			recipeTranslate = {
 				"Cheese Cauli.": "Cheese Cauliflower",
 				"Cookies": "Cookie",
@@ -614,7 +611,24 @@ window.onload = function () {
 				"Dish o' The Sea": "Dish O' The Sea",
 				"Eggplant Parm.": "Eggplant Parmesan",
 				"Vegetable Stew": "Vegetable Medley"
-			},
+			};
+
+
+		table[0] = parsePlayerCooking($(xmlDoc).find('SaveGame > player'), saveInfo, recipes, recipeTranslate);
+		if (saveInfo.numPlayers > 1) {
+			$(xmlDoc).find('farmhand').each(function () {
+				table.push(parsePlayerCooking($(this), saveInfo, recipes, recipeTranslate));
+			});
+		}
+		output += printTranspose(table);
+		return output;
+	}
+		
+	function parsePlayerCooking(player, saveInfo, recipes, recipeTranslate) {
+		/* cookingRecipes is keyed by name, but recipesCooked is keyed by ObjectInformation ID.
+		 * Also, some cookingRecipes names are different from the names in ObjectInformation (e.g. Cookies vs Cookie) */
+		var output = '',
+			recipe_count = Object.keys(recipes).length,
 			known = {},
 			known_count = 0,
 			crafted = {},
@@ -624,8 +638,7 @@ window.onload = function () {
 			id,
 			r;
 
-		$(xmlDoc).find('player > cookingRecipes > item').each(function () {
-		//$(xmlDoc).find('farmhand cookingRecipes > item').each(function () {
+		$(player).find('cookingRecipes > item').each(function () {
 			var id = $(this).find('key > string').text(),
 				num = $(this).find('value > int').text();
 			if (recipeTranslate.hasOwnProperty(id)) {
@@ -634,8 +647,7 @@ window.onload = function () {
 			known[id] = num;
 			known_count++;
 		});
-		$(xmlDoc).find('player > recipesCooked > item').each(function () {
-		//$(xmlDoc).find('farmhand recipesCooked > item').each(function () {
+		$(player).find('recipesCooked > item').each(function () {
 			var id = $(this).find('key > int').text(),
 				num = $(this).find('value > int').text();
 			// Do we need to check that num>0?
@@ -643,8 +655,8 @@ window.onload = function () {
 			craft_count++;
 		});
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' knows ' + known_count + ' recipe(s) and has cooked ' +
-			craft_count + ' of them; there are ' + recipe_count + ' total recipes.</span><ul class="ach_list">\n';
+		output += '<span class="result">' + $(player).children('name').html() + " has cooked " + craft_count + ' and knows ' +
+			known_count + ' of ' + recipe_count + ' recipes.</span><ul class="ach_list">\n';
 		output += '<li>';
 		output += (craft_count >= 10) ? getAchieveString('Cook', 'cook 10 different recipes', 1) :
 				getAchieveString('Cook', 'cook 10 different recipes', 0) + (10 - craft_count) + ' more';
@@ -676,13 +688,14 @@ window.onload = function () {
 			}
 			output += '</ul></span>\n';
 		}
-		return output;
+		return [output];
 	}
 
 	function parseCrafting(xmlDoc, saveInfo) {
 		/* Manually listing all crafting recipes in the order they appear on http://stardewvalleywiki.com/Crafting
 		 * A translation is needed again because of text mismatch. */
 		var output = '<h3>Crafting</h3>\n',
+			table = [],
 			recipes = [	"Cherry Bomb", "Bomb", "Mega Bomb",
 						"Gate", "Wood Fence", "Stone Fence", "Iron Fence", "Hardwood Fence",
 						"Sprinkler", "Quality Sprinkler", "Iridium Sprinkler",
@@ -702,10 +715,28 @@ window.onload = function () {
 							"Crystalarium", "Charcoal Kiln", "Lightning Rod", "Recycling Machine", "Tapper", "Worm Bin",
 							"Slime Egg-Press", "Slime Incubator", "Warp Totem: Beach", "Warp Totem: Mountains", "Warp Totem: Farm",
 							"Rain Totem", "Tub o' Flowers", "Wicked Statue", "Flute Block", "Drum Block" ],
-			recipe_count,
 			recipeTranslate = {
 				"Oil Of Garlic": "Oil of Garlic"
-			},
+			};
+
+		if (saveInfo.is1_3) {
+			// Wedding Ring is specifically excluded in StardewValley.Stats.checkForCraftingAchievments() so it is not listed here.
+			recipes.push('Wood Sign', 'Stone Sign', 'Garden Pot');
+		}
+
+		table[0] = parsePlayerCrafting($(xmlDoc).find('SaveGame > player'), saveInfo, recipes, recipeTranslate);
+		if (saveInfo.numPlayers > 1) {
+			$(xmlDoc).find('farmhand').each(function () {
+				table.push(parsePlayerCrafting($(this), saveInfo, recipes, recipeTranslate));
+			});
+		}
+		output += printTranspose(table);
+		return output;
+	}
+
+	function parsePlayerCrafting(player, saveInfo, recipes, recipeTranslate) {
+		var output = '',
+			recipe_count,
 			known = {},
 			known_count = 0,
 			craft_count = 0,
@@ -714,13 +745,8 @@ window.onload = function () {
 			id,
 			r;
 
-		if (saveInfo.is1_3) {
-			// Wedding Ring is specifically excluded in StardewValley.Stats.checkForCraftingAchievments() so it is not listed here.
-			recipes.push('Wood Sign', 'Stone Sign', 'Garden Pot');
-		}
 		recipe_count = recipes.length;
-		$(xmlDoc).find('player > craftingRecipes > item').each(function () {
-		//$(xmlDoc).find('farmhand craftingRecipes > item').each(function () {
+		$(player).find('craftingRecipes > item').each(function () {
 			var id = $(this).find('key > string').text(),
 				num = $(this).find('value > int').text();
 			if (recipeTranslate.hasOwnProperty(id)) {
@@ -738,8 +764,8 @@ window.onload = function () {
 			}
 		});
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' knows ' + known_count + ' recipe(s) and has crafted ' +
-				craft_count + ' of them; there are ' + recipe_count + ' total recipes.</span><ul class="ach_list">\n';
+		output += '<span class="result">' + $(player).children('name').html() + " has crafted " + craft_count + ' and knows ' +
+			known_count + ' of ' + recipe_count + ' recipes.</span><ul class="ach_list">\n';
 		output += '<li>';
 		output += (craft_count >= 15) ? getAchieveString('D.I.Y.', 'craft 15 different items', 1) :
 				getAchieveString('D.I.Y.', 'craft 15 different items', 0) + (15 - craft_count) + ' more';
@@ -771,13 +797,12 @@ window.onload = function () {
 			}
 			output += '</ul></span>\n';
 		}
-		return output;
+		return [output];
 	}
 
 	function parseFishing(xmlDoc, saveInfo) {
-		// Note, Clam (372) will show up in the save, but it is category "Basic -23" and is ignored for achievements.
-		// Also, it is possible to catch Void Mayo (308) in the Witch's Swamp; this should be ignored too.
 		var output = '<h3>Fishing</h3>\n',
+			table = [],
 			recipes = {
 				// "Fish" category
 				152: "Seaweed",
@@ -840,8 +865,26 @@ window.onload = function () {
 				775: "Glacierfish",
 				795: "Void Salmon",
 				796: "Slimejack"
-			},
-			recipe_count,
+			};
+		if (saveInfo.is1_3) {
+			recipes[798] = 'Midnight Squid';
+			recipes[799] = 'Spook Fish';
+			recipes[800] = 'Blob Fish';
+		}
+		table[0] = parsePlayerFishing($(xmlDoc).find('SaveGame > player'), saveInfo, recipes);
+		if (saveInfo.numPlayers > 1) {
+			$(xmlDoc).find('farmhand').each(function () {
+				table.push(parsePlayerFishing($(this), saveInfo, recipes));
+			});
+		}
+		output += printTranspose(table);
+		return output;
+	}
+	
+	function parsePlayerFishing(player, saveInfo, recipes) {
+		// Much of the logic was ported from the crafting function which is why the variables are weirdly named
+		var output = '',
+			recipe_count = Object.keys(recipes).length,
 			count = 0,
 			craft_count = 0, // for fish types
 			known = [],
@@ -849,15 +892,11 @@ window.onload = function () {
 			id,
 			r;
 
-		if (saveInfo.is1_3) {
-			recipes[798] = 'Midnight Squid';
-			recipes[799] = 'Spook Fish';
-			recipes[800] = 'Blob Fish';
-		}
-		recipe_count = Object.keys(recipes).length;
-		$(xmlDoc).find('player > fishCaught > item').each(function () {
+		$(player).find('fishCaught > item').each(function () {
 			var id = $(this).find('key > int').text(),
 				num = Number($(this).find('value > ArrayOfInt > int').first().text());
+			// Note, Clam (372) will show up in the save, but it is category "Basic -23" and is ignored for achievements.
+			// Also, it is possible to catch Void Mayo (308) in the Witch's Swamp; this should be ignored too.
 			if (id !== '372' && id !== '308' && num > 0) {
 				craft_count++;
 				// We are adding up the count ourselves, but the total is also stored in (stats > fishCaught) and (stats > FishCaught)
@@ -866,11 +905,11 @@ window.onload = function () {
 			}
 		});
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has caught ' + count + ' total fish of ' + craft_count +
-				' different type(s); there are ' + recipe_count + ' total types.</span><ul class="ach_list">\n';
+		output += '<span class="result">' + $(player).children('name').html() + ' has caught ' + craft_count +
+				' of ' + recipe_count + ' different fish (' + count + ' total)</span><ul class="ach_list">\n';
 		output += '<li>';
-		output += (count >= 100) ? getAchieveString('Mother Catch', 'catch 100 fish', 1) :
-				getAchieveString('Mother Catch', 'catch 100 fish', 0) + (100 - count) + ' more';
+		output += (count >= 100) ? getAchieveString('Mother Catch', 'catch 100 total fish', 1) :
+				getAchieveString('Mother Catch', 'catch 100 total fish', 0) + (100 - count) + ' more';
 		output += '</li>\n<li>';
 		output += (craft_count >= 10) ? getAchieveString('Fisherman', 'catch 10 different fish', 1) :
 				getAchieveString('Fisherman', 'catch 10 different fish', 0) + (10 - craft_count) + ' more';
@@ -878,13 +917,13 @@ window.onload = function () {
 		output += (craft_count >= 24) ? getAchieveString('Ol\' Mariner', 'catch 24 different fish', 1) :
 				getAchieveString('Ol\' Mariner', 'catch 24 different fish', 0) + (24 - craft_count) + ' more';
 		output += '</li>\n<li>';
-		// Count currently sorta hardcoded; will need to be changed back to recipe_count if the achieve changes
-		output += (craft_count >= Math.min(59, recipe_count)) ? getAchieveString('Master Angler', 'catch every fish', 1) :
-				getAchieveString('Master Angler', 'catch every fish', 0) + (Math.min(59, recipe_count) - craft_count) + ' more';
+		// Count currently hardcoded; min should be removed and description adjusted if this is fixed in the game
+		output += (craft_count >= Math.min(59, recipe_count)) ? getAchieveString('Master Angler', 'catch 59 different fish', 1) :
+				getAchieveString('Master Angler', 'catch 59 different fish', 0) + (Math.min(59, recipe_count) - craft_count) + ' more';
 		if (saveInfo.is1_3) {
-			output += ' <span class="note">(Note: In current beta, Master Angler triggers after 59 different fish are caught.)</span></li>\n<li>';
-			output += (craft_count >= recipe_count) ? getMilestoneString('Actually catch every fish', 1) :
-				getMilestoneString('Actually catch every fish', 0) + (recipe_count - craft_count) + ' more';
+			output += '</li>\n<li>';
+			output += (craft_count >= recipe_count) ? getMilestoneString('Catch every type of fish', 1) :
+				getMilestoneString('Catch every type of fish', 0) + (recipe_count - craft_count) + ' more';
 		}
 		output += '</li></ul>\n';
 		if (craft_count < recipe_count) {
@@ -899,7 +938,7 @@ window.onload = function () {
 			}
 			output += '<span class="need">Left to catch:<ol>' + need.sort().join('') + '</ol></span>\n';
 		}
-		return output;
+		return [output];
 	}
 
 	function parseBasicShipping(xmlDoc, saveInfo) {
