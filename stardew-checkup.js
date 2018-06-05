@@ -32,30 +32,30 @@ window.onload = function () {
 		if (desc.length > 0) {
 			desc = '(' + desc + ') ';
 		}
-		return (yes) ? '<span class="ach_yes"><span class="ach">' + name + '</span> Achievement ' + desc + 'requirements met</span>' :
-					'<span class="ach_no"><span class="ach">' + name + '</span> Achievement ' + desc + 'requirements not met</span> -- need ';
+		return (yes) ? '<span class="ach_yes"><span class="ach">' + name + '</span> ' + desc + ' done</span>' :
+					'<span class="ach_no"><span class="ach">' + name + '</span> ' + desc + '</span> -- need ';
 	}
 
 	function getAchieveImpossibleString(name, desc) {
 		if (desc.length > 0) {
 			desc = '(' + desc + ') ';
 		}
-		return '<span class="ach_imp"><span class="ach">' + name + '</span> Achievement ' + desc + 'cannot be completed on this save</span>';
+		return '<span class="ach_imp"><span class="ach">' + name + '</span> ' + desc + ' impossible</span>';
 	}
 
 	function getMilestoneString(desc, yes) {
-		return (yes) ? '<span class="ms_yes">' + desc + ' <span class="ach">(no associated achievement)</span> requirements met</span>' :
-					'<span class="ms_no">' + desc + ' <span class="ach">(no associated achievement)</span> requirements not met</span> -- need ';
+		return (yes) ? '<span class="ms_yes">' + desc + '</span>' :
+					'<span class="ms_no">' + desc + '</span> -- need ';
 	}
 
 	function getPointString(pts, desc, cum, yes) {
 		var c = (cum) ? ' more' : '';
-		return (yes) ? '<span class="pt_yes"><span class="pts">+' + pts + c + '</span> has been earned for ' + desc + '</span>' :
-					'<span class="pt_no"><span class="pts"> (' + pts + c + ')</span> could be earned for ' + desc + '</span>';
+		return (yes) ? '<span class="pt_yes"><span class="pts">+' + pts + c + '</span> earned (' + desc + ')</span>' :
+					'<span class="pt_no"><span class="pts"> (' + pts + c + ')</span> possible (' + desc + ')</span>';
 	}
 
 	function getPointImpossibleString(pts, desc) {
-		return '<span class="pt_imp"><span class="pts">+' + pts + '</span> cannot be earned for ' + desc + ' on this save</span>';
+		return '<span class="pt_imp"><span class="pts">+' + pts + '</span> impossible (' + desc + ')</span>';
 	}
 
 	function wikify(item, page) {
@@ -72,24 +72,77 @@ window.onload = function () {
 		return wikify(item);
 	}
 	
+	function printTranspose(table) {
+		var output = '<table class="output">';
+		for (var r = 0; r < table[0].length; r++) {
+			output += '<tr>';
+			for (var c = 0; c < table.length; c++) {
+				output += '<td>' + table[c][r] + '</td>';
+			}
+			output += '</tr>';
+		}
+		output += '</table>';
+		return output;
+	}
+	
 	// Individual chunks of save parsing.
-	// Each receives the xmlDoc object to parse and returns HTML to output.
-	function parseSummary(xmlDoc) {
+	// Each receives the xmlDoc object to parse & the saveInfo information structure and returns HTML to output.
+	function parseSummary(xmlDoc, saveInfo) {
 		var output = '<h3>Summary</h3>\n',
 			farmTypes = ['Standard', 'Riverland', 'Forest', 'Hill-top', 'Wilderness'],
 			playTime = Number($(xmlDoc).find('player > millisecondsPlayed').text()),
 			playHr = Math.floor(playTime / 36e5),
 			playMin = Math.floor((playTime % 36e5) / 6e4),
-			saveIs1_3 = $(xmlDoc).find('hasApplied1_3_UpdateChanges').text();
-
+			id = "0",
+			name = $(xmlDoc).find('player > name').html(),
+			farmhands = [];
+			
+		saveInfo.is1_3 = ($(xmlDoc).find('hasApplied1_3_UpdateChanges').text() === 'true');
 		// Farmer & farm names are read as html() because they come from user input and might contain characters
 		// which must be escaped. This will happen with child names later too.
-		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' of ' + 
-			$(xmlDoc).find('player > farmName').html() + ' Farm (' + 
-			farmTypes[$(xmlDoc).find('whichFarm').text()] + ')</span><br />\n';
+		saveInfo.players = {};
+		saveInfo.children = {};
+		if (saveInfo.is1_3) {
+			id = $(xmlDoc).find('player > UniqueMultiplayerID').text();
+		}
+		saveInfo.players[id] = name;
+		saveInfo.children[id] = [];
+		$(xmlDoc).find("[xsi\\:type='FarmHouse'] NPC[xsi\\:type='Child']").each(function () {
+			saveInfo.children[id].push($(this).find('name').html());
+		});
+		saveInfo.numPlayers = 1;
+		output += '<span class="result">' + $(xmlDoc).find('player > farmName').html() + ' Farm (' + 
+			farmTypes[$(xmlDoc).find('whichFarm').text()] + ')</span><br />';
+		output += '<span class="result">Farmer ' + name ;
+		$(xmlDoc).find('farmhand').each(function() {
+			saveInfo.numPlayers++;
+			id = $(this).children('UniqueMultiplayerID').text();
+			name = $(this).children('name').html();
+			farmhands.push(name);
+			saveInfo.players[id] = name;
+			saveInfo.children[id] = [];
+			$(this).parent('indoors[xsi\\:type="Cabin"]').find("NPC[xsi\\:type='Child']").each(function () {
+				saveInfo.children[id].push($(this).find('name').html());
+			});
+		});
+		if (saveInfo.numPlayers > 1) {
+			output += ' and Farmhand(s) ' + farmhands.join(', ');
+		}
+		output += '</span><br />';
+		// Searching for marriage between players & their children
+		saveInfo.partners = {};
+		$(xmlDoc).find('farmerFriendships > item').each(function() {
+			var item = this;
+			if ($(this).find('value > Friendship > Status').text() === 'Married') {
+				var id1 = $(item).find('key > FarmerPair > Farmer1').text();
+				var id2 = $(item).find('key > FarmerPair > Farmer2').text();
+				saveInfo.partners[id1] = id2;
+				saveInfo.partners[id2] = id1;
+			}
+		});
 		// Date originally used XXForSaveGame elements, but those were not always present on saves downloaded from upload.farm
 		output += '<span class="result">Day ' + $(xmlDoc).find('dayOfMonth').text() + ' of ' +
-			capitalize($(xmlDoc).find('currentSeason').text()) + ', Year ' + $(xmlDoc).find('year').text() + '</span><br />\n';
+			capitalize($(xmlDoc).find('currentSeason').text()) + ', Year ' + $(xmlDoc).find('year').text() + '</span><br />';
 		// Playtime of < 1 min will be blank.
 		output += '<span class="result">Played for ';
 		if (playHr > 0) {
@@ -98,16 +151,19 @@ window.onload = function () {
 		if (playMin > 0) {
 			output += playMin + ' min ';
 		}
-		output += '</span><br />\n';
-		output += '<span class="result">Save is ' + ((saveIs1_3 === 'true') ? '' : 'not ') + ' from version 1.3 or later</span><br />\n';
+		output += '</span><br />';
+		output += '<span class="result">Save is ' +
+			(saveInfo.is1_3 ? 'from version 1.3 or later' : 'from version 1.2 or earlier') + '</span><br />';
 		return output;
 	}
 
-	function parseMoney(xmlDoc) {
+	function parseMoney(xmlDoc, saveInfo) {
+		// If multiplayer gold becomes unshared, this will need to change
 		var output = '<h3>Money</h3>\n',
 			money = Number($(xmlDoc).find('player > totalMoneyEarned').text());
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has earned a total of ' + addCommas(money) + 'g.</span><br />\n';
+		output += '<span class="result">' + $(xmlDoc).find('player > farmName').html() + ' Farm has earned a total of ' +
+			addCommas(money) + 'g.</span><br />\n';
 		output += '<ul class="ach_list"><li>';
 		output += (money >= 15e3) ? getAchieveString('Greenhorn', 'earn 15,000g', 1) :
 				getAchieveString('Greenhorn', 'earn 15,000g', 0) + addCommas(15e3 - money) + 'g more';
@@ -127,18 +183,67 @@ window.onload = function () {
 		return output;
 	}
 
-	function parseSocial(xmlDoc) {
+	function parseSocial(xmlDoc, saveInfo) {
 		var output = '<h3>Social</h3>\n',
+			table = [],
+			player = $(xmlDoc).find('SaveGame > player'),
+			countdown = Number($(xmlDoc).find('countdownToWedding').text()),
+			daysPlayed = Number($(xmlDoc).find('stats > daysPlayed').first().text()),
+			spouse = $(xmlDoc).find('player > spouse').text(), // only used for 1.2 engagement checking
+			npc = {};
+
+		// Search locations for NPCs. They could be hardcoded, but this is somewhat more mod-friendly and it also
+		// lets us to grab children and search out relationship status for version 1.2 saves.
+		$(xmlDoc).find('locations > GameLocation').each(function () {
+			$(this).find('characters > NPC').each(function () {
+				// Filter out animals and monsters
+				if ($(this).attr('xsi:type') === 'Horse' || $(this).attr('xsi:type') === 'Cat' || $(this).attr('xsi:type') === 'Dog' ||
+					$(this).attr('xsi:type') === 'Fly' || $(this).attr('xsi:type') === 'Grub' || $(this).attr('xsi:type') === 'GreenSlime') {
+					return;
+				}
+				var who = $(this).find('name').text();
+				// Filter out those who can't gain friendship. This might fail in non-English files.
+				if (who === 'Gunther' || who === 'Mister Qi' || who === 'Marlon' || who === 'Bouncer' || who === 'Henchman') { return; }
+				npc[who] = {};
+				npc[who].isDatable = ($(this).find('datable').text() === 'true');
+				npc[who].isGirl = ($(this).find('gender').text() === '1');
+				npc[who].isChild = ($(this).attr('xsi:type') === 'Child');
+				if (!saveInfo.is1_3) {
+					if ($(this).find('divorcedFromFarmer').text() === 'true') {
+						npc[who].relStatus = 'Divorced';
+					} else if (countdown > 0 && who === spouse.slice(0,-7)) {
+						npc[who].relStatus = 'Engaged';
+					} else if ($(this).find('daysMarried').text() > 0) {
+						npc[who].relStatus = 'Married';
+					} else if ($(this).find('datingFarmer').text() === 'true') {
+						npc[who].relStatus = 'Dating';
+					} else {
+						npc[who].relStatus = 'Friendly';
+					}
+				}
+			});
+		});
+		table[0] = parsePlayerSocial(player, saveInfo, npc, countdown, daysPlayed);
+		if (saveInfo.numPlayers > 1) {
+			$(xmlDoc).find('farmhand').each(function () {
+				table.push(parsePlayerSocial($(this), saveInfo, npc, countdown, daysPlayed));
+			});
+		}
+		output += printTranspose(table);
+		return output;
+	}
+
+	function parsePlayerSocial(player, saveInfo, npc, countdown, daysPlayed) {
+		var output = '',
+			rows = [],
 			count_5h = 0,
 			count_10h = 0,
 			points = {},
 			list_fam = [],
 			list_bach = [],
 			list_other = [],
-			farmer = $(xmlDoc).find('player > name').html(),
-			saveIs1_3 = $(xmlDoc).find('hasApplied1_3_UpdateChanges').text(),
-			spouse = $(xmlDoc).find('player > spouse').text(), // this may need adjustment due to multiplayer farmhand marriage
-			countdown = Number($(xmlDoc).find('countdownToWedding').text()),
+			farmer = $(player).children('name').html(),
+			spouse = $(player).children('spouse').text(),
 			relStatus = {},
 			dating = {},
 			dumped_Girls = 0,
@@ -177,9 +282,8 @@ window.onload = function () {
 				'Robin': [ [6, 33] ],
 				'Willy': [ ['a6', 711130] ]
 			};
-
-		if (saveIs1_3 === 'true') {
-			$(xmlDoc).find('player > activeDialogueEvents > item').each(function () {
+		if (saveInfo.is1_3) {
+			$(player).find('activeDialogueEvents > item').each(function () {
 				var which = $(this).find('key > string').text();
 				var num = Number($(this).find('value > int').text());
 				if (which === 'dumped_Girls') {
@@ -188,132 +292,114 @@ window.onload = function () {
 					dumped_Guys = num;
 				}
 			});
-			$(xmlDoc).find('player > friendshipData > item').each(function () {
+			$(player).find('friendshipData > item').each(function () {
 				var who = $(this).find('key > string').html();
 				var num = $(this).find('value > Friendship > Points').text();
 				if (num >= 2500) { count_10h++; }
 				if (num >= 1250) { count_5h++; }
 				points[who] = num;
-				relStatus[who] = $(this).find('value > Friendship > Status').text();
+				if (!npc.hasOwnProperty(who)) {
+					// This shouldn't happen
+					npc[who] = {'isDatable': false, 'isGirl': false, 'isChild': false};
+				}
+				npc[who].relStatus = $(this).find('value > Friendship > Status').text();
 			});
 		} else {
-			$(xmlDoc).find('player > friendships > item').each(function () {
+			$(player).find('friendships > item').each(function () {
 				var who = $(this).find('key > string').html();
 				var num = $(this).find('value > ArrayOfInt > int').first().text();
 				if (num >= 2500) { count_10h++; }
 				if (num >= 1250) { count_5h++; }
 				points[who] = num;
 			});
+			if (countdown > 0) {
+				spouse = spouse.slice(0,-7);
+			}
 		}
 
-		$(xmlDoc).find('player > eventsSeen > int').each(function () {
+		$(player).find('eventsSeen > int').each(function () {
 			eventsSeen[$(this).text()] = 1;
 		});
-		$(xmlDoc).find('player > mailReceived > string').each(function () {
+		$(player).find('mailReceived > string').each(function () {
 			if($(this).text() === 'CF_Spouse') {
 				hasSpouseStardrop = true;
 				return false;
 			}
 		});
-		$(xmlDoc).find('locations > GameLocation').each(function () {
-			$(this).find('characters > NPC').each(function () {
-				// Filter out animals and monsters
-				if ($(this).attr('xsi:type') === 'Horse' || $(this).attr('xsi:type') === 'Cat' || $(this).attr('xsi:type') === 'Dog' ||
-					$(this).attr('xsi:type') === 'Fly' || $(this).attr('xsi:type') === 'Grub' || $(this).attr('xsi:type') === 'GreenSlime') {
-					return;
-				}
-				var who = $(this).find('name').text();
-				// Filter out those who can't gain friendship. This might fail in non-English files.
-				if (who === 'Gunther' || who === 'Mister Qi' || who === 'Marlon' || who === 'Bouncer' || who === 'Henchman') { return; }
-				var isDatable = ($(this).find('datable').text() === 'true');
-				var isGirl = ($(this).find('gender').text() === '1');
-				// Faking status for pre 1.2. Note: bouquet emoji = &#x1f490;
-				if (!saveIs1_3) {
-					if ($(this).find('divorcedFromFarmer').text() === 'true') {
-						relStatus[who] = 'Divorced';
-					} else if (countdown > 0 && who === spouse.slice(0,-7)) {
-						relStatus[who] = 'Engaged';
-					} else if ($(this).find('daysMarried').text() > 0) {
-						relStatus[who] = 'Married';
-					} else if ($(this).find('datingFarmer').text() === 'true') {
-						relStatus[who] = 'Dating';
-					} else if (points.hasOwnProperty(who)) { 
-						relStatus[who] = 'Friendly';
-					} else {
-						relStatus[who] = 'Unmet';
-					}
-				}
-				// Overriding status for the confrontation events
-				if (dumped_Girls > 0 && isDatable && isGirl) {
-					relStatus[who] = 'Angry (' + dumped_Girls + ' more day(s))';
-				} else if (dumped_Guys > 0 && isDatable && !isGirl) {
-					relStatus[who] = 'Angry (' + dumped_Guys + ' more day(s))';
-				} 
-				var pts = 0;
-				if (points.hasOwnProperty(who)) { pts = points[who]; }
-				if (!relStatus.hasOwnProperty(who)) { relStatus[who] = "Unmet"; }
-				var hearts = Math.floor(pts/250);
-				var entry = '<li>';
-				entry += ($(this).attr('xsi:type') === 'Child') ? who + ' (' + wikify('Child', 'Children') + ')' : wikify(who);
-				entry += ': ' + relStatus[who] + ', ' + hearts + '&#x2665; (' + pts + ' points) -- ';
+		for (var who in npc) {
+			// Overriding status for the confrontation events
+			if (dumped_Girls > 0 && npc[who].isDatable && npc[who].isGirl) {
+				npc[who].relStatus = 'Angry (' + dumped_Girls + ' more day(s))';
+			} else if (dumped_Guys > 0 && npc[who].isDatable && !npc[who].isGirl) {
+				npc[who].relStatus = 'Angry (' + dumped_Guys + ' more day(s))';
+			} 
+			var pts = 0;
+			if (points.hasOwnProperty(who)) {
+				pts = points[who];
+			} else {
+				npc[who].relStatus = "Unmet";
+			}
+			var hearts = Math.floor(pts/250);
+			var entry = '<li>';
+			entry += (npc[who].isChild) ? who + ' (' + wikify('Child', 'Children') + ')' : wikify(who);
+			entry += ': ' + npc[who].relStatus + ', ' + hearts + '&#x2665; (' + pts + ' pts) -- ';
 				
-				// Check events
-				// We want to only make an Event list item if there are actually events for this NPC and now that there is different
-				// content for different versions, this is much harder without lame hardcoded checks.
-				var eventInfo = '';
-				if (eventList.hasOwnProperty(who)) {
-					if (saveIs1_3 === 'true' || (who !== 'Jas' && who != 'Pam' && who != 'Willy')) {
-						eventInfo += '<ul><li>Event(s) seen: ';
-						eventList[who].forEach( function(arr) {
-							var seen = false;
-							var neg = 'no';
-							String(arr[1]).split('|').forEach( function(e) {
-								if (eventsSeen.hasOwnProperty(e)) {
-									seen = true;
-								}
-							});
-							// checks for events which can be permanently missed; 1st is Clint 6H, second is Sam 3H
-							if ((arr[1] === 101 && (eventsSeen.hasOwnProperty(2123243) || eventsSeen.hasOwnProperty(2123343))) || 
-								(arr[1] === 733330 && Number($(xmlDoc).find('stats > daysPlayed').first().text()) > 84) ) {
-									neg = 'imp';
-								}
-							if (String(arr[0]).substr(0,1) === 'a') {
-								if (saveIs1_3 === 'true') {
-									var id = arr[0].substr(1);
-									eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + id + '&#x2665;' + '</span>]';
-								}
-							} else {
-								eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + arr[0] + '&#x2665;' + '</span>]';
+			// Check events
+			// We want to only make an Event list item if there are actually events for this NPC and now that there is different
+			// content for different versions, this is much harder without lame hardcoded checks.
+			var eventInfo = '';
+			if (eventList.hasOwnProperty(who)) {
+				if (saveInfo.is1_3 || (who !== 'Jas' && who != 'Pam' && who != 'Willy')) {
+					eventInfo += '<ul class="compact"><li>Event(s): ';
+					eventList[who].forEach( function(arr) {
+						var seen = false;
+						var neg = 'no';
+						String(arr[1]).split('|').forEach( function(e) {
+							if (eventsSeen.hasOwnProperty(e)) {
+								seen = true;
 							}
 						});
-						eventInfo += '</li></ul>';
-					}
+						// checks for events which can be permanently missed; 1st is Clint 6H, second is Sam 3H
+						if ((arr[1] === 101 && (eventsSeen.hasOwnProperty(2123243) || eventsSeen.hasOwnProperty(2123343))) || 
+							(arr[1] === 733330 && daysPlayed > 84) ) {
+								neg = 'imp';
+							}
+						if (String(arr[0]).substr(0,1) === 'a') {
+							if (saveInfo.is1_3) {
+								var id = arr[0].substr(1);
+								eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + id + '&#x2665;' + '</span>]';
+							}
+						} else {
+							eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + arr[0] + '&#x2665;' + '</span>]';
+						}
+					});
+					eventInfo += '</li></ul>';
 				}
-				if (who === spouse) {
-					// Spouse Stardrop threshold is 3375 from StardewValley.NPC.checkAction()
-					var max = hasSpouseStardrop ? 3250 : 3375;
-					entry += (pts >= max) ? '<span class="ms_yes">MAX (can still decay)</span></li>' :
-						'<span class="ms_no">need ' + (max - pts) + ' more</span></li>';
+			}
+			if (who === spouse) {
+				// Spouse Stardrop threshold is 3375 from StardewValley.NPC.checkAction()
+				var max = hasSpouseStardrop ? 3250 : 3375;
+				entry += (pts >= max) ? '<span class="ms_yes">MAX (can still decay)</span></li>' :
+					'<span class="ms_no">need ' + (max - pts) + ' more</span></li>';
+				list_fam.push(entry + eventInfo);
+			} else if (npc[who].isDatable) {
+				var max = 2000;
+				if (npc[who].relStatus === 'Dating') {
+					max = 2500;
+				}
+				entry += (pts >= max) ? '<span class="ms_yes">MAX</span></li>' :
+					'<span class="ms_no">need ' + (max - pts) + ' more</span></li>';
+				list_bach.push(entry + eventInfo);
+			} else {
+				entry += (pts >= 2500) ? '<span class="ms_yes">MAX</span></li>' :
+					'<span class="ms_no">need ' + (2500 - pts) + ' more</span></li>';
+				if (npc[who].isChild) {
 					list_fam.push(entry + eventInfo);
-				} else if (isDatable) {
-					var max = 2000;
-					if (relStatus[who] === 'Dating') {
-						max = 2500;
-					}
-					entry += (pts >= max) ? '<span class="ms_yes">MAX</span></li>' :
-						'<span class="ms_no">need ' + (max - pts) + ' more</span></li>';
-					list_bach.push(entry + eventInfo);
 				} else {
-					entry += (pts >= 2500) ? '<span class="ms_yes">MAX</span></li>' :
-						'<span class="ms_no">need ' + (2500 - pts) + ' more</span></li>';
-					if ($(this).attr('xsi:type') === 'Child') {
-						list_fam.push(entry + eventInfo);
-					} else {
-						list_other.push(entry + eventInfo);
-					}
+					list_other.push(entry + eventInfo);
 				}
-			});
-		});
+			}
+		}
 
 		output += '<span class="result">' + farmer + ' has ' + count_5h + ' relationship(s) of 5+ hearts.</span><ul class="ach_list">\n';
 		output += '<li>';
@@ -329,7 +415,8 @@ window.onload = function () {
 		output += (count_5h >= 20) ? getAchieveString('Popular', '5&#x2665; with 20 people', 1) :
 				getAchieveString('Popular', '5&#x2665; with 20 people', 0) + (20 - count_5h) + ' more';
 		output += '</li></ul>\n';
-		output += '<span class="result">' + farmer + ' has ' + count_10h + ' relationships of 10+ hearts.</span><ul class="ach_list">\n';
+		rows[0] = output;
+		output = '<span class="result">' + farmer + ' has ' + count_10h + ' relationships of 10+ hearts.</span><ul class="ach_list">\n';
 		output += '<li>';
 		output += (count_10h >= 1) ? getAchieveString('Best Friends', '10&#x2665; with 1 person', 1) :
 				getAchieveString('Best Friends', '10&#x2665; with 1 person', 0) + (1 - count_10h) + ' more';
@@ -337,45 +424,82 @@ window.onload = function () {
 		output += (count_10h >= 8) ? getAchieveString('The Beloved Farmer', '10&#x2665; with 8 people', 1) :
 				getAchieveString('The Beloved Farmer', '10&#x2665; with 8 people', 0) + (8 - count_10h) + ' more';
 		output += '</li></ul>\n';
-		output += '<span class="need">Individual Friendship Progress<ul>';
+		rows[1] = output;
+		output = '<span class="result">Individual Friendship Progress for ' + farmer + '</span><ul class="outer">';
 		if (list_fam.length > 0) {
-			output += '<li>Family<ol>' + list_fam.sort().join('') + '</ol></li>\n';
+			output += '<li>Family (includes all player children)<ol class="compact">' + list_fam.sort().join('') + '</ol></li>\n';
 		}
 		if (list_bach.length > 0) {
-			output += '<li>Datable Villagers<ol>' + list_bach.sort().join('') + '</ol></li>\n';
+			output += '<li>Datable Villagers<ol class="compact">' + list_bach.sort().join('') + '</ol></li>\n';
 		}
 		if (list_other.length > 0) {
-			output += '<li>Other Villagers<ol>' + list_other.sort().join('') + '</ol></li>\n';
+			output += '<li>Other Villagers<ol class="compact">' + list_other.sort().join('') + '</ol></li>\n';
 		}
-		output += '</ul></span>\n';
+		output += '</ul>\n';
+		rows[2] = output;
+		return rows;
+	}
 
+	function parseFamily(xmlDoc, saveInfo) {
+		var output = '<h3>Home and Family</h3>\n',
+			table = [],
+			player = $(xmlDoc).find('SaveGame > player'),
+			wedding = Number($(xmlDoc).find('countdownToWedding').text());
+
+		table[0] = parsePlayerFamily(player, saveInfo, wedding, true);
+		if (saveInfo.numPlayers > 1) {
+			$(xmlDoc).find('farmhand').each(function () {
+				table.push(parsePlayerFamily($(this), saveInfo, wedding, false));
+			});
+		}
+		output += printTranspose(table);
 		return output;
 	}
 
-	function parseFamily(xmlDoc) {
-		var output = '<h3>Home and Family</h3>\n',
-			spouse = '(None)',
+	function parsePlayerFamily(player, saveInfo, wedding, isHost) {
+		var output = '',
+			column = [],
 			needs = [],
 			count = 0,
-			result = $(xmlDoc).find('player > spouse'),
+			maxUpgrades = (isHost ? 3 : 2),
+			houseType = (isHost ? "FarmHouse" : "Cabin"),
+			farmer = $(player).children('name').html(),
+			spouse = $(player).children('spouse').html(),
+			id = $(player).children('UniqueMultiplayerID').text(),
+			building,
 			children = '(None)',
 			child_name = [],
-			wedding = Number($(xmlDoc).find('countdownToWedding').text()),
-			houseUpgrades = $(xmlDoc).find('player > houseUpgradeLevel').text();
-		if (result.length > 0) {
-			spouse = (wedding) ? result.text().slice(0, -7) : result.text();
+			houseUpgrades = $(player).children('houseUpgradeLevel').text();
+		if (typeof(id) === 'undefined' || id === '') {
+			id = "0";
+		}
+		if (typeof(spouse) !== 'undefined' && spouse.length > 0) {
+			if (wedding > 0 && !saveInfo.is1_3) {
+				spouse = spouse.slice(0,-7);
+			}
+			count++;
+		} else if (saveInfo.partners.hasOwnProperty(id)) {
+			spouse = saveInfo.players[saveInfo.partners[id]];
 			count++;
 		} else {
+			spouse = '(None)';
 			needs.push('spouse');
 		}
-		output += '<span class="result">Spouse: ' + spouse + ((wedding) ? ' -- wedding in ' + wedding + ' day(s)' : '') + '</span><br />\n';
-		// not sure how to get the [] attribute selectors to recognize xsi:type as valid attribute name, so working around it
-		$(xmlDoc).find('locations > GameLocation > Characters > NPC').each(function () {
-			if ($(this).attr('xsi:type') === 'Child') {
+		output += '<span class="result">' + farmer + "'s spouse: " + spouse + 
+			((wedding) ? ' -- wedding in ' + wedding + ' day(s)' : '') + '</span><br />\n';
+		if (saveInfo.children.hasOwnProperty(id) && saveInfo.children[id].length > 0) {
+			child_name = saveInfo.children[id];
+			count += child_name.length;
+		} else if (saveInfo.partners.hasOwnProperty(id) && saveInfo.children.hasOwnProperty(saveInfo.partners[id]) &&
+					saveInfo.children[saveInfo.partners[id]].length > 0) {
+			child_name = saveInfo.children[saveInfo.partners[id]];
+			count += child_name.length;
+		} else {
+			$(player).parent().find("[xsi\\:type='" + houseType + "'] NPC[xsi\\:type='Child']").each(function () {
 				count++;
 				child_name.push($(this).find('name').html());
-			}
-		});
+			});
+		}
 		if (child_name.length) {
 			children = child_name.join(', ');
 			if (child_name.length === 1) {
@@ -384,12 +508,13 @@ window.onload = function () {
 		} else {
 			needs.push("2 children");
 		}
-		output += '<span class="result">Children: ' + children + '</span><ul class="ach_list"><li>\n';
+		output += '<span class="result">' + farmer + "'s Children: " + children + '</span><ul class="ach_list"><li>\n';
 		output += (count >= 3) ? getAchieveString('Full House', 'Married + 2 kids', 1) :
 				getAchieveString('Full House', 'Married + 2 kids', 0) + needs.join(' and ');
 		output += '</li></ul>\n';
-
-		output += '<span class="result">Farmhouse has been upgraded ' + houseUpgrades + ' time(s); 3 upgrades are possible.</span><br /><ul class="ach_list">\n';
+		column[0] = output;
+		output = '<span class="result">' + houseType + ' upgraded ' + houseUpgrades + ' time(s) of ';
+		output += maxUpgrades + ' possible.</span><br /><ul class="ach_list">\n';
 		output += '<li>';
 		output += (houseUpgrades >= 1) ? getAchieveString('Moving Up', '1 upgrade', 1) :
 				getAchieveString('Moving Up', '1 upgrade', 0) + (1 - houseUpgrades) + ' more';
@@ -397,13 +522,14 @@ window.onload = function () {
 		output += (houseUpgrades >= 2) ? getAchieveString('Living Large', '2 upgrades', 1) :
 				getAchieveString('Living Large', '2 upgrades', 0) + (2 - houseUpgrades) + ' more';
 		output += '</li>\n<li>';
-		output += (houseUpgrades >= 3) ? getMilestoneString('House fully upgraded', 1) :
-				getMilestoneString('House fully upgraded', 0) + (3 - houseUpgrades) + ' more';
+		output += (houseUpgrades >= maxUpgrades) ? getMilestoneString('House fully upgraded', 1) :
+				getMilestoneString('House fully upgraded', 0) + (maxUpgrades - houseUpgrades) + ' more';
 		output += '</li></ul>\n';
-		return output;
+		column[1] = output;
+		return column;
 	}
 
-	function parseCooking(xmlDoc) {
+	function parseCooking(xmlDoc, saveInfo) {
 		/* cookingRecipes is keyed by name, but recipesCooked is keyed by ObjectInformation ID.
 		 * Also, some cookingRecipes names are different from the names in ObjectInformation (e.g. Cookies vs Cookie) */
 		var output = '<h3>Cooking</h3>\n',
@@ -499,6 +625,7 @@ window.onload = function () {
 			r;
 
 		$(xmlDoc).find('player > cookingRecipes > item').each(function () {
+		//$(xmlDoc).find('farmhand cookingRecipes > item').each(function () {
 			var id = $(this).find('key > string').text(),
 				num = $(this).find('value > int').text();
 			if (recipeTranslate.hasOwnProperty(id)) {
@@ -508,6 +635,7 @@ window.onload = function () {
 			known_count++;
 		});
 		$(xmlDoc).find('player > recipesCooked > item').each(function () {
+		//$(xmlDoc).find('farmhand recipesCooked > item').each(function () {
 			var id = $(this).find('key > int').text(),
 				num = $(this).find('value > int').text();
 			// Do we need to check that num>0?
@@ -551,7 +679,7 @@ window.onload = function () {
 		return output;
 	}
 
-	function parseCrafting(xmlDoc) {
+	function parseCrafting(xmlDoc, saveInfo) {
 		/* Manually listing all crafting recipes in the order they appear on http://stardewvalleywiki.com/Crafting
 		 * A translation is needed again because of text mismatch. */
 		var output = '<h3>Crafting</h3>\n',
@@ -584,15 +712,15 @@ window.onload = function () {
 			need_k = [],
 			need_c = [],
 			id,
-			saveIs1_3 = $(xmlDoc).find('hasApplied1_3_UpdateChanges').text(),
 			r;
 
-		if (saveIs1_3 === 'true') {
+		if (saveInfo.is1_3) {
 			// Wedding Ring is specifically excluded in StardewValley.Stats.checkForCraftingAchievments() so it is not listed here.
 			recipes.push('Wood Sign', 'Stone Sign', 'Garden Pot');
 		}
 		recipe_count = recipes.length;
 		$(xmlDoc).find('player > craftingRecipes > item').each(function () {
+		//$(xmlDoc).find('farmhand craftingRecipes > item').each(function () {
 			var id = $(this).find('key > string').text(),
 				num = $(this).find('value > int').text();
 			if (recipeTranslate.hasOwnProperty(id)) {
@@ -646,7 +774,7 @@ window.onload = function () {
 		return output;
 	}
 
-	function parseFishing(xmlDoc) {
+	function parseFishing(xmlDoc, saveInfo) {
 		// Note, Clam (372) will show up in the save, but it is category "Basic -23" and is ignored for achievements.
 		// Also, it is possible to catch Void Mayo (308) in the Witch's Swamp; this should be ignored too.
 		var output = '<h3>Fishing</h3>\n',
@@ -719,10 +847,9 @@ window.onload = function () {
 			known = [],
 			need = [],
 			id,
-			saveIs1_3 = $(xmlDoc).find('hasApplied1_3_UpdateChanges').text(),
 			r;
 
-		if (saveIs1_3 === 'true') {
+		if (saveInfo.is1_3) {
 			recipes[798] = 'Midnight Squid';
 			recipes[799] = 'Spook Fish';
 			recipes[800] = 'Blob Fish';
@@ -754,7 +881,7 @@ window.onload = function () {
 		// Count currently sorta hardcoded; will need to be changed back to recipe_count if the achieve changes
 		output += (craft_count >= Math.min(59, recipe_count)) ? getAchieveString('Master Angler', 'catch every fish', 1) :
 				getAchieveString('Master Angler', 'catch every fish', 0) + (Math.min(59, recipe_count) - craft_count) + ' more';
-		if (saveIs1_3 === 'true') {
+		if (saveInfo.is1_3) {
 			output += ' <span class="note">(Note: In current beta, Master Angler triggers after 59 different fish are caught.)</span></li>\n<li>';
 			output += (craft_count >= recipe_count) ? getMilestoneString('Actually catch every fish', 1) :
 				getMilestoneString('Actually catch every fish', 0) + (recipe_count - craft_count) + ' more';
@@ -775,7 +902,7 @@ window.onload = function () {
 		return output;
 	}
 
-	function parseBasicShipping(xmlDoc) {
+	function parseBasicShipping(xmlDoc, saveInfo) {
 		/* Basic shipping achieve details are not easy to pull from decompiled source -- lots of filtering of
 		 * ObjectInformation in StardewValley.Utility.hasFarmerShippedAllItems() with additional calls to
 		 * StardewValley.Object.isPotentialBasicShippedCategory().
@@ -947,7 +1074,7 @@ window.onload = function () {
 		return output;
 	}
 
-	function parseCropShipping(xmlDoc) {
+	function parseCropShipping(xmlDoc, saveInfo) {
 		// Relevant IDs were pulled from decompiled source - StardewValley.Stats.checkForShippingAchievments()
 		// Note that there are 5 more "crops" for Monoculture than there are for Polyculture
 		var output = '<h3>Crop Shipping</h3>\n',
@@ -1054,7 +1181,7 @@ window.onload = function () {
 		return output;
 	}
 
-	function parseSkills(xmlDoc) {
+	function parseSkills(xmlDoc, saveInfo) {
 		var output = '<h3>Skills</h3>\n',
 			skills = ["Farming", "Fishing",	"Foraging",	"Mining", "Combat"],
 			next_level = [100,380,770,1300,2150,3300,4800,6900,10000,15000],
@@ -1105,7 +1232,7 @@ window.onload = function () {
 		return output;
 	}
 
-	function parseMuseum(xmlDoc) {
+	function parseMuseum(xmlDoc, saveInfo) {
 		var output = '<h3>Museum Collection</h3>\n',
 			artifacts = {
 				96: "Dwarf Scroll I",
@@ -1320,7 +1447,7 @@ window.onload = function () {
 		return output;
 	}
 
-	function parseMonsters(xmlDoc) {
+	function parseMonsters(xmlDoc, saveInfo) {
 		/* Conditions & details from decompiled source StardewValley.Locations.AdventureGuild.gil()
 		 * The game counts some monsters which are not currently available; we will count them too
 		 * just in case they are in someone's save file, but not list them in the details. */
@@ -1432,7 +1559,7 @@ window.onload = function () {
 		return output;
 	}
 
-	function parseQuests(xmlDoc) {
+	function parseQuests(xmlDoc, saveInfo) {
 		var output = '<h3>Quests</h3>\n',
 			// Every player has his own quest count; using find('stats > questsCompleted') will hit all of them.
 			// In 1.3, the host's stats are under 'SaveGame > player > stats' & other players are under 'farmhand > stats'
@@ -1450,7 +1577,7 @@ window.onload = function () {
 		return output;
 	}
 
-	function parseStardrops(xmlDoc) {
+	function parseStardrops(xmlDoc, saveInfo) {
 		/* mailReceived identifiers from decompiled source of StardewValley.Utility.foundAllStardrops()
 		 * descriptions are not from anywhere else and are just made up. */
 		var output = '<h3>Stardrops</h3>\n',
@@ -1496,11 +1623,10 @@ window.onload = function () {
 		return output;
 	}
 
-	function parseGrandpa(xmlDoc) {
+	function parseGrandpa(xmlDoc, saveInfo) {
 		// Scoring details from StardewValley.Utility.getGradpaScore() & getGrandpaCandlesFromScore()
 		var output = '<h3>Grandpa\'s Evaluation</h3>\n',
 			farmer = $(xmlDoc).find('player > name').html(),
-			saveIs1_3 = $(xmlDoc).find('hasApplied1_3_UpdateChanges').text(),
 			count = 0,
 			max_count = 21,
 			candles = 1,
@@ -1594,7 +1720,7 @@ window.onload = function () {
 		if (spouse.length > 0 && houseUpgrades >= 2) {
 			count++;
 		}
-		if (saveIs1_3 === 'true') {
+		if (saveInfo.is1_3) {
 			$(xmlDoc).find('player> friendshipData > item').each(function () {
 				var num = Number($(this).find('value > Friendship > Points').text());
 				if (num >= 1975) { heart_count++; }
@@ -1758,7 +1884,7 @@ window.onload = function () {
 		return output;
 	}
 
-	function parseBundles(xmlDoc) {
+	function parseBundles(xmlDoc, saveInfo) {
 		// Bundle info from Data\Bundles.xnb & StardewValley.Locations.CommunityCenter class
 		var output = '<h3>Community Center / Joja Community Development</h3>\n',
 			farmer = $(xmlDoc).find('player > name').html(),
@@ -2032,10 +2158,9 @@ window.onload = function () {
 		return output;
 	}
 
-	function parseSecretNotes(xmlDoc) {
+	function parseSecretNotes(xmlDoc, saveInfo) {
 		var output = '<h3>Secret Notes</h3>\n',
 			farmer = $(xmlDoc).find('player > name').html(),
-			saveIs1_3 = $(xmlDoc).find('hasApplied1_3_UpdateChanges').text(),
 			hasSeenKrobus = false,
 			hasMagnifyingGlass = false,
 			isJojaMember = false,
@@ -2051,7 +2176,7 @@ window.onload = function () {
 			reward_count = note_count - reward_start + 1,
 			reward_re;
 
-		if (saveIs1_3 === 'true') {
+		if (saveInfo.is1_3) {
 			// Check Krobus event, then check for magnifier, then check number of notes
 			// Also checking for one of the reward events here, so we no longer use "return false" to end early.
 			$(xmlDoc).find('player > eventsSeen > int').each(function () {
@@ -2192,9 +2317,9 @@ window.onload = function () {
 			prog = document.getElementById('progress');
 
 		prog.value = 0;
-		$(document.getElementById('output-container')).hide();
-		$(document.getElementById('progress-container')).show();
-		$(document.getElementById('changelog')).hide();
+		$('#output-container').hide();
+		$('#progress-container').show();
+		$('#changelog').hide();
 		reader.onloadstart = function (e) {
 			prog.value = 20;
 		};
@@ -2206,33 +2331,34 @@ window.onload = function () {
 		};
 		reader.onload = function (e) {
 			var output = "",
-				xmlDoc = $.parseXML(e.target.result);
+				xmlDoc = $.parseXML(e.target.result),
+				saveInfo = {};
 
-			output += parseSummary(xmlDoc);
-			output += parseMoney(xmlDoc);
-			output += parseSkills(xmlDoc);
-			output += parseQuests(xmlDoc);
-			output += parseMonsters(xmlDoc);
-			output += parseStardrops(xmlDoc);
-			output += parseFamily(xmlDoc);
-			output += parseSocial(xmlDoc);
-			output += parseCooking(xmlDoc);
-			output += parseCrafting(xmlDoc);
-			output += parseFishing(xmlDoc);
-			output += parseBasicShipping(xmlDoc);
-			output += parseCropShipping(xmlDoc);
-			output += parseMuseum(xmlDoc);
-			output += parseSecretNotes(xmlDoc);
-			output += parseBundles(xmlDoc);
-			output += parseGrandpa(xmlDoc);
+			output += parseSummary(xmlDoc, saveInfo);
+			output += parseMoney(xmlDoc, saveInfo);
+			output += parseSkills(xmlDoc, saveInfo);
+			output += parseQuests(xmlDoc, saveInfo);
+			output += parseMonsters(xmlDoc, saveInfo);
+			output += parseStardrops(xmlDoc, saveInfo);
+			output += parseFamily(xmlDoc, saveInfo);
+			output += parseSocial(xmlDoc, saveInfo);
+			output += parseCooking(xmlDoc, saveInfo);
+			output += parseCrafting(xmlDoc, saveInfo);
+			output += parseFishing(xmlDoc, saveInfo);
+			output += parseBasicShipping(xmlDoc, saveInfo);
+			output += parseCropShipping(xmlDoc, saveInfo);
+			output += parseMuseum(xmlDoc, saveInfo);
+			output += parseSecretNotes(xmlDoc, saveInfo);
+			output += parseBundles(xmlDoc, saveInfo);
+			output += parseGrandpa(xmlDoc, saveInfo);
 
 			// End of checks
 			prog.value = 100;
 			document.getElementById('out').innerHTML = output;
-			$(document.getElementById('output-container')).show();
-			$(document.getElementById('progress-container')).hide();
+			$('#output-container').show();
+			$('#progress-container').hide();
 			createTOC();
-			$(document.getElementById('TOC')).show();
+			$('#TOC').show();
 		};
 		reader.readAsText(file);
 	}

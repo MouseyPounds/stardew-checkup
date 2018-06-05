@@ -23,13 +23,16 @@ h3 {
 }
 .panel {
 	background-color: #ffe0b0;
-	padding: 8px 10% 8px 12px;
+	padding: .5em 2em .5em 1em;
 	margin: 5px;
 	border: 5px solid #804000;
 	border-radius: 15px;
 }
+#header {
+	padding-right: 5em;
+}
 #footer {
-	padding-right: 12px;
+	padding-right: 1em;
 }
 #input-container { display: none; }
 #output-container { display: none; }
@@ -97,6 +100,24 @@ h3 {
 .need > ol {
 	margin-left: 48px;
 	margin-top: 0px;
+}
+ol.outer, ul.outer {
+	margin-top: 0;
+	padding-left: 3em;
+}
+ol.compact, ul.compact {
+	margin-top: 0;
+	padding-left: 1em;
+}
+table.output {
+	border: none;
+	border-collapse: collapse;
+	width: 100%;
+	table-layout: fixed;
+}
+tr td:not(:first-child) {
+	border-left: 1px solid;
+	vertical-align: top;
 }
 #TOC {
 	position: fixed;
