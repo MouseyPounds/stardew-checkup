@@ -115,6 +115,10 @@ window.onload = function () {
 			farmTypes[$(xmlDoc).find('whichFarm').text()] + ')</span><br />';
 		output += '<span class="result">Farmer ' + name ;
 		$(xmlDoc).find('farmhand').each(function() {
+			// Currently using a blank userID field to determine that a farmhand slot is empty
+			if ($(this).children('userID').text() === '') {
+				return true;
+			}
 			saveInfo.numPlayers++;
 			id = $(this).children('UniqueMultiplayerID').text();
 			name = $(this).children('name').html();
