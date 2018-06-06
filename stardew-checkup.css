@@ -93,13 +93,12 @@ h3 {
 .need {
 	margin-left: 38px;
 }
-.need > ul {
-	margin-left: 48px;
+.need > ul, .need > ol {
+	margin-left: 3.5em;
 	margin-top: 0px;
 }
-.need > ol {
-	margin-left: 48px;
-	margin-top: 0px;
+.need ol, .need ul {
+	padding-left: 1.5em;
 }
 ol.outer, ul.outer {
 	margin-top: 0;

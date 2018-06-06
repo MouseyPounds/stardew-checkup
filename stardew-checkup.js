@@ -158,11 +158,24 @@ window.onload = function () {
 	}
 
 	function parseMoney(xmlDoc, saveInfo) {
-		// If multiplayer gold becomes unshared, this will need to change
 		var output = '<h3>Money</h3>\n',
-			money = Number($(xmlDoc).find('player > totalMoneyEarned').text());
+			table = [];
+		// This is pretty pointless with shared gold, but I separate everything else for multiplayer...
+		table[0] = parsePlayerMoney($(xmlDoc).find('SaveGame > player'), saveInfo);
+		if (saveInfo.numPlayers > 1) {
+			$(xmlDoc).find('farmhand').each(function () {
+				table.push(parsePlayerMoney($(this), saveInfo));
+			});
+		}
+		output += printTranspose(table);
+		return output;
+	}
 
-		output += '<span class="result">' + $(xmlDoc).find('player > farmName').html() + ' Farm has earned a total of ' +
+	function parsePlayerMoney(player, saveInfo) {
+		var output = '',
+			money = Number($(player).children('totalMoneyEarned').text());
+
+		output += '<span class="result">' + $(player).children('name').html() + ' has earned ' +
 			addCommas(money) + 'g.</span><br />\n';
 		output += '<ul class="ach_list"><li>';
 		output += (money >= 15e3) ? getAchieveString('Greenhorn', 'earn 15,000g', 1) :
@@ -180,7 +193,7 @@ window.onload = function () {
 		output += (money >= 1e7) ? getAchieveString('Legend', 'earn 10,000,000g', 1) :
 				getAchieveString('Legend', 'earn 10,000,000g', 0) + addCommas(1e7 - money) + 'g more';
 		output += '</li></ul>\n';
-		return output;
+		return [output];
 	}
 
 	function parseSocial(xmlDoc, saveInfo) {
@@ -276,8 +289,6 @@ window.onload = function () {
 			list_other = [],
 			farmer = $(player).children('name').html(),
 			spouse = $(player).children('spouse').text(),
-			relStatus = {},
-			dating = {},
 			dumped_Girls = 0,
 			dumped_Guys = 0,
 			hasSpouseStardrop = false,
@@ -326,6 +337,28 @@ window.onload = function () {
 				return false;
 			}
 		});
+		var eventCheck = function (arr) {
+			var seen = false;
+			var neg = 'no';
+			String(arr[1]).split('|').forEach( function(e) {
+				if (eventsSeen.hasOwnProperty(e)) {
+					seen = true;
+				}
+			});
+			// checks for events which can be permanently missed; 1st is Clint 6H, second is Sam 3H
+			if ((arr[1] === 101 && (eventsSeen.hasOwnProperty(2123243) || eventsSeen.hasOwnProperty(2123343))) || 
+				(arr[1] === 733330 && daysPlayed > 84) ) {
+					neg = 'imp';
+				}
+			if (String(arr[0]).substr(0,1) === 'a') {
+				if (saveInfo.is1_3) {
+					var id = arr[0].substr(1);
+					eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + id + '&#x2665;' + '</span>]';
+				}
+			} else {
+				eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + arr[0] + '&#x2665;' + '</span>]';
+			}
+		};
 		for (var who in npc) {
 			// Overriding status for the confrontation events
 			if (dumped_Girls > 0 && npc[who].isDatable && npc[who].isGirl) {
@@ -351,28 +384,7 @@ window.onload = function () {
 			if (eventList.hasOwnProperty(who)) {
 				if (saveInfo.is1_3 || (who !== 'Jas' && who != 'Pam' && who != 'Willy')) {
 					eventInfo += '<ul class="compact"><li>Event(s): ';
-					eventList[who].forEach( function(arr) {
-						var seen = false;
-						var neg = 'no';
-						String(arr[1]).split('|').forEach( function(e) {
-							if (eventsSeen.hasOwnProperty(e)) {
-								seen = true;
-							}
-						});
-						// checks for events which can be permanently missed; 1st is Clint 6H, second is Sam 3H
-						if ((arr[1] === 101 && (eventsSeen.hasOwnProperty(2123243) || eventsSeen.hasOwnProperty(2123343))) || 
-							(arr[1] === 733330 && daysPlayed > 84) ) {
-								neg = 'imp';
-							}
-						if (String(arr[0]).substr(0,1) === 'a') {
-							if (saveInfo.is1_3) {
-								var id = arr[0].substr(1);
-								eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + id + '&#x2665;' + '</span>]';
-							}
-						} else {
-							eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + arr[0] + '&#x2665;' + '</span>]';
-						}
-					});
+					eventList[who].forEach(eventCheck);
 					eventInfo += '</li></ul>';
 				}
 			}
@@ -466,7 +478,6 @@ window.onload = function () {
 			farmer = $(player).children('name').html(),
 			spouse = $(player).children('spouse').html(),
 			id = $(player).children('UniqueMultiplayerID').text(),
-			building,
 			children = '(None)',
 			child_name = [],
 			houseUpgrades = $(player).children('houseUpgradeLevel').text();
@@ -1253,8 +1264,22 @@ window.onload = function () {
 
 	function parseSkills(xmlDoc, saveInfo) {
 		var output = '<h3>Skills</h3>\n',
+			table = [],
 			skills = ["Farming", "Fishing",	"Foraging",	"Mining", "Combat"],
-			next_level = [100,380,770,1300,2150,3300,4800,6900,10000,15000],
+			next_level = [100,380,770,1300,2150,3300,4800,6900,10000,15000];
+			
+		table[0] = parsePlayerSkills($(xmlDoc).find('SaveGame > player'), saveInfo, skills, next_level);
+		if (saveInfo.numPlayers > 1) {
+			$(xmlDoc).find('farmhand').each(function () {
+				table.push(parsePlayerSkills($(this), saveInfo, skills, next_level));
+			});
+		}
+		output += printTranspose(table);
+		return output;
+	}
+	
+	function parsePlayerSkills(player, saveInfo, skills, next_level) {
+		var output = '',
 			xp = {},
 			i = 0,
 			j,
@@ -1263,7 +1288,7 @@ window.onload = function () {
 			count = 0,
 			need = [];
 
-		$(xmlDoc).find('player > experiencePoints > int').each(function () {
+		$(player).find('experiencePoints > int').each(function () {
 			// We need to skip the unused 6th entry (Luck)
 			if (i < 5) {
 				num = Number($(this).text());
@@ -1285,8 +1310,8 @@ window.onload = function () {
 			}
 		});
 
-
-		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has reached level 10 in ' + count + ' skill(s).</span><br />\n';
+		output += '<span class="result">' + $(player).children('name').html() + ' has reached level 10 in ' + count + 
+			' of 5 skills.</span><br />\n';
 		output += '<ul class="ach_list"><li>';
 		output += (count >= 1) ? getAchieveString('Singular Talent', 'level 10 in a skill', 1) :
 				getAchieveString('Singular Talent', 'level 10 in a skill', 0) + (1 - count) + ' more';
@@ -1298,8 +1323,7 @@ window.onload = function () {
 		if (need.length > 0) {
 			output += '<span class="need">Skills left:<ol>' + need.sort().join('') + '</ol></span>\n';
 		}
-
-		return output;
+		return [output];
 	}
 
 	function parseMuseum(xmlDoc, saveInfo) {
@@ -1522,6 +1546,7 @@ window.onload = function () {
 		 * The game counts some monsters which are not currently available; we will count them too
 		 * just in case they are in someone's save file, but not list them in the details. */
 		var output = '<h3>Monster Hunting</h3>\n',
+			table = [],
 			goals = {
 				"Slimes": 1000,
 				"Void Spirits": 150,
@@ -1531,7 +1556,6 @@ window.onload = function () {
 				"Duggies": 30,
 				"Dust Sprites": 500
 			},
-			goal_count = Object.keys(goals).length,
 			categories = {
 				"Green Slime": "Slimes",
 				"Frost Jelly": "Slimes",
@@ -1558,38 +1582,50 @@ window.onload = function () {
 				"Cave Insects": ["Bug", "Cave Fly", "Grub"],
 				"Duggies": ["Duggy"],
 				"Dust Sprites": ["Dust Spirit"]
-			},
+			};
+		table[0] = parsePlayerMonsters($(xmlDoc).find('SaveGame > player'), saveInfo, goals, categories, monsters);
+		if (saveInfo.numPlayers > 1) {
+			$(xmlDoc).find('farmhand').each(function () {
+				table.push(parsePlayerMonsters($(this), saveInfo, goals, categories, monsters));
+			});
+		}
+		output += printTranspose(table);
+		return output;
+	}
+
+	function parsePlayerMonsters(player, saveInfo, goals, categories, monsters) {
+		var output = '',
+			table = [],
+			goal_count = Object.keys(goals).length,
 			killed = [],
 			completed = 0,
 			need = [],
 			id,
-			mineLevel = Number($(xmlDoc).find('player > deepestMineLevel').text()),
-			hasSkullKey = $(xmlDoc).find('player > hasSkullKey').text(),
-			farmer = $(xmlDoc).find('player > name').html();
-
-		// Deepest mine level is separately tracked for each player and is sometimes off in multiplayer.
-		// To work around this we will use presence of skull key to override the level & bump it to 120.
+			mineLevel = Number($(player).children('deepestMineLevel').text()),
+			hasSkullKey = $(player).children('hasSkullKey').text(),
+			farmer = $(player).children('name').html();
+			
+		// Have seen some inconsitencies in multiplayer, so will use presence of skull key to override the level & bump it to 120.
 		if (hasSkullKey === 'true') {
 			mineLevel = Math.max(120, mineLevel);
 		}
 		if (mineLevel <= 0) {
 			output += '<span class="result">' + farmer + ' has not yet explored the mines.</span><br />\n';
 		} else {
-			output += '<span class="result">' + farmer + ' has reached level ' + Math.min(mineLevel, 120) + ' of the mines';
-			if (mineLevel > 120) {
-				output += ' and level ' + (mineLevel - 120) + ' of the Skull Cavern';
-			} else {
-				output += ' but has not yet explored the Skull Cavern';
-			}
+			output += '<span class="result">' + farmer + ' has reached level ' + Math.min(mineLevel, 120) +
+				' of the mines</span><br />\n';
+			output += '<span class="result">' + farmer + ((mineLevel > 120) ?
+				(' has reached level ' + (mineLevel - 120) + ' of the Skull Cavern') :
+				'has not yet explored the Skull Cavern');
 			output += '.</span><br />';
 		}
-		output += '<ul class="ach_list"><li>\n';
+		table[0] = output;
+		output = '<ul class="ach_list"><li>\n';
 		output += (mineLevel >= 120) ? getAchieveString('The Bottom', 'reach mine level 120', 1) :
 				getAchieveString('The Bottom', 'reach mine level 120', 0) + (120 - mineLevel) + ' more';
 		output += '</li></ul>\n';
 
-		// May break on multiplayer saves
-		$(xmlDoc).find('stats > specificMonstersKilled > item').each(function () {
+		$(player).find('stats > specificMonstersKilled > item').each(function () {
 			var id = $(this).find('key > string').text(),
 				num = Number($(this).find('value > int').text()),
 				old = 0;
@@ -1625,18 +1661,36 @@ window.onload = function () {
 		if (need.length > 0) {
 			output += '<span class="need">Goals left:<ol>' + need.sort().join('') + '</ol></span>\n';
 		}
-
-		return output;
+		table[1] = output;
+		return table;
 	}
 
 	function parseQuests(xmlDoc, saveInfo) {
 		var output = '<h3>Quests</h3>\n',
-			// Every player has his own quest count; using find('stats > questsCompleted') will hit all of them.
-			// In 1.3, the host's stats are under 'SaveGame > player > stats' & other players are under 'farmhand > stats'
-			// But in 1.2, they are in 'SaveGame > stats'. The most compatible seems to be using .first()
-			count = Number($(xmlDoc).find('stats > questsCompleted').first().text());
+			table = [];
+			
+		table[0] = parsePlayerQuests($(xmlDoc).find('SaveGame > player'), saveInfo);
+		if (saveInfo.numPlayers > 1) {
+			$(xmlDoc).find('farmhand').each(function () {
+				table.push(parsePlayerQuests($(this), saveInfo));
+			});
+		}
+		output += printTranspose(table);
+		return output;
+	}
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has completed ' + count + ' "Help Wanted" quest(s).</span><br />\n';
+	function parsePlayerQuests(player, saveInfo) {
+		var output = '',
+			count;
+			
+		if (saveInfo.is1_3) {
+			count = Number($(player).find('stats > questsCompleted').text());
+		} else {
+			// In 1.2, stats are under the root SaveGame so we must go back up the tree
+			count = Number($(player).parent().find('stats > questsCompleted').text());
+		}
+
+		output += '<span class="result">' + $(player).children('name').html() + ' has completed ' + count + ' "Help Wanted" quest(s).</span><br />\n';
 		output += '<ul class="ach_list"><li>';
 		output += (count >= 10) ? getAchieveString('Gofer', 'complete 10 quests', 1) :
 				getAchieveString('Gofer', 'complete 10 quests', 0) + (10 - count) + ' more';
@@ -1644,29 +1698,43 @@ window.onload = function () {
 		output += (count >= 40) ? getAchieveString('A Big Help', 'complete 40 quests', 1) :
 				getAchieveString('A Big Help', 'complete 40 quests', 0) + (40 - count) + ' more';
 		output += '</li></ul>\n';
-		return output;
+		return [output];
 	}
 
 	function parseStardrops(xmlDoc, saveInfo) {
 		/* mailReceived identifiers from decompiled source of StardewValley.Utility.foundAllStardrops()
 		 * descriptions are not from anywhere else and are just made up. */
 		var output = '<h3>Stardrops</h3>\n',
+			table = [],
+			stardrops = {
+				'CF_Fair': 'Purchased at the Fair for 2000 star tokens.',
+				'CF_Mines': 'Found in the chest on mine level 100.',
+				'CF_Spouse': 'Given by spouse at 13.5 hearts (3375 points).',
+				'CF_Sewer': 'Purchased from Krobus in the Sewers for 20,000g.',
+				'CF_Statue': 'Received from Old Master Cannoli in the Secret Woods.',
+				'CF_Fish': 'Mailed by Willy after catching all fish.',
+				'museumComplete': 'Reward for completing the Museum collection.'
+			};
+			
+		table[0] = parsePlayerStardrops($(xmlDoc).find('SaveGame > player'), saveInfo, stardrops);
+		if (saveInfo.numPlayers > 1) {
+			$(xmlDoc).find('farmhand').each(function () {
+				table.push(parsePlayerStardrops($(this), saveInfo, stardrops));
+			});
+		}
+		output += printTranspose(table);
+		return output;
+	}
+
+	function parsePlayerStardrops(player, saveInfo, stardrops) {
+		var output = '',
 			count = 0,
 			id,
 			need = [],
 			received = {},
-			stardrops = {
-				'CF_Fair': 'Purchased at the Stardew Valley Fair for 2000 star tokens.',
-				'CF_Mines': 'Found in the chest on mine level 100.',
-				'CF_Spouse': 'Given by spouse at 13.5 hearts (3375 points).',
-				'CF_Sewer': 'Purchased from Krobus in the Sewers for 20,000g.',
-				'CF_Statue': 'Received from the Old Master Cannoli statue in the Secret Woods in exchange for a Sweet Gem Berry.',
-				'CF_Fish': 'Mailed by Willy after catching all the different fish.',
-				'museumComplete': 'Reward for completing the Museum collection.'
-			},
 			stardrop_count = Object.keys(stardrops).length;
 
-		$(xmlDoc).find('player > mailReceived > string').each(function () {
+		$(player).find('mailReceived > string').each(function () {
 			var id = $(this).text();
 			if (stardrops.hasOwnProperty(id)) {
 				count++;
@@ -1681,8 +1749,8 @@ window.onload = function () {
 			}
 		}
 
-		output += '<span class="result">' + $(xmlDoc).find('player > name').html() + ' has received ' + count +
-				' of the ' + stardrop_count + ' stardrops.</span><br />\n';
+		output += '<span class="result">' + $(player).children('name').html() + ' has received ' + count +
+				' of ' + stardrop_count + ' stardrops.</span><br />\n';
 		output += '<ul class="ach_list"><li>';
 		output += (count >= stardrop_count) ? getAchieveString('Mystery Of The Stardrops', 'find every stardrop', 1) :
 				getAchieveString('Mystery Of The Stardrops', 'find every stardrop', 0) + (stardrop_count - count) + ' more';
@@ -1690,7 +1758,7 @@ window.onload = function () {
 		if (need.length > 0) {
 			output += '<span class="need">Stardrops left:<ol>' + need.sort().join('') + '</ol></span>\n';
 		}
-		return output;
+		return [output];
 	}
 
 	function parseGrandpa(xmlDoc, saveInfo) {
