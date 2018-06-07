@@ -85,6 +85,14 @@ window.onload = function () {
 		return output;
 	}
 	
+	function isValidFarmhand(player) {
+		// Currently using a blank userID field to determine that a farmhand slot is empty
+		if ($(player).children('userID').text() === '') {
+			return false;
+		}
+		return true;
+	}
+	
 	// Individual chunks of save parsing.
 	// Each receives the xmlDoc object to parse & the saveInfo information structure and returns HTML to output.
 	function parseSummary(xmlDoc, saveInfo) {
@@ -115,19 +123,17 @@ window.onload = function () {
 			farmTypes[$(xmlDoc).find('whichFarm').text()] + ')</span><br />';
 		output += '<span class="result">Farmer ' + name ;
 		$(xmlDoc).find('farmhand').each(function() {
-			// Currently using a blank userID field to determine that a farmhand slot is empty
-			if ($(this).children('userID').text() === '') {
-				return true;
+			if (isValidFarmhand(this)) {
+				saveInfo.numPlayers++;
+				id = $(this).children('UniqueMultiplayerID').text();
+				name = $(this).children('name').html();
+				farmhands.push(name);
+				saveInfo.players[id] = name;
+				saveInfo.children[id] = [];
+				$(this).parent('indoors[xsi\\:type="Cabin"]').find("NPC[xsi\\:type='Child']").each(function () {
+					saveInfo.children[id].push($(this).find('name').html());
+				});
 			}
-			saveInfo.numPlayers++;
-			id = $(this).children('UniqueMultiplayerID').text();
-			name = $(this).children('name').html();
-			farmhands.push(name);
-			saveInfo.players[id] = name;
-			saveInfo.children[id] = [];
-			$(this).parent('indoors[xsi\\:type="Cabin"]').find("NPC[xsi\\:type='Child']").each(function () {
-				saveInfo.children[id].push($(this).find('name').html());
-			});
 		});
 		if (saveInfo.numPlayers > 1) {
 			output += ' and Farmhand(s) ' + farmhands.join(', ');
@@ -168,7 +174,9 @@ window.onload = function () {
 		table[0] = parsePlayerMoney($(xmlDoc).find('SaveGame > player'), saveInfo);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
-				table.push(parsePlayerMoney($(this), saveInfo));
+				if (isValidFarmhand(this)) {
+					table.push(parsePlayerMoney(this, saveInfo));
+				}
 			});
 		}
 		output += printTranspose(table);
@@ -275,7 +283,9 @@ window.onload = function () {
 		table[0] = parsePlayerSocial($(xmlDoc).find('SaveGame > player'), saveInfo, npc, eventList, countdown, daysPlayed);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
-				table.push(parsePlayerSocial($(this), saveInfo, npc, eventList, countdown, daysPlayed));
+				if (isValidFarmhand(this)) {
+					table.push(parsePlayerSocial(this, saveInfo, npc, eventList, countdown, daysPlayed));
+				}
 			});
 		}
 		output += printTranspose(table);
@@ -465,7 +475,9 @@ window.onload = function () {
 		table[0] = parsePlayerFamily($(xmlDoc).find('SaveGame > player'), saveInfo, wedding, true);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
-				table.push(parsePlayerFamily($(this), saveInfo, wedding, false));
+				if (isValidFarmhand(this)) {
+					table.push(parsePlayerFamily(this, saveInfo, wedding, false));
+				}
 			});
 		}
 		output += printTranspose(table);
@@ -633,7 +645,9 @@ window.onload = function () {
 		table[0] = parsePlayerCooking($(xmlDoc).find('SaveGame > player'), saveInfo, recipes, recipeTranslate);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
-				table.push(parsePlayerCooking($(this), saveInfo, recipes, recipeTranslate));
+				if (isValidFarmhand(this)) {
+					table.push(parsePlayerCooking(this, saveInfo, recipes, recipeTranslate));
+				}
 			});
 		}
 		output += printTranspose(table);
@@ -743,7 +757,9 @@ window.onload = function () {
 		table[0] = parsePlayerCrafting($(xmlDoc).find('SaveGame > player'), saveInfo, recipes, recipeTranslate);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
-				table.push(parsePlayerCrafting($(this), saveInfo, recipes, recipeTranslate));
+				if (isValidFarmhand(this)) {
+					table.push(parsePlayerCrafting(this, saveInfo, recipes, recipeTranslate));
+				}
 			});
 		}
 		output += printTranspose(table);
@@ -890,7 +906,9 @@ window.onload = function () {
 		table[0] = parsePlayerFishing($(xmlDoc).find('SaveGame > player'), saveInfo, recipes);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
-				table.push(parsePlayerFishing($(this), saveInfo, recipes));
+				if (isValidFarmhand(this)) {
+					table.push(parsePlayerFishing(this, saveInfo, recipes));
+				}
 			});
 		}
 		output += printTranspose(table);
@@ -1097,7 +1115,9 @@ window.onload = function () {
 		table[0] = parsePlayerBasicShipping($(xmlDoc).find('SaveGame > player'), saveInfo, recipes);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
-				table.push(parsePlayerBasicShipping($(this), saveInfo, recipes));
+				if (isValidFarmhand(this)) {
+					table.push(parsePlayerBasicShipping(this, saveInfo, recipes));
+				}
 			});
 		}
 		output += printTranspose(table);
@@ -1194,7 +1214,9 @@ window.onload = function () {
 		table[0] = parsePlayerCropShipping($(xmlDoc).find('SaveGame > player'), saveInfo, poly_crops, mono_extras);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
-				table.push(parsePlayerCropShipping($(this), saveInfo, poly_crops, mono_extras));
+				if (isValidFarmhand(this)) {
+					table.push(parsePlayerCropShipping(this, saveInfo, poly_crops, mono_extras));
+				}
 			});
 		}
 		output += printTranspose(table);
@@ -1275,7 +1297,9 @@ window.onload = function () {
 		table[0] = parsePlayerSkills($(xmlDoc).find('SaveGame > player'), saveInfo, skills, next_level);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
-				table.push(parsePlayerSkills($(this), saveInfo, skills, next_level));
+				if (isValidFarmhand(this)) {
+					table.push(parsePlayerSkills(this, saveInfo, skills, next_level));
+				}
 			});
 		}
 		output += printTranspose(table);
@@ -1328,221 +1352,6 @@ window.onload = function () {
 			output += '<span class="need">Skills left:<ol>' + need.sort().join('') + '</ol></span>\n';
 		}
 		return [output];
-	}
-
-	function parseMuseumOld(xmlDoc, saveInfo) {
-		var output = '<h3>Museum Collection</h3>\n',
-			artifacts = {
-				96: "Dwarf Scroll I",
-				97: "Dwarf Scroll II",
-				98: "Dwarf Scroll III",
-				99: "Dwarf Scroll IV",
-				100: "Chipped Amphora",
-				101: "Arrowhead",
-				103: "Ancient Doll",
-				104: "Elvish Jewelry",
-				105: "Chewing Stick",
-				106: "Ornamental Fan",
-				107: "Dinosaur Egg",
-				108: "Rare Disc",
-				109: "Ancient Sword",
-				110: "Rusty Spoon",
-				111: "Rusty Spur",
-				112: "Rusty Cog",
-				113: "Chicken Statue",
-				114: "Ancient Seed",
-				115: "Prehistoric Tool",
-				116: "Dried Starfish",
-				117: "Anchor",
-				118: "Glass Shards",
-				119: "Bone Flute",
-				120: "Prehistoric Handaxe",
-				121: "Dwarvish Helm",
-				122: "Dwarf Gadget",
-				123: "Ancient Drum",
-				124: "Golden Mask",
-				125: "Golden Relic",
-				126: "Strange Doll (green)",
-				127: "Strange Doll (yellow)",
-				579: "Prehistoric Scapula",
-				580: "Prehistoric Tibia",
-				581: "Prehistoric Skull",
-				582: "Skeletal Hand",
-				583: "Prehistoric Rib",
-				584: "Prehistoric Vertebra",
-				585: "Skeletal Tail",
-				586: "Nautilus Fossil",
-				587: "Amphibian Fossil",
-				588: "Palm Fossil",
-				589: "Trilobite"
-			},
-			minerals = {
-				60: "Emerald",
-				62: "Aquamarine",
-				64: "Ruby",
-				66: "Amethyst",
-				68: "Topaz",
-				70: "Jade",
-				72: "Diamond",
-				74: "Prismatic Shard",
-				80: "Quartz",
-				82: "Fire Quartz",
-				84: "Frozen Tear",
-				86: "Earth Crystal",
-				538: "Alamite",
-				539: "Bixite",
-				540: "Baryte",
-				541: "Aerinite",
-				542: "Calcite",
-				543: "Dolomite",
-				544: "Esperite",
-				545: "Fluorapatite",
-				546: "Geminite",
-				547: "Helvite",
-				548: "Jamborite",
-				549: "Jagoite",
-				550: "Kyanite",
-				551: "Lunarite",
-				552: "Malachite",
-				553: "Neptunite",
-				554: "Lemon Stone",
-				555: "Nekoite",
-				556: "Orpiment",
-				557: "Petrified Slime",
-				558: "Thunder Egg",
-				559: "Pyrite",
-				560: "Ocean Stone",
-				561: "Ghost Crystal",
-				562: "Tigerseye",
-				563: "Jasper",
-				564: "Opal",
-				565: "Fire Opal",
-				566: "Celestine",
-				567: "Marble",
-				568: "Sandstone",
-				569: "Granite",
-				570: "Basalt",
-				571: "Limestone",
-				572: "Soapstone",
-				573: "Hematite",
-				574: "Mudstone",
-				575: "Obsidian",
-				576: "Slate",
-				577: "Fairy Stone",
-				578: "Star Shards"
-			},
-			artifact_count = Object.keys(artifacts).length,
-			mineral_count = Object.keys(minerals).length,
-			museum_count = artifact_count + mineral_count,
-			donated = {},
-			donated_art = 0,
-			donated_min = 0,
-			donated_count = 0,
-			found = {},
-			found_art = 0,
-			found_min = 0,
-			need_art = [],
-			need_min = [],
-			need = [],
-			id,
-			r,
-			farmer = $(xmlDoc).find('player > name').html();
-
-		$(xmlDoc).find('player > archaeologyFound > item').each(function () {
-			var id = $(this).find('key > int').text(),
-				num = Number($(this).find('value > ArrayOfInt > int').first().text());
-			if (artifacts.hasOwnProperty(id) && num > 0) {
-				found[id] = num;
-				found_art++;
-			}
-		});
-		$(xmlDoc).find('player > mineralsFound > item').each(function () {
-			var id = $(this).find('key > int').text(),
-				num = Number($(this).find('value > int').text());
-			if (minerals.hasOwnProperty(id) && num > 0) {
-				found[id] = num;
-				found_min++;
-			}
-		});
-		$(xmlDoc).find('locations > GameLocation').each(function () {
-			if ($(this).attr('xsi:type') === 'LibraryMuseum') {
-				$(this).find('museumPieces > item').each(function () {
-					var id = $(this).find('value > int').text();
-					if (artifacts.hasOwnProperty(id)) {
-						donated_art++;
-						donated[id] = 1;
-					} else if (minerals.hasOwnProperty(id)) {
-						donated_min++;
-						donated[id] = 1;
-					}
-				});
-			}
-		});
-
-		donated_count = donated_art + donated_min;
-		output += '<span class="result">' + farmer + ' has found ' + found_art + ' artifact(s) and has donated ' +
-			donated_art + '; there are ' + artifact_count + ' total artifacts.</span><br />\n';
-		output += '<span class="result">' + farmer + ' has found ' + found_min + ' mineral(s) and has donated ' +
-			donated_min + '; there are ' + mineral_count + ' total minerals.</span><ul class="ach_list">\n';
-		output += '<li>';
-		output += (donated_count >= 40) ? getAchieveString('Treasure Trove', 'donate 40 items', 1) :
-				getAchieveString('Treasure Trove', 'donate 40 items', 0) + (40 - donated_art - donated_min) + ' more';
-		output += '</li>\n<li>';
-		output += (donated_count >= 60) ? getMilestoneString('Donate enough items (60) to get the Rusty Key', 1) :
-				getMilestoneString('Donate enough items (60) to get the Rusty Key', 0) + (60 - donated_art - donated_min) + ' more';
-		output += '</li>\n<li>';
-		output += (donated_count >= museum_count) ? getAchieveString('A Complete Collection', 'donate every item', 1) :
-				getAchieveString('A Complete Collection', 'donate every item', 0) + (museum_count - donated_count) + ' more';
-		output += '</li>\n<li>';
-		output += (found_art >= artifact_count) ? getMilestoneString('All artifacts found', 1) :
-				getMilestoneString('All artifacts found', 0) + (artifact_count - found_art) + ' more';
-		output += '</li>\n<li>';
-		output += (found_min >= mineral_count) ? getMilestoneString('All minerals found', 1) :
-				getMilestoneString('All minerals found', 0) + (mineral_count - found_min) + ' more';
-		output += '</li></ul>\n';
-		// I've seen at least 1 save with an artifact donated that wasn't marked found, so we account for that.
-		if (donated_count < museum_count || (found_art + found_min) < museum_count) {
-			for (id in artifacts) {
-				if (artifacts.hasOwnProperty(id)) {
-					r = artifacts[id];
-					need = [];
-					if (!found.hasOwnProperty(id)) {
-						need.push('found');
-					}
-					if (!donated.hasOwnProperty(id)) {
-						need.push('donated');
-					}
-					if (need.length > 0) {
-						need_art.push('<li>' + wikify(r) + ' -- not ' + need.join(" or ") + '</li>');
-					}
-				}
-			}
-			for (id in minerals) {
-				if (minerals.hasOwnProperty(id)) {
-					r = minerals[id];
-					need = [];
-					if (!found.hasOwnProperty(id)) {
-						need.push('found');
-					}
-					if (!donated.hasOwnProperty(id)) {
-						need.push('donated');
-					}
-					if (need.length > 0) {
-						need_min.push('<li>' + wikify(r) + ' -- not ' + need.join(" or ") + '</li>');
-					}
-				}
-			}
-			output += '<span class="need">Items left:<ul>';
-			if (need_art.length > 0) {
-				output += '<li>Artifacts<ol>' + need_art.sort().join('') + '</ol></li>\n';
-			}
-			if (need_min.length > 0) {
-				output += '<li>Minerals<ol>' + need_min.sort().join('') + '</ol></li>\n';
-			}
-			output += '</ul></span>\n';
-		}
-
-		return output;
 	}
 
 	function parseMuseum(xmlDoc, saveInfo) {
@@ -1681,7 +1490,9 @@ window.onload = function () {
 		table[0] = parsePlayerMuseum($(xmlDoc).find('SaveGame > player'), saveInfo, donated, artifacts, minerals);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
-				table.push(parsePlayerMuseum($(this), saveInfo, donated, artifacts, minerals));
+				if (isValidFarmhand(this)) {
+					table.push(parsePlayerMuseum(this, saveInfo, donated, artifacts, minerals));
+				}
 			});
 		}
 		output += printTranspose(table);
@@ -1822,7 +1633,9 @@ window.onload = function () {
 		table[0] = parsePlayerMonsters($(xmlDoc).find('SaveGame > player'), saveInfo, goals, categories, monsters);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
-				table.push(parsePlayerMonsters($(this), saveInfo, goals, categories, monsters));
+				if (isValidFarmhand(this)) {
+					table.push(parsePlayerMonsters(this, saveInfo, goals, categories, monsters));
+				}
 			});
 		}
 		output += printTranspose(table);
@@ -1908,7 +1721,9 @@ window.onload = function () {
 		table[0] = parsePlayerQuests($(xmlDoc).find('SaveGame > player'), saveInfo);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
-				table.push(parsePlayerQuests($(this), saveInfo));
+				if (isValidFarmhand(this)) {
+					table.push(parsePlayerQuests(this, saveInfo));
+				}
 			});
 		}
 		output += printTranspose(table);
@@ -1955,7 +1770,9 @@ window.onload = function () {
 		table[0] = parsePlayerStardrops($(xmlDoc).find('SaveGame > player'), saveInfo, stardrops);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
-				table.push(parsePlayerStardrops($(this), saveInfo, stardrops));
+				if (isValidFarmhand(this)) {
+					table.push(parsePlayerStardrops(this, saveInfo, stardrops));
+				}
 			});
 		}
 		output += printTranspose(table);
@@ -2390,30 +2207,27 @@ window.onload = function () {
 			b,
 			temp,
 			bundleNeed = [],
-			need = [];
+			need = [],
+			ccLoc = $(xmlDoc).find("locations > GameLocation[xsi\\:type='CommunityCenter']");
 
-		$(xmlDoc).find('locations > GameLocation').each(function () {
-			if ($(this).attr('xsi:type') === 'CommunityCenter') {
-				// First check basic completion
-				temp = 0;
-				$(this).find('areasComplete > boolean').each(function () {
-					if ($(this).text() === 'true') {
-						ccHave++;
-						done[temp] = 1;
-					}
-					temp++;
-				});
-				// Now look at bundles. Getting an item count but not which items are placed
-				$(this).find('bundles > item').each(function () {
-					id = $(this).find('key > int').text();
-					bundleHave[id] = 0;
-					$(this).find('ArrayOfBoolean > boolean').each(function () {
-						if ($(this).text() === 'true') {
-							bundleHave[id]++;
-						}
-					});
-				});
+		// First check basic completion
+		r = 0;
+		$(ccLoc).find('areasComplete > boolean').each(function () {
+			if ($(this).text() === 'true') {
+				ccHave++;
+				done[r] = 1;
 			}
+			r++;
+		});
+		// Now look at bundles. Getting an item count but not which items are placed
+		$(ccLoc).find('bundles > item').each(function () {
+			id = $(this).find('key > int').text();
+			bundleHave[id] = 0;
+			$(this).find('ArrayOfBoolean > boolean').each(function () {
+				if ($(this).text() === 'true') {
+					bundleHave[id]++;
+				}
+			});
 		});
 		$(xmlDoc).find('player > mailReceived > string').each(function () {
 			var id = $(this).text();
@@ -2574,7 +2388,9 @@ window.onload = function () {
 		table[0] = parsePlayerSecretNotes($(xmlDoc).find('SaveGame > player'), saveInfo, hasStoneJunimo);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
-				table.push(parsePlayerSecretNotes($(this), saveInfo, hasStoneJunimo));
+				if (isValidFarmhand(this)) {
+					table.push(parsePlayerSecretNotes(this, saveInfo, hasStoneJunimo));
+				}
 			});
 		}
 		output += printTranspose(table);
