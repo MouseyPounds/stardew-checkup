@@ -284,7 +284,7 @@ window.onload = function () {
 
 	function parsePlayerSocial(player, saveInfo, npc, eventList, countdown, daysPlayed) {
 		var output = '',
-			rows = [],
+			table = [],
 			count_5h = 0,
 			count_10h = 0,
 			points = {},
@@ -432,7 +432,7 @@ window.onload = function () {
 		output += (count_5h >= 20) ? getAchieveString('Popular', '5&#x2665; with 20 people', 1) :
 				getAchieveString('Popular', '5&#x2665; with 20 people', 0) + (20 - count_5h) + ' more';
 		output += '</li></ul>\n';
-		rows[0] = output;
+		table.push(output);
 		output = '<span class="result">' + farmer + ' has ' + count_10h + ' relationships of 10+ hearts.</span><ul class="ach_list">\n';
 		output += '<li>';
 		output += (count_10h >= 1) ? getAchieveString('Best Friends', '10&#x2665; with 1 person', 1) :
@@ -441,7 +441,7 @@ window.onload = function () {
 		output += (count_10h >= 8) ? getAchieveString('The Beloved Farmer', '10&#x2665; with 8 people', 1) :
 				getAchieveString('The Beloved Farmer', '10&#x2665; with 8 people', 0) + (8 - count_10h) + ' more';
 		output += '</li></ul>\n';
-		rows[1] = output;
+		table.push(output);
 		output = '<span class="result">Individual Friendship Progress for ' + farmer + '</span><ul class="outer">';
 		if (list_fam.length > 0) {
 			output += '<li>Family (includes all player children)<ol class="compact">' + list_fam.sort().join('') + '</ol></li>\n';
@@ -453,8 +453,8 @@ window.onload = function () {
 			output += '<li>Other Villagers<ol class="compact">' + list_other.sort().join('') + '</ol></li>\n';
 		}
 		output += '</ul>\n';
-		rows[2] = output;
-		return rows;
+		table.push(output);
+		return table;
 	}
 
 	function parseFamily(xmlDoc, saveInfo) {
@@ -474,7 +474,7 @@ window.onload = function () {
 
 	function parsePlayerFamily(player, saveInfo, wedding, isHost) {
 		var output = '',
-			column = [],
+			table = [],
 			needs = [],
 			count = 0,
 			maxUpgrades = (isHost ? 3 : 2),
@@ -527,7 +527,7 @@ window.onload = function () {
 		output += (count >= 3) ? getAchieveString('Full House', 'Married + 2 kids', 1) :
 				getAchieveString('Full House', 'Married + 2 kids', 0) + needs.join(' and ');
 		output += '</li></ul>\n';
-		column[0] = output;
+		table.push(output);
 		output = '<span class="result">' + houseType + ' upgraded ' + houseUpgrades + ' time(s) of ';
 		output += maxUpgrades + ' possible.</span><br /><ul class="ach_list">\n';
 		output += '<li>';
@@ -540,8 +540,8 @@ window.onload = function () {
 		output += (houseUpgrades >= maxUpgrades) ? getMilestoneString('House fully upgraded', 1) :
 				getMilestoneString('House fully upgraded', 0) + (maxUpgrades - houseUpgrades) + ' more';
 		output += '</li></ul>\n';
-		column[1] = output;
-		return column;
+		table.push(output);
+		return table;
 	}
 
 	function parseCooking(xmlDoc, saveInfo) {
@@ -1330,7 +1330,7 @@ window.onload = function () {
 		return [output];
 	}
 
-	function parseMuseum(xmlDoc, saveInfo) {
+	function parseMuseumOld(xmlDoc, saveInfo) {
 		var output = '<h3>Museum Collection</h3>\n',
 			artifacts = {
 				96: "Dwarf Scroll I",
@@ -1376,7 +1376,6 @@ window.onload = function () {
 				588: "Palm Fossil",
 				589: "Trilobite"
 			},
-			artifact_count = Object.keys(artifacts).length,
 			minerals = {
 				60: "Emerald",
 				62: "Aquamarine",
@@ -1432,6 +1431,7 @@ window.onload = function () {
 				577: "Fairy Stone",
 				578: "Star Shards"
 			},
+			artifact_count = Object.keys(artifacts).length,
 			mineral_count = Object.keys(minerals).length,
 			museum_count = artifact_count + mineral_count,
 			donated = {},
@@ -1545,6 +1545,238 @@ window.onload = function () {
 		return output;
 	}
 
+	function parseMuseum(xmlDoc, saveInfo) {
+		var output = '<h3>Museum Collection</h3>\n',
+			table = [],
+			artifacts = {
+				96: "Dwarf Scroll I",
+				97: "Dwarf Scroll II",
+				98: "Dwarf Scroll III",
+				99: "Dwarf Scroll IV",
+				100: "Chipped Amphora",
+				101: "Arrowhead",
+				103: "Ancient Doll",
+				104: "Elvish Jewelry",
+				105: "Chewing Stick",
+				106: "Ornamental Fan",
+				107: "Dinosaur Egg",
+				108: "Rare Disc",
+				109: "Ancient Sword",
+				110: "Rusty Spoon",
+				111: "Rusty Spur",
+				112: "Rusty Cog",
+				113: "Chicken Statue",
+				114: "Ancient Seed",
+				115: "Prehistoric Tool",
+				116: "Dried Starfish",
+				117: "Anchor",
+				118: "Glass Shards",
+				119: "Bone Flute",
+				120: "Prehistoric Handaxe",
+				121: "Dwarvish Helm",
+				122: "Dwarf Gadget",
+				123: "Ancient Drum",
+				124: "Golden Mask",
+				125: "Golden Relic",
+				126: "Strange Doll (green)",
+				127: "Strange Doll (yellow)",
+				579: "Prehistoric Scapula",
+				580: "Prehistoric Tibia",
+				581: "Prehistoric Skull",
+				582: "Skeletal Hand",
+				583: "Prehistoric Rib",
+				584: "Prehistoric Vertebra",
+				585: "Skeletal Tail",
+				586: "Nautilus Fossil",
+				587: "Amphibian Fossil",
+				588: "Palm Fossil",
+				589: "Trilobite"
+			},
+			minerals = {
+				60: "Emerald",
+				62: "Aquamarine",
+				64: "Ruby",
+				66: "Amethyst",
+				68: "Topaz",
+				70: "Jade",
+				72: "Diamond",
+				74: "Prismatic Shard",
+				80: "Quartz",
+				82: "Fire Quartz",
+				84: "Frozen Tear",
+				86: "Earth Crystal",
+				538: "Alamite",
+				539: "Bixite",
+				540: "Baryte",
+				541: "Aerinite",
+				542: "Calcite",
+				543: "Dolomite",
+				544: "Esperite",
+				545: "Fluorapatite",
+				546: "Geminite",
+				547: "Helvite",
+				548: "Jamborite",
+				549: "Jagoite",
+				550: "Kyanite",
+				551: "Lunarite",
+				552: "Malachite",
+				553: "Neptunite",
+				554: "Lemon Stone",
+				555: "Nekoite",
+				556: "Orpiment",
+				557: "Petrified Slime",
+				558: "Thunder Egg",
+				559: "Pyrite",
+				560: "Ocean Stone",
+				561: "Ghost Crystal",
+				562: "Tigerseye",
+				563: "Jasper",
+				564: "Opal",
+				565: "Fire Opal",
+				566: "Celestine",
+				567: "Marble",
+				568: "Sandstone",
+				569: "Granite",
+				570: "Basalt",
+				571: "Limestone",
+				572: "Soapstone",
+				573: "Hematite",
+				574: "Mudstone",
+				575: "Obsidian",
+				576: "Slate",
+				577: "Fairy Stone",
+				578: "Star Shards"
+			},
+			donated = {},
+			artifact_count = Object.keys(artifacts).length,
+			mineral_count = Object.keys(minerals).length,
+			museum_count = artifact_count + mineral_count,
+			donated_count = 0,
+			museum = $(xmlDoc).find("locations > GameLocation[xsi\\:type='LibraryMuseum']"),
+			farmName = $(xmlDoc).find('player > farmName').html();
+
+		$(museum).find('museumPieces > item').each(function () {
+			var id = $(this).find('value > int').text();
+			if (artifacts.hasOwnProperty(id) || minerals.hasOwnProperty(id)) {
+				donated[id] = 1;
+			}
+		});
+		donated_count = Object.keys(donated).length;
+		output += '<span class="result">Inhabitants of ' + farmName + ' Farm have donated ' + donated_count + ' of ' +
+			museum_count + ' items to the museum.</span><ul class="ach_list">\n';
+		output += '<li>';
+		output += (donated_count >= 40) ? getAchieveString('Treasure Trove', 'donate 40 items', 1) :
+				getAchieveString('Treasure Trove', 'donate 40 items', 0) + (40 - donated_count) + ' more';
+		output += '</li>\n<li>';
+		output += (donated_count >= 60) ? getMilestoneString('Donate enough items (60) to get the Rusty Key', 1) :
+				getMilestoneString('Donate enough items (60) to get the Rusty Key', 0) + (60 - donated_count) + ' more';
+		output += '</li>\n<li>';
+		output += (donated_count >= museum_count) ? getAchieveString('A Complete Collection', 'donate every item', 1) :
+				getAchieveString('A Complete Collection', 'donate every item', 0) + (museum_count - donated_count) + ' more';
+		output += '</li></ul>\n';
+		if (donated_count < museum_count) {			
+			output += '<span class="need">See below for items left to donate</span><br /><br />\n';
+		}
+		
+		table[0] = parsePlayerMuseum($(xmlDoc).find('SaveGame > player'), saveInfo, donated, artifacts, minerals);
+		if (saveInfo.numPlayers > 1) {
+			$(xmlDoc).find('farmhand').each(function () {
+				table.push(parsePlayerMuseum($(this), saveInfo, donated, artifacts, minerals));
+			});
+		}
+		output += printTranspose(table);
+		return output;
+	}
+
+	function parsePlayerMuseum(player, saveInfo, donated, artifacts, minerals) {
+		var output = '',
+			donated_count = Object.keys(donated).length,
+			artifact_count = Object.keys(artifacts).length,
+			mineral_count = Object.keys(minerals).length,
+			museum_count = artifact_count + mineral_count,
+			found = {},
+			found_art = 0,
+			found_min = 0,
+			need_art = [],
+			need_min = [],
+			need = [],
+			id,
+			r,
+			farmer = $(player).children('name').html();
+	
+		$(player).find('archaeologyFound > item').each(function () {
+			var id = $(this).find('key > int').text(),
+				num = Number($(this).find('value > ArrayOfInt > int').first().text());
+			if (artifacts.hasOwnProperty(id) && num > 0) {
+				found[id] = num;
+				found_art++;
+			}
+		});
+		$(player).find('mineralsFound > item').each(function () {
+			var id = $(this).find('key > int').text(),
+				num = Number($(this).find('value > int').text());
+			if (minerals.hasOwnProperty(id) && num > 0) {
+				found[id] = num;
+				found_min++;
+			}
+		});
+
+		output += '<span class="result">' + farmer + ' has found ' + found_art + ' of ' + artifact_count + ' artifacts.</span><br />\n';
+		output += '<span class="result">' + farmer + ' has found ' + found_min + ' of ' + mineral_count +
+			' minerals.</span><ul class="ach_list">\n';
+		output += '<li>';
+		output += '</li>\n<li>';
+		output += (found_art >= artifact_count) ? getMilestoneString('All artifacts found', 1) :
+				getMilestoneString('All artifacts found', 0) + (artifact_count - found_art) + ' more';
+		output += '</li>\n<li>';
+		output += (found_min >= mineral_count) ? getMilestoneString('All minerals found', 1) :
+				getMilestoneString('All minerals found', 0) + (mineral_count - found_min) + ' more';
+		output += '</li></ul>\n';
+
+		if (donated_count < museum_count || (found_art + found_min) < museum_count) {
+			for (id in artifacts) {
+				if (artifacts.hasOwnProperty(id)) {
+					r = artifacts[id];
+					need = [];
+					if (!found.hasOwnProperty(id)) {
+						need.push('found');
+					}
+					if (!donated.hasOwnProperty(id)) {
+						need.push('donated');
+					}
+					if (need.length > 0) {
+						need_art.push('<li>' + wikify(r) + ' -- not ' + need.join(" or ") + '</li>');
+					}
+				}
+			}
+			for (id in minerals) {
+				if (minerals.hasOwnProperty(id)) {
+					r = minerals[id];
+					need = [];
+					if (!found.hasOwnProperty(id)) {
+						need.push('found');
+					}
+					if (!donated.hasOwnProperty(id)) {
+						need.push('donated');
+					}
+					if (need.length > 0) {
+						need_min.push('<li>' + wikify(r) + ' -- not ' + need.join(" or ") + '</li>');
+					}
+				}
+			}
+			output += '<span class="need">Items left:<ul>';
+			if (need_art.length > 0) {
+				output += '<li>Artifacts<ol>' + need_art.sort().join('') + '</ol></li>\n';
+			}
+			if (need_min.length > 0) {
+				output += '<li>Minerals<ol>' + need_min.sort().join('') + '</ol></li>\n';
+			}
+			output += '</ul></span>\n';
+		}
+		
+		return [output];
+	}
+
 	function parseMonsters(xmlDoc, saveInfo) {
 		/* Conditions & details from decompiled source StardewValley.Locations.AdventureGuild.gil()
 		 * The game counts some monsters which are not currently available; we will count them too
@@ -1623,7 +1855,7 @@ window.onload = function () {
 				'has not yet explored the Skull Cavern');
 			output += '.</span><br />';
 		}
-		table[0] = output;
+		table.push(output);
 		output = '<ul class="ach_list"><li>\n';
 		output += (mineLevel >= 120) ? getAchieveString('The Bottom', 'reach mine level 120', 1) :
 				getAchieveString('The Bottom', 'reach mine level 120', 0) + (120 - mineLevel) + ' more';
@@ -1665,7 +1897,7 @@ window.onload = function () {
 		if (need.length > 0) {
 			output += '<span class="need">Goals left:<ol>' + need.sort().join('') + '</ol></span>\n';
 		}
-		table[1] = output;
+		table.push(output);
 		return table;
 	}
 
@@ -2302,9 +2534,59 @@ window.onload = function () {
 
 	function parseSecretNotes(xmlDoc, saveInfo) {
 		var output = '<h3>Secret Notes</h3>\n',
-			farmer = $(xmlDoc).find('player > name').html(),
+			table = [],
+			hasStoneJunimo = false;
+		
+		if (!saveInfo.is1_3) {
+			return '';
+		}
+		
+		// Stone Junimo is a giant pain in the ass. It seems to not have any confirmation so we have to search
+		// the entire save for it. Worse, the buried one may reappear later so we need to ignore that one when
+		// searching. The buried one is at (57, 16) on the Town map.
+		// It also should not be obtainable if the players went the Joja route, but we will deal with that later.
+		$(xmlDoc).find('Item > name').each(function () {
+			if ($(this).text() === "Stone Junimo") {
+				// Found one in storage somewhere. We good.
+				hasStoneJunimo = true;
+				return false;
+			}
+		});
+		if (!hasStoneJunimo) {
+			$(xmlDoc).find('Object > name').each(function () {
+				if ($(this).text() === "Stone Junimo") {
+					var loc = $(this).parents('GameLocation').children('name').text();
+					if (loc === 'Town') {
+						var x = $(this).parents('item').find('key > Vector2 > X').text();
+						var y = $(this).parents('item').find('key > Vector2 > Y').text();
+						if (x !== '57' || y !== '16') {
+							hasStoneJunimo = true;
+							return false;
+						}
+					} else {
+						hasStoneJunimo = true;
+						return false;
+					}
+				}
+			});
+		}
+		
+		table[0] = parsePlayerSecretNotes($(xmlDoc).find('SaveGame > player'), saveInfo, hasStoneJunimo);
+		if (saveInfo.numPlayers > 1) {
+			$(xmlDoc).find('farmhand').each(function () {
+				table.push(parsePlayerSecretNotes($(this), saveInfo, hasStoneJunimo));
+			});
+		}
+		output += printTranspose(table);
+		return output;
+	}
+
+	function parsePlayerSecretNotes(player, saveInfo, hasStoneJunimo) {
+		var output = '',
+			table = [],
+			farmer = $(player).children('name').html(),
 			hasSeenKrobus = false,
-			hasMagnifyingGlass = false,
+			hasMagnifyingGlass = ($(player).children('hasMagnifyingGlass').text() === 'true'),
 			isJojaMember = false,
 			notes = {},
 			need = [],
@@ -2314,127 +2596,92 @@ window.onload = function () {
 			found_rewards = 0,
 			note_count = 23,
 			reward_start = 13,
-			hasStoneJunimo = false,
 			reward_count = note_count - reward_start + 1,
 			reward_re,
 			i;
 
-		if (saveInfo.is1_3) {
-			// Check Krobus event, then check for magnifier, then check number of notes
-			// Also checking for one of the reward events here, so we no longer use "return false" to end early.
-			$(xmlDoc).find('player > eventsSeen > int').each(function () {
-				if ($(this).text() === '520702') {
-					hasSeenKrobus = true;
-				} else if ($(this).text() === '2120303') {
-					rewards[23] = true;
-					found_rewards++;
-				}
-			});
-			output += '<span class="result">' + farmer + ' has ' + (hasSeenKrobus ? '' : 'not ') + ' seen Krobus at the Bus Stop.</span><br />\n';
-			if ($(xmlDoc).find('player > hasMagnifyingGlass').text() === 'true') {
-				hasMagnifyingGlass = true;
-			}
-			output += '<span class="result">' + farmer + ' has ' + (hasMagnifyingGlass ? '' : 'not ') + ' found the Magnifying Glass.</span><br />\n';
-			$(xmlDoc).find('player > secretNotesSeen > int').each(function () {
-				notes[$(this).text()] = true;
-				found_notes++;
-			});
-			output += '<span class="result">' + farmer + ' has read ' + found_notes + ' secret note(s); there are ' +
-				note_count + ' total notes.</span><br />\n';
-			output += '<ul class="ach_list"><li>';
-			output += (found_notes >= note_count) ? getMilestoneString('Read all the secret notes', 1) :
-					getMilestoneString('Read all the secret notes', 0) + (note_count - found_notes) + ' more';
-			output += '</li></ul>\n';
-			if (found_notes < note_count) {
-				for (i = 1; i <= note_count; i++) {
-					if (!notes.hasOwnProperty(i)) {
-						need.push('<li>' + wikify('Secret Note ' + i, 'Secret Notes') + '</li>');
-					}
-				}
-				if (need.length > 0) {
-					output += '<span class="need">Left to read:<ol>' + need.join('') + '</ol></span>\n';
-				}
-			}
-			// Most rewards are noted by SecretNoteXX_done mail items. the one for note 21 starts with lower-case s though.
-			reward_re = new RegExp('[Ss]ecretNote(\\d+)_done');
-			$(xmlDoc).find('player > mailReceived > string').each(function () {
-				var match = reward_re.exec($(this).text());
-				if (match !== null) {
-					rewards[match[1]] = true;
-					found_rewards++;
-				} else if ($(this).text() === 'gotPearl') {
-					rewards[15] = true;
-					found_rewards++;
-					} else if ($(this).text() === 'junimoPlush') {
-					rewards[13] = true;
-					found_rewards++;
-					} else if ($(this).text() === 'TH_Tunnel') {
-					// Qi quest we just check for the start. Full completion is 'TH_Lumberpile'
-					rewards[22] = true;
-					found_rewards++;
-				} else if ($(this).text() === 'JojaMember') {
-					isJojaMember = true;
-				}
-			});
-			// Stone Junimo is a giant pain in the ass. Seems to not have any confirmation and also doesn't work if Joja Member.
-			// We have to search for it, but we also want to avoid counting the buried one, which is under:
-			// locations > GameLocation "Town" > objects > item > value > Object ; the key is Vector2 > <X>57</X><Y>16</Y>
-			if (!isJojaMember) {
-				$(xmlDoc).find('Item > name').each(function () {
-					if ($(this).text() === "Stone Junimo") {
-						// Found one in storage somewhere. We good.
-						hasStoneJunimo = true;
-						return false;
-					}
-				});
-				if (!hasStoneJunimo) {
-					$(xmlDoc).find('Object > name').each(function () {
-						if ($(this).text() === "Stone Junimo") {
-							var loc = $(this).parents('GameLocation').children('name').text();
-							if (loc === 'Town') {
-								var x = $(this).parents('item').find('key > Vector2 > X').text();
-								var y = $(this).parents('item').find('key > Vector2 > Y').text();
-								if (x !== '57' || y !== '16') {
-									hasStoneJunimo = true;
-									return false;
-								}
-							} else {
-								hasStoneJunimo = true;
-								return false;
-							}
-						}
-					});
-				}
-			} else {
-				reward_count--;
-				reward_skip[14] = true;
-			}
-			if (hasStoneJunimo) {
-				rewards[14] = true;
+		// Check Krobus event, then check for magnifier, then check number of notes
+		// Also checking for one of the reward events here, so don't use "return false" to end early.
+		$(player).find('eventsSeen > int').each(function () {
+			if ($(this).text() === '520702') {
+				hasSeenKrobus = true;
+			} else if ($(this).text() === '2120303') {
+				rewards[23] = true;
 				found_rewards++;
 			}
-			output += '<span class="result">' + farmer + ' has found the rewards from  ' + found_rewards + ' secret note(s); there are ' +
-				reward_count + ' total rewards.</span><br />\n';
-			output += '<ul class="ach_list"><li>';
-			output += (found_rewards >= reward_count) ? getMilestoneString('Find all the secret note rewards', 1) :
-					getMilestoneString('Find all the secret note rewards', 0) + (reward_count - found_rewards) + ' more';
-			output += '</li></ul>\n';
-			if (found_rewards < reward_count) {
-				need = [];
-				for (i = reward_start; i <= note_count; i++) {
-					if (!reward_skip.hasOwnProperty(i) && !rewards.hasOwnProperty(i)) {
-						need.push('<li> Reward from ' + wikify('Secret Note ' + i, 'Secret Notes') + '</li>');
-					}
-				}
-				if (need.length > 0) {
-					output += '<span class="need">Left to find:<ol>' + need.join('') + '</ol></span>\n';
+		});
+		output += '<span class="result">' + farmer + ' has ' + (hasSeenKrobus ? '' : 'not ') + ' seen Krobus at the Bus Stop.</span><br />\n';
+		output += '<span class="result">' + farmer + ' has ' + (hasMagnifyingGlass ? '' : 'not ') + ' found the Magnifying Glass.</span><br />\n';
+		$(player).find('secretNotesSeen > int').each(function () {
+			notes[$(this).text()] = true;
+			found_notes++;
+		});
+		output += '<span class="result">' + farmer + ' has read ' + found_notes + ' of ' +
+			note_count + ' secret notes.</span><br />\n';
+		output += '<ul class="ach_list"><li>';
+		output += (found_notes >= note_count) ? getMilestoneString('Read all the secret notes', 1) :
+				getMilestoneString('Read all the secret notes', 0) + (note_count - found_notes) + ' more';
+		output += '</li></ul>\n';
+		if (found_notes < note_count) {
+			for (i = 1; i <= note_count; i++) {
+				if (!notes.hasOwnProperty(i)) {
+					need.push('<li>' + wikify('Secret Note ' + i, 'Secret Notes') + '</li>');
 				}
 			}
-
-
-			return output;
+			if (need.length > 0) {
+				output += '<span class="need">Left to read:<ol>' + need.join('') + '</ol></span>\n';
+			}
 		}
-		return '';
+		table.push(output);
+		// Most rewards are noted by SecretNoteXX_done mail items. The one for note 21 starts with lower-case s though.
+		reward_re = new RegExp('[Ss]ecretNote(\\d+)_done');
+		$(player).find('mailReceived > string').each(function () {
+			var match = reward_re.exec($(this).text());
+			if (match !== null) {
+				rewards[match[1]] = true;
+				found_rewards++;
+			} else if ($(this).text() === 'gotPearl') {
+				rewards[15] = true;
+				found_rewards++;
+				} else if ($(this).text() === 'junimoPlush') {
+				rewards[13] = true;
+				found_rewards++;
+				} else if ($(this).text() === 'TH_Tunnel') {
+				// Qi quest we just check for the start. Full completion is 'TH_Lumberpile'
+				rewards[22] = true;
+				found_rewards++;
+			} else if ($(this).text() === 'JojaMember') {
+				isJojaMember = true;
+			}
+		});
+		// Stone Junimo not available for Joja route. We silently remove it from the list, which isn't optimal
+		if (isJojaMember) {
+			reward_count--;
+			reward_skip[14] = true;
+		} else if (hasStoneJunimo) {
+			rewards[14] = true;
+			found_rewards++;
+		}
+			
+		output = '<span class="result">' + farmer + ' has found the rewards from  ' + found_rewards + ' of ' +
+			reward_count + ' secret notes.</span><br />\n';
+		output += '<ul class="ach_list"><li>';
+		output += (found_rewards >= reward_count) ? getMilestoneString('Find all the secret note rewards', 1) :
+				getMilestoneString('Find all the secret note rewards', 0) + (reward_count - found_rewards) + ' more';
+		output += '</li></ul>\n';
+		if (found_rewards < reward_count) {
+			need = [];
+			for (i = reward_start; i <= note_count; i++) {
+				if (!reward_skip.hasOwnProperty(i) && !rewards.hasOwnProperty(i)) {
+					need.push('<li> Reward from ' + wikify('Secret Note ' + i, 'Secret Notes') + '</li>');
+				}
+			}
+			if (need.length > 0) {
+				output += '<span class="need">Left to find:<ol>' + need.join('') + '</ol></span>\n';
+			}
+		}
+		table.push(output);
+		return table;
 	}
 
 	function createTOC() {
