@@ -1650,6 +1650,7 @@ window.onload = function () {
 			completed = 0,
 			need = [],
 			id,
+			stats,
 			mineLevel = Number($(player).children('deepestMineLevel').text()),
 			hasSkullKey = $(player).children('hasSkullKey').text(),
 			farmer = $(player).children('name').html();
@@ -1662,7 +1663,7 @@ window.onload = function () {
 			output += '<span class="result">' + farmer + ' has not yet explored the mines.</span><br />\n';
 		} else {
 			output += '<span class="result">' + farmer + ' has reached level ' + Math.min(mineLevel, 120) +
-				' of the mines</span><br />\n';
+				' of the mines.</span><br />\n';
 			output += '<span class="result">' + farmer + ((mineLevel > 120) ?
 				(' has reached level ' + (mineLevel - 120) + ' of the Skull Cavern') :
 				'has not yet explored the Skull Cavern');
@@ -1673,8 +1674,15 @@ window.onload = function () {
 		output += (mineLevel >= 120) ? getAchieveString('The Bottom', 'reach mine level 120', 1) :
 				getAchieveString('The Bottom', 'reach mine level 120', 0) + (120 - mineLevel) + ' more';
 		output += '</li></ul>\n';
+		
+		if (saveInfo.is1_3) {
+			stats = $(player).find('stats > specificMonstersKilled');
+		} else {
+			// In 1.2, stats are under the root SaveGame so we must go back up the tree
+			stats = $(player).parent().find('stats > specificMonstersKilled');
+		}
 
-		$(player).find('stats > specificMonstersKilled > item').each(function () {
+		$(stats).children('item').each(function () {
 			var id = $(this).find('key > string').text(),
 				num = Number($(this).find('value > int').text()),
 				old = 0;
@@ -1760,7 +1768,7 @@ window.onload = function () {
 			stardrops = {
 				'CF_Fair': 'Purchased at the Fair for 2000 star tokens.',
 				'CF_Mines': 'Found in the chest on mine level 100.',
-				'CF_Spouse': 'Given by spouse at 13.5 hearts (3375 points).',
+				'CF_Spouse': 'Given by NPC spouse at 13.5 hearts (3375 points).',
 				'CF_Sewer': 'Purchased from Krobus in the Sewers for 20,000g.',
 				'CF_Statue': 'Received from Old Master Cannoli in the Secret Woods.',
 				'CF_Fish': 'Mailed by Willy after catching all fish.',
@@ -1822,6 +1830,7 @@ window.onload = function () {
 			max_count = 21,
 			candles = 1,
 			max_candles = 4,
+			currentCandles = Number($(xmlDoc).find("locations > GameLocation[xsi\\:type='Farm'] > grandpaScore").text()),
 			need = '',
 			money = Number($(xmlDoc).find('player > totalMoneyEarned').text()),
 			achieves = {
@@ -1950,7 +1959,8 @@ window.onload = function () {
 		}
 		output += '<span class="result">' + farmer + ' has earned a total of ' + count +
 				' point(s) (details below); the maximum possible is ' + max_count + ' points.</span><br />\n';
-		output += '<span class="result">The next evaluation will light ' + candles + ' candle(s).</span><br />\n';
+		output += '<span class="result">The shrine has ' + currentCandles + ' candle(s) lit. The next evaluation will light ' +
+				candles + ' candle(s).</span><br />\n';
 		output += '<ul class="ach_list"><li>';
 		output += (candles >= max_candles) ? getMilestoneString('Four candle evaluation', 1) :
 				getMilestoneString('Four candle evaluation', 0) + (12 - count) + ' more point(s)';
@@ -1958,44 +1968,44 @@ window.onload = function () {
 
 		output += '<span class="result">' + farmer + ' has earned a total of ' + addCommas(money) + 'g.</span><br />\n';
 		output += '<ul class="ach_list"><li>';
-		output += (money >= 5e4) ? getPointString(1, ' having at least 50,000g earnings', 0, 1) :
-				getPointString(1, ' having at least 50,000g earnings', 0, 0) + ' -- need ' + addCommas(5e4 - money) + 'g more';
+		output += (money >= 5e4) ? getPointString(1, 'at least 50,000g earnings', 0, 1) :
+				getPointString(1, 'at least 50,000g earnings', 0, 0) + ' -- need ' + addCommas(5e4 - money) + 'g more';
 		output += '</li>\n<li>';
-		output += (money >= 1e5) ? getPointString(1, ' having at least 100,000g earnings', 1, 1) :
-				getPointString(1, ' having at least 100,000g earnings', 1, 0) + ' -- need ' + addCommas(1e5 - money) + 'g more';
+		output += (money >= 1e5) ? getPointString(1, 'at least 100,000g earnings', 1, 1) :
+				getPointString(1, 'at least 100,000g earnings', 1, 0) + ' -- need ' + addCommas(1e5 - money) + 'g more';
 		output += '</li>\n<li>';
-		output += (money >= 2e5) ? getPointString(1, ' having at least 200,000g earnings', 1, 1) :
-				getPointString(1, ' having at least 200,000g earnings', 1, 0) + ' -- need ' + addCommas(2e5 - money) + 'g more';
+		output += (money >= 2e5) ? getPointString(1, 'at least 200,000g earnings', 1, 1) :
+				getPointString(1, 'at least 200,000g earnings', 1, 0) + ' -- need ' + addCommas(2e5 - money) + 'g more';
 		output += '</li>\n<li>';
-		output += (money >= 3e5) ? getPointString(1, ' having at least 300,000g earnings', 1, 1) :
-				getPointString(1, ' having at least 300,000g earnings', 1, 0) + ' -- need ' + addCommas(3e5 - money) + 'g more';
+		output += (money >= 3e5) ? getPointString(1, 'at least 300,000g earnings', 1, 1) :
+				getPointString(1, 'at least 300,000g earnings', 1, 0) + ' -- need ' + addCommas(3e5 - money) + 'g more';
 		output += '</li>\n<li>';
-		output += (money >= 5e5) ? getPointString(1, ' having at least 500,000g earnings', 1, 1) :
-				getPointString(1, ' having at least 500,000g earnings', 1, 0) + ' -- need ' + addCommas(5e5 - money) + 'g more';
+		output += (money >= 5e5) ? getPointString(1, 'at least 500,000g earnings', 1, 1) :
+				getPointString(1, 'at least 500,000g earnings', 1, 0) + ' -- need ' + addCommas(5e5 - money) + 'g more';
 		output += '</li>\n<li>';
-		output += (money >= 1e6) ? getPointString(2, ' having at least 1,000,000g earnings', 1, 1) :
-				getPointString(2, ' having at least 1,000,000g earnings', 1, 0) + ' -- need ' + addCommas(1e6 - money) + 'g more';
+		output += (money >= 1e6) ? getPointString(2, 'at least 1,000,000g earnings', 1, 1) :
+				getPointString(2, 'at least 1,000,000g earnings', 1, 0) + ' -- need ' + addCommas(1e6 - money) + 'g more';
 		output += '</li></ul>\n';
 
 		output += '<span class="result">' + farmer + ' has earned ' + Object.keys(ach_have).length +
 				' of the ' + ach_count + ' relevant achievments.</span><br />\n';
 		output += '<ul class="ach_list"><li>';
-		output += (ach_have.hasOwnProperty(5)) ? getPointString(1, ' having "A Complete Collection" Achievement', 0, 1) :
-				getPointString(1, ' having "A Complete Collection" Achievement', 0, 0);
+		output += (ach_have.hasOwnProperty(5)) ? getPointString(1, '<span class="ach">A Complete Collection</span> Achievement', 0, 1) :
+				getPointString(1, '<span class="ach">A Complete Collection</span> Achievement', 0, 0);
 		output += '</li>\n<li>';
-		output += (ach_have.hasOwnProperty(26)) ? getPointString(1, ' having "Master Angler" Achievement', 0, 1) :
-				getPointString(1, ' having "Master Angler" Achievement', 0, 0);
+		output += (ach_have.hasOwnProperty(26)) ? getPointString(1, '<span class="ach">Master Angler</span> Achievement', 0, 1) :
+				getPointString(1, '<span class="ach">Master Angler</span> Achievement', 0, 0);
 		output += '</li>\n<li>';
-		output += (ach_have.hasOwnProperty(34)) ? getPointString(1, ' having "Full Shipment" Achievement', 0, 1) :
-				getPointString(1, ' having "Full Shipment" Achievement', 0, 0);
+		output += (ach_have.hasOwnProperty(34)) ? getPointString(1, '<span class="ach">Full Shipment</span> Achievement', 0, 1) :
+				getPointString(1, '<span class="ach">Full Shipment</span> Achievement', 0, 0);
 		output += '</li></ul>\n';
 
 		if (isJojaMember) {
 			output += '<span class="result">' + farmer + ' has purchased a Joja membership and cannot restore the Community Center';
 			output += '<ul class="ach_list"><li>';
-			output += getPointImpossibleString(1, ' completing Community Center');
+			output += getPointImpossibleString(1, 'complete Community Center');
 			output += '</li>\n<li>';
-			output += getPointImpossibleString(2, ' attending the Community Center re-opening');
+			output += getPointImpossibleString(2, 'attend the Community Center re-opening');
 			output += '</li></ul>\n';
 		} else {
 			if (cc_done || cc_have >= cc_count) {
@@ -2006,31 +2016,31 @@ window.onload = function () {
 				output += '<span class="result">' + farmer + ' has not completed the Community Center restoration.';
 			}
 			output += '<ul class="ach_list"><li>';
-			output += (cc_done || cc_have >= cc_count) ? getPointString(1, ' completing Community Center', 0, 1) :
-					getPointString(1, ' completing Community Center', 0, 0);
+			output += (cc_done || cc_have >= cc_count) ? getPointString(1, 'complete Community Center', 0, 1) :
+					getPointString(1, 'complete Community Center', 0, 0);
 			output += '</li>\n<li>';
-			output += (cc_done) ? getPointString(2, ' attending the Community Center re-opening', 0, 1) :
-					getPointString(2, ' attending the Community Center re-opening', 0, 0);
+			output += (cc_done) ? getPointString(2, 'attend the Community Center re-opening', 0, 1) :
+					getPointString(2, 'attend the Community Center re-opening', 0, 0);
 			output += '</li></ul>\n';
 		}
 
 		output += '<span class="result">' + farmer + ' has ' + realPlayerLevel + ' total skill levels.</span><br />\n';
 		output += '<ul class="ach_list"><li>';
-		output += (playerLevel >= 15) ? getPointString(1, ' having 30 total skill levels', 0, 1) :
-				getPointString(1, ' having 30 total skill levels', 0, 0) + ' -- need ' + (30 - realPlayerLevel) + ' more';
+		output += (playerLevel >= 15) ? getPointString(1, '30 total skill levels', 0, 1) :
+				getPointString(1, '30 total skill levels', 0, 0) + ' -- need ' + (30 - realPlayerLevel) + ' more';
 		output += '</li>\n<li>';
-		output += (playerLevel >= 25) ? getPointString(1, ' having 50 total skill levels', 1, 1) :
-				getPointString(1, ' having 50 total skill levels', 1, 0) + ' -- need ' + (50 - realPlayerLevel) + ' more';
+		output += (playerLevel >= 25) ? getPointString(1, '50 total skill levels', 1, 1) :
+				getPointString(1, '50 total skill levels', 1, 0) + ' -- need ' + (50 - realPlayerLevel) + ' more';
 		output += '</li></ul>\n';
 
 		output += '<span class="result">' + farmer + ' has ' + heart_count +
 				' relationship(s) of 1975+ friendship points (~8 hearts.)</span><br />\n';
 		output += '<ul class="ach_list"><li>';
-		output += (heart_count >= 5) ? getPointString(1, ' having ~8&#x2665; with 5 people', 0, 1) :
-				getPointString(1, ' having ~8&#x2665; with 5 people', 0, 0) + ' -- need ' + (5 - heart_count) + ' more';
+		output += (heart_count >= 5) ? getPointString(1, '~8&#x2665; with 5 people', 0, 1) :
+				getPointString(1, '~8&#x2665; with 5 people', 0, 0) + ' -- need ' + (5 - heart_count) + ' more';
 		output += '</li>\n<li>';
-		output += (heart_count >= 10) ? getPointString(1, ' having ~8&#x2665; with 10 people', 1, 1) :
-				getPointString(1, ' having ~8&#x2665; with 10 people', 1, 0) + ' -- need ' + (10 - heart_count) + ' more';
+		output += (heart_count >= 10) ? getPointString(1, '~8&#x2665; with 10 people', 1, 1) :
+				getPointString(1, '~8&#x2665; with 10 people', 1, 0) + ' -- need ' + (10 - heart_count) + ' more';
 		output += '</li></ul>\n';
 
 		if (hasPet) {
@@ -2040,8 +2050,8 @@ window.onload = function () {
 			output += '<span class="result">' + farmer + ' does not have a pet.</span><br />\n';
 		}
 		output += '<ul class="ach_list"><li>';
-		output += (petLove >= 999) ? getPointString(1, ' having a pet with at least 999 friendship points', 0, 1) :
-				getPointString(1, ' having a pet with at least 999 friendship points', 0, 0) + ' -- need ' +
+		output += (petLove >= 999) ? getPointString(1, 'pet with at least 999 friendship points', 0, 1) :
+				getPointString(1, 'pet with at least 999 friendship points', 0, 0) + ' -- need ' +
 				need + (999 - petLove) + ' friendship points';
 		output += '</li></ul>\n';
 
@@ -2055,8 +2065,8 @@ window.onload = function () {
 		if (houseUpgrades < 2) {
 			need.push((2 - houseUpgrades) + ' more upgrade(s)');
 		}
-		output += (need.length === 0) ? getPointString(1, ' being married with at least 2 house upgrades', 0, 1) :
-				getPointString(1, ' being married with at least 2 house upgrades', 0, 0) + ' -- need ' + need.join(" and ");
+		output += (need.length === 0) ? getPointString(1, 'married with at least 2 house upgrades', 0, 1) :
+				getPointString(1, 'married with at least 2 house upgrades', 0, 0) + ' -- need ' + need.join(" and ");
 		output += '</li></ul>\n';
 
 		if (hasKeys.length > 0) {
@@ -2065,11 +2075,11 @@ window.onload = function () {
 			output += '<span class="result">' + farmer + ' has not acquired either the Rusty Key or Skull Key.</span><br />\n';
 		}
 		output += '<ul class="ach_list"><li>';
-		output += (hasRustyKey === 'true') ? getPointString(1, ' having the Rusty Key', 0, 1) :
-				getPointString(1, ' having the Rusty Key', 0, 0) + ' -- acquired after 60 museum donations';
+		output += (hasRustyKey === 'true') ? getPointString(1, 'has the Rusty Key', 0, 1) :
+				getPointString(1, 'get the Rusty Key', 0, 0) + ' -- acquired after 60 museum donations';
 		output += '</li>\n<li>';
-		output += (hasSkullKey === 'true') ? getPointString(1, ' having the Skull Key', 0, 1) :
-				getPointString(1, ' having the Skull Key', 0, 0) + ' -- acquired on level 120 of the mines';
+		output += (hasSkullKey === 'true') ? getPointString(1, 'has the Skull Key', 0, 1) :
+				getPointString(1, 'get the Skull Key', 0, 0) + ' -- acquired on level 120 of the mines';
 		output += '</li></ul>\n';
 
 		return output;
