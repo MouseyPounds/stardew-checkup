@@ -214,6 +214,20 @@ window.onload = function () {
 			countdown = Number($(xmlDoc).find('countdownToWedding').text()),
 			daysPlayed = Number($(xmlDoc).find('stats > daysPlayed').first().text()),
 			spouse = $(xmlDoc).find('player > spouse').text(), // only used for 1.2 engagement checking
+			// NPCs and NPC Types we are ignoring either in location data or friendship data
+			ignore = {
+				'Horse': 1,
+				'Cat': 1,
+				'Dog': 1,
+				'Fly': 1,
+				'Grub': 1,
+				'GreenSlime': 1,
+				'Gunther': 1,
+				'Marlon': 1,
+				'Bouncer': 1,
+				'Mister Qi': 1,
+				'Henchman': 1
+			},
 			npc = {},
 			// <NPC>: [ [<numHearts>, <id>], ... ]
 			// if numHearts starts with 'a', this is content added in patch 1.3
@@ -253,14 +267,12 @@ window.onload = function () {
 		// lets us to grab children and search out relationship status for version 1.2 saves.
 		$(xmlDoc).find('locations > GameLocation').each(function () {
 			$(this).find('characters > NPC').each(function () {
+				var type = $(this).attr('xsi:type');
+				var who = $(this).find('name').text();
 				// Filter out animals and monsters
-				if ($(this).attr('xsi:type') === 'Horse' || $(this).attr('xsi:type') === 'Cat' || $(this).attr('xsi:type') === 'Dog' ||
-					$(this).attr('xsi:type') === 'Fly' || $(this).attr('xsi:type') === 'Grub' || $(this).attr('xsi:type') === 'GreenSlime') {
+				if (ignore.hasOwnProperty(type) || ignore.hasOwnProperty(who)) {
 					return;
 				}
-				var who = $(this).find('name').text();
-				// Filter out those who can't gain friendship. This might fail in non-English files.
-				if (who === 'Gunther' || who === 'Mister Qi' || who === 'Marlon' || who === 'Bouncer' || who === 'Henchman') { return; }
 				npc[who] = {};
 				npc[who].isDatable = ($(this).find('datable').text() === 'true');
 				npc[who].isGirl = ($(this).find('gender').text() === '1');
@@ -280,11 +292,11 @@ window.onload = function () {
 				}
 			});
 		});
-		table[0] = parsePlayerSocial($(xmlDoc).find('SaveGame > player'), saveInfo, npc, eventList, countdown, daysPlayed);
+		table[0] = parsePlayerSocial($(xmlDoc).find('SaveGame > player'), saveInfo, ignore, npc, eventList, countdown, daysPlayed);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
 				if (isValidFarmhand(this)) {
-					table.push(parsePlayerSocial(this, saveInfo, npc, eventList, countdown, daysPlayed));
+					table.push(parsePlayerSocial(this, saveInfo, ignore, npc, eventList, countdown, daysPlayed));
 				}
 			});
 		}
@@ -292,7 +304,7 @@ window.onload = function () {
 		return output;
 	}
 
-	function parsePlayerSocial(player, saveInfo, npc, eventList, countdown, daysPlayed) {
+	function parsePlayerSocial(player, saveInfo, ignore, npc, eventList, countdown, daysPlayed) {
 		var output = '',
 			table = [],
 			count_5h = 0,
@@ -319,6 +331,7 @@ window.onload = function () {
 			});
 			$(player).find('friendshipData > item').each(function () {
 				var who = $(this).find('key > string').html();
+				if (ignore.hasOwnProperty(who)) { return; }
 				var num = $(this).find('value > Friendship > Points').text();
 				if (num >= 2500) { count_10h++; }
 				if (num >= 1250) { count_5h++; }
