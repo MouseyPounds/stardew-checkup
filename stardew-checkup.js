@@ -680,9 +680,11 @@ window.onload = function () {
 		$(player).find('recipesCooked > item').each(function () {
 			var id = $(this).find('key > int').text(),
 				num = $(this).find('value > int').text();
-			// Do we need to check that num>0?
-			crafted[recipes[id]] = num;
-			craft_count++;
+			// Sanity-check both recipe id and number cooked.
+			if (recipes.hasOwnProperty(id) && num > 0) {
+				crafted[recipes[id]] = num;
+				craft_count++;
+			}
 		});
 
 		output += '<span class="result">' + $(player).children('name').html() + " has cooked " + craft_count + ' and knows ' +
