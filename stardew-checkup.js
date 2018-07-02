@@ -1681,7 +1681,7 @@ window.onload = function () {
 				' of the mines.</span><br />\n';
 			output += '<span class="result">' + farmer + ((mineLevel > 120) ?
 				(' has reached level ' + (mineLevel - 120) + ' of the Skull Cavern') :
-				'has not yet explored the Skull Cavern');
+				' has not yet explored the Skull Cavern');
 			output += '.</span><br />';
 		}
 		table.push(output);
