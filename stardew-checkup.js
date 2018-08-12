@@ -255,7 +255,7 @@ window.onload = function () {
 				'Jodi': [ [4, '94|95'] ], // 94 y1, 95 y2
 				'Kent': [ [3, 100] ],
 				'Lewis': [ [6, 639373] ],
-				'Linus': [ ['0.2', 502969], ['a8', 371652] ],
+				'Linus': [ ['0.2', 502969], [4, 26], ['a8', 371652] ],
 				'Pam': [ ['a9', 503180] ],
 				'Pierre': [ [6, 16] ],
 				'Robin': [ [6, 33] ],
@@ -946,7 +946,8 @@ window.onload = function () {
 				num = Number($(this).find('value > ArrayOfInt > int').first().text());
 			// Note, Clam (372) will show up in the save, but it is category "Basic -23" and is ignored for achievements.
 			// Also, it is possible to catch Void Mayo (308) in the Witch's Swamp; this should be ignored too.
-			if (id !== '372' && id !== '308' && num > 0) {
+			// As of 1.3, Secret Notes (79) can also be caught directly
+			if (id !== '372' && id !== '308' && id !== '79' && num > 0) {
 				craft_count++;
 				// We are adding up the count ourselves, but the total is also stored in (stats > fishCaught) and (stats > FishCaught)
 				count += num;
