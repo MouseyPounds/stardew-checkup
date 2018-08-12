@@ -73,11 +73,13 @@ window.onload = function () {
 	}
 	
 	function printTranspose(table) {
-		var output = '<table class="output">';
+		var output = '<table class="output">',
+			id;
 		for (var r = 0; r < table[0].length; r++) {
 			output += '<tr>';
 			for (var c = 0; c < table.length; c++) {
-				output += '<td>' + table[c][r] + '</td>';
+				id = 'PL_' + (c+1);
+				output += '<td class="' + id + '">' + table[c][r] + '</td>';
 			}
 			output += '</tr>';
 		}
@@ -103,6 +105,7 @@ window.onload = function () {
 			playMin = Math.floor((playTime % 36e5) / 6e4),
 			id = "0",
 			name = $(xmlDoc).find('player > name').html(),
+			farmer = name,
 			farmhands = [];
 			
 		saveInfo.is1_3 = ($(xmlDoc).find('hasApplied1_3_UpdateChanges').text() === 'true');
@@ -137,6 +140,7 @@ window.onload = function () {
 		});
 		if (saveInfo.numPlayers > 1) {
 			output += ' and Farmhand(s) ' + farmhands.join(', ');
+			createPlayerList(saveInfo.numPlayers, farmer, farmhands);
 		}
 		output += '</span><br />';
 		// Searching for marriage between players & their children
@@ -2543,6 +2547,39 @@ window.onload = function () {
 		document.getElementById('TOC-details').innerHTML = list;
 	}
 
+	function togglePlayer(e) {
+		console.log("Somebody clicked on " + $(e.currentTarget).attr('id') + " which has a class of " + $(e.currentTarget).attr('class'));
+		// Adjust PlayerList entry to reflect status of this player
+		var isOn = ($(e.currentTarget).attr('class') === 'on'),
+			match = "td." + $(e.currentTarget).attr('id').substring(5);
+		$(e.currentTarget).attr('class', (isOn ? 'off' : 'on'));
+		// Go find all the entries for this player and toggle them.
+		$(match).each(function () {
+			if ($(this).is(":visible")) {
+				$(this).hide();
+			} else {
+				$(this).show();
+			}
+		});
+	}
+	
+	function createPlayerList(numPlayers, farmer, farmhands) {
+		var width = Math.floor(100 / (1 + numPlayers)),
+			i,
+			text = '<table><tr><th>Toggle Player Display:</th>' + '<td id="List_PL_1" class="on">' + farmer + '</td>';
+		for (i = 2; i <= numPlayers; i++) {
+			text += ' <td id="List_PL_' + i + '" class="on">' + farmhands[i-2] + '</td>';
+		}
+		text += '</tr></table>';
+		$("#PlayerList").html(text);
+		$("#PlayerList").show();
+		// Add click handlers
+		for (i = 1; i <= numPlayers; i++) {
+			var ID = "#List_PL_" + i;
+			$(ID).click(togglePlayer);
+		}
+	}
+
 	function handleFileSelect(evt) {
 		var file = evt.target.files[0],
 			reader = new FileReader(),
@@ -2552,6 +2589,7 @@ window.onload = function () {
 		$('#output-container').hide();
 		$('#progress-container').show();
 		$('#changelog').hide();
+		$('#PlayerList').hide();
 		reader.onloadstart = function (e) {
 			prog.value = 20;
 		};

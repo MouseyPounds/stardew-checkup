@@ -32,7 +32,9 @@ h3 {
 	padding-right: 5em;
 }
 #footer {
+	text-align: center;
 	padding-right: 1em;
+	margin-bottom: 3em;
 }
 #input-container { display: none; }
 #output-container { display: none; }
@@ -44,9 +46,6 @@ h3 {
 }
 .path {
 	font-family: monospace;
-}
-#footer {
-	text-align: center;
 }
 .ach,.warn,.note {
 	font-style: italic;
@@ -119,6 +118,43 @@ table.output {
 }
 tr td:not(:first-child) {
 	border-left: 1px solid;
+}
+#PlayerList {
+	position: fixed;
+	left: 0;
+	bottom: 0;
+	padding: 3px;
+	max-height: 90%;
+	width: 100%;
+	overflow: auto;
+	background-color: #603000;
+	color: #eecc99;
+	display: none;
+}
+#PlayerList > table {
+	border: none;
+	width: 99%;
+	table-layout: fixed;
+}
+#PlayerList tr td:not(:first-child) {
+	border: 2px solid #eecc99;
+}
+#PlayerList td {
+	text-align: center;
+	cursor: pointer;
+	padding: 4px;
+}
+#PlayerList td.on:hover, #PlayerList td.off:hover  {
+	color: #ffe0b0;
+	background-color: #906030;
+}
+#PlayerList td.on {
+	color: #eecc99;
+	background-color: #804000;
+}
+#PlayerList td.off {
+	color: #906030;
+	background-color: #603000;
 }
 #TOC {
 	position: fixed;
