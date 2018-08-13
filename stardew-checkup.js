@@ -942,16 +942,19 @@ window.onload = function () {
 			craft_count = 0, // for fish types
 			known = [],
 			need = [],
+			ignore = { // Things you can catch that aren't counted in fishing achieve
+				372: 1, // Clam is category "Basic -23"
+				308: 1, // Void Mayo can be caught in Witch's Swamp during "Goblin Problems"
+				79: 1,  // Secret Notes can be caught directly
+				797: 1  // Pearl can be caught directly in Night Market Submarine
+			},
 			id,
 			r;
 
 		$(player).find('fishCaught > item').each(function () {
 			var id = $(this).find('key > int').text(),
 				num = Number($(this).find('value > ArrayOfInt > int').first().text());
-			// Note, Clam (372) will show up in the save, but it is category "Basic -23" and is ignored for achievements.
-			// Also, it is possible to catch Void Mayo (308) in the Witch's Swamp; this should be ignored too.
-			// As of 1.3, Secret Notes (79) can also be caught directly
-			if (id !== '372' && id !== '308' && id !== '79' && num > 0) {
+			if (!ignore.hasOwnProperty(id) && num > 0) {
 				craft_count++;
 				// We are adding up the count ourselves, but the total is also stored in (stats > fishCaught) and (stats > FishCaught)
 				count += num;
