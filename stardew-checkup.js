@@ -920,7 +920,7 @@ window.onload = function () {
 		if (saveInfo.is1_3) {
 			recipes[798] = 'Midnight Squid';
 			recipes[799] = 'Spook Fish';
-			recipes[800] = 'Blob Fish';
+			recipes[800] = 'Blobfish';
 		}
 		table[0] = parsePlayerFishing($(xmlDoc).find('SaveGame > player'), saveInfo, recipes);
 		if (saveInfo.numPlayers > 1) {
