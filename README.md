@@ -7,6 +7,7 @@ This app checks a Stardew Valley save file for various achievements and mileston
 The app is written in Javascript and uses jQuery it is hosted on GitHub Pages at https://mouseypounds.github.io/stardew-checkup/ and the source code repository is https://github.com/MouseyPounds/stardew-checkup. It is released under the MIT license.
 
 Changelog
+* 20 Aug  2018 - v2.1.2 - Blobfish spelling fix and better input sanitization
 * 12 Aug  2018 - v2.1.1 - Another bugfix for fish count (Pearls)
 * 12 Aug  2018 - v2.1.0 - Individual player output can now be toggled on/off on multiplayer saves
 * 11 Aug  2018 - v2.0.2 - Bugfix in fish count related to Secret Notes

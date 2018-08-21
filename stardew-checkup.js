@@ -155,8 +155,8 @@ window.onload = function () {
 			}
 		});
 		// Date originally used XXForSaveGame elements, but those were not always present on saves downloaded from upload.farm
-		output += '<span class="result">Day ' + $(xmlDoc).find('dayOfMonth').text() + ' of ' +
-			capitalize($(xmlDoc).find('currentSeason').text()) + ', Year ' + $(xmlDoc).find('year').text() + '</span><br />';
+		output += '<span class="result">Day ' + Number($(xmlDoc).find('dayOfMonth').text()) + ' of ' +
+			capitalize($(xmlDoc).find('currentSeason').html()) + ', Year ' + Number($(xmlDoc).find('year').text()) + '</span><br />';
 		// Playtime of < 1 min will be blank.
 		output += '<span class="result">Played for ';
 		if (playHr > 0) {
@@ -272,7 +272,7 @@ window.onload = function () {
 		$(xmlDoc).find('locations > GameLocation').each(function () {
 			$(this).find('characters > NPC').each(function () {
 				var type = $(this).attr('xsi:type');
-				var who = $(this).find('name').text();
+				var who = $(this).find('name').html();
 				// Filter out animals and monsters
 				if (ignore.hasOwnProperty(type) || ignore.hasOwnProperty(who)) {
 					return;
@@ -318,7 +318,7 @@ window.onload = function () {
 			list_bach = [],
 			list_other = [],
 			farmer = $(player).children('name').html(),
-			spouse = $(player).children('spouse').text(),
+			spouse = $(player).children('spouse').html(),
 			dumped_Girls = 0,
 			dumped_Guys = 0,
 			hasSpouseStardrop = false,
@@ -336,7 +336,7 @@ window.onload = function () {
 			$(player).find('friendshipData > item').each(function () {
 				var who = $(this).find('key > string').html();
 				if (ignore.hasOwnProperty(who)) { return; }
-				var num = $(this).find('value > Friendship > Points').text();
+				var num = Number($(this).find('value > Friendship > Points').text());
 				if (num >= 2500) { count_10h++; }
 				if (num >= 1250) { count_5h++; }
 				points[who] = num;
@@ -344,12 +344,12 @@ window.onload = function () {
 					// This shouldn't happen
 					npc[who] = {'isDatable': false, 'isGirl': false, 'isChild': false};
 				}
-				npc[who].relStatus = $(this).find('value > Friendship > Status').text();
+				npc[who].relStatus = $(this).find('value > Friendship > Status').html();
 			});
 		} else {
 			$(player).find('friendships > item').each(function () {
 				var who = $(this).find('key > string').html();
-				var num = $(this).find('value > ArrayOfInt > int').first().text();
+				var num = Number($(this).find('value > ArrayOfInt > int').first().text());
 				if (num >= 2500) { count_10h++; }
 				if (num >= 1250) { count_5h++; }
 				points[who] = num;
@@ -513,7 +513,7 @@ window.onload = function () {
 			id = $(player).children('UniqueMultiplayerID').text(),
 			children = '(None)',
 			child_name = [],
-			houseUpgrades = $(player).children('houseUpgradeLevel').text();
+			houseUpgrades = Number($(player).children('houseUpgradeLevel').text());
 		if (typeof(id) === 'undefined' || id === '') {
 			id = "0";
 		}
@@ -687,7 +687,7 @@ window.onload = function () {
 
 		$(player).find('cookingRecipes > item').each(function () {
 			var id = $(this).find('key > string').text(),
-				num = $(this).find('value > int').text();
+				num = Number($(this).find('value > int').text());
 			if (recipeTranslate.hasOwnProperty(id)) {
 				id = recipeTranslate[id];
 			}
@@ -696,7 +696,7 @@ window.onload = function () {
 		});
 		$(player).find('recipesCooked > item').each(function () {
 			var id = $(this).find('key > int').text(),
-				num = $(this).find('value > int').text();
+				num = Number($(this).find('value > int').text());
 			// Sanity-check both recipe id and number cooked.
 			if (recipes.hasOwnProperty(id) && num > 0) {
 				crafted[recipes[id]] = num;
@@ -799,7 +799,7 @@ window.onload = function () {
 		recipe_count = recipes.length;
 		$(player).find('craftingRecipes > item').each(function () {
 			var id = $(this).find('key > string').text(),
-				num = $(this).find('value > int').text();
+				num = Number($(this).find('value > int').text());
 			if (recipeTranslate.hasOwnProperty(id)) {
 				id = recipeTranslate[id];
 			}
@@ -1159,7 +1159,7 @@ window.onload = function () {
 
 		$(player).find('basicShipped > item').each(function () {
 			var id = $(this).find('key > int').text(),
-				num = $(this).find('value > int').text();
+				num = Number($(this).find('value > int').text());
 			if (recipes.hasOwnProperty(id) && num > 0) {
 				crafted[recipes[id]] = num;
 				craft_count++;
@@ -1488,7 +1488,7 @@ window.onload = function () {
 			farmName = $(xmlDoc).find('player > farmName').html();
 
 		$(museum).find('museumPieces > item').each(function () {
-			var id = $(this).find('value > int').text();
+			var id = Number($(this).find('value > int').text());
 			if (artifacts.hasOwnProperty(id) || minerals.hasOwnProperty(id)) {
 				donated[id] = 1;
 			}
