@@ -260,9 +260,11 @@ window.onload = function () {
 				'Kent': [ [3, 100] ],
 				'Lewis': [ [6, 639373] ],
 				'Linus': [ ['0.2', 502969], [4, 26], ['a8', 371652] ],
+				'Marnie': [ [6, 639373] ],
 				'Pam': [ ['a9', 503180] ],
 				'Pierre': [ [6, 16] ],
 				'Robin': [ [6, 33] ],
+				'Vincent': [ ['a8', 3910979] ],
 				'Willy': [ ['a6', 711130] ]
 			};
 
@@ -317,12 +319,18 @@ window.onload = function () {
 			list_fam = [],
 			list_bach = [],
 			list_other = [],
+			list_poly = [],
 			farmer = $(player).children('name').html(),
 			spouse = $(player).children('spouse').html(),
 			dumped_Girls = 0,
 			dumped_Guys = 0,
 			hasSpouseStardrop = false,
-			eventsSeen = {};
+			eventsSeen = {},
+			hasNPCSpouse = false,
+			polyamory = {
+				'All Bachelors': [195013,195099],
+				'All Bachelorettes': [195012,195019]
+				};
 		if (saveInfo.is1_3) {
 			$(player).find('activeDialogueEvents > item').each(function () {
 				var which = $(this).find('key > string').text();
@@ -371,6 +379,7 @@ window.onload = function () {
 		var eventCheck = function (arr) {
 			var seen = false;
 			var neg = 'no';
+			// Note we are altering eventInfo from parent function
 			String(arr[1]).split('|').forEach( function(e) {
 				if (eventsSeen.hasOwnProperty(e)) {
 					seen = true;
@@ -381,13 +390,21 @@ window.onload = function () {
 				(arr[1] === 733330 && daysPlayed > 84) ) {
 					neg = 'imp';
 				}
+			// Now we are hardcoding 2 events that involve multiple NPCs too.
+			var extra = '';
 			if (String(arr[0]).substr(0,1) === 'a') {
 				if (saveInfo.is1_3) {
 					var id = arr[0].substr(1);
-					eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + id + '&#x2665;' + '</span>]';
+					if (arr[1] === 3910979) {
+						extra = " (Jas &amp; Vincent both)";
+					}
+					eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + id + '&#x2665;' + extra + '</span>]';
 				}
 			} else {
-				eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + arr[0] + '&#x2665;' + '</span>]';
+				if (arr[1] === 639373) {
+					extra = " (Lewis &amp; Marnie both)";
+				}
+				eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + arr[0] + '&#x2665;' + extra + '</span>]';
 			}
 		};
 		for (var who in npc) {
@@ -413,7 +430,7 @@ window.onload = function () {
 			// content for different versions, this is much harder without lame hardcoded checks.
 			var eventInfo = '';
 			if (eventList.hasOwnProperty(who)) {
-				if (saveInfo.is1_3 || (who !== 'Jas' && who != 'Pam' && who != 'Willy')) {
+				if (saveInfo.is1_3 || (who !== 'Jas' && who != 'Vincent' && who != 'Pam' && who != 'Willy')) {
 					eventInfo += '<ul class="compact"><li>Event(s): ';
 					eventList[who].forEach(eventCheck);
 					eventInfo += '</li></ul>';
@@ -425,6 +442,7 @@ window.onload = function () {
 				max = hasSpouseStardrop ? 3250 : 3375;
 				entry += (pts >= max) ? '<span class="ms_yes">MAX (can still decay)</span></li>' :
 					'<span class="ms_no">need ' + (max - pts) + ' more</span></li>';
+				hasNPCSpouse = true;
 				list_fam.push(entry + eventInfo);
 			} else if (npc[who].isDatable) {
 				max = 2000;
@@ -444,6 +462,26 @@ window.onload = function () {
 				}
 			}
 		}
+		if (saveInfo.is1_3) {
+			for (var who in polyamory) {
+				// Rather than trying to force these to work in the eventCheck function, we make a new checker.
+				var seen = false;
+				var span = 'no';
+				var entry = '<li>' + who;
+				for (var id = 0; id < polyamory[who].length; id++ ) {
+					if (eventsSeen.hasOwnProperty(polyamory[who][id])) {
+						seen = true;
+					}
+				}
+				if (seen) {
+					span = 'yes';
+				} else if (hasNPCSpouse) {
+					span = 'imp';
+				}
+				entry += ': [<span class="ms_' + span + '">10&#x2665;</span>]</li>';
+				list_poly.push(entry);
+			}
+		}	
 
 		output += '<span class="result">' + farmer + ' has ' + count_5h + ' relationship(s) of 5+ hearts.</span><ul class="ach_list">\n';
 		output += '<li>';
@@ -475,6 +513,9 @@ window.onload = function () {
 		}
 		if (list_bach.length > 0) {
 			output += '<li>Datable Villagers<ol class="compact">' + list_bach.sort().join('') + '</ol></li>\n';
+		}
+		if (list_poly.length > 0) {
+			output += '<li>Polyamory Events<ol class="compact">' + list_poly.sort().join('') + '</ol></li>\n';
 		}
 		if (list_other.length > 0) {
 			output += '<li>Other Villagers<ol class="compact">' + list_other.sort().join('') + '</ol></li>\n';
