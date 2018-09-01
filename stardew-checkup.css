@@ -39,6 +39,7 @@ h3 {
 #input-container { display: none; }
 #output-container { display: none; }
 #progress-container { display: none; }
+.initial_hide { display: none; }
 .error {
 	font-weight: bold;
 	font-size: 150%;

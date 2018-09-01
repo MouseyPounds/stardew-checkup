@@ -834,6 +834,8 @@ window.onload = function () {
 			craft_count = 0,
 			need_k = [],
 			need_c = [],
+			mod_known = 0,
+			mod_count = 0,
 			id,
 			r;
 
@@ -847,6 +849,13 @@ window.onload = function () {
 			if (id === 'Wedding Ring') {
 				return true;
 			}
+			if (recipes.indexOf(id) === -1) {
+				mod_known++;
+				if (num > 0) {
+					mod_count++
+				}
+				return true;
+			}
 			known[id] = num;
 			known_count++;
 			if (num > 0) {
@@ -857,8 +866,12 @@ window.onload = function () {
 		});
 
 		output += '<span class="result">' + $(player).children('name').html() + " has crafted " + craft_count + ' and knows ' +
-			known_count + ' of ' + recipe_count + ' recipes.</span><ul class="ach_list">\n';
-		output += '<li>';
+			known_count + ' of ' + recipe_count + ' recipes.</span>\n';
+		if (mod_known > 0) {
+			output += '<br /><span class="result"><span class="note">' + $(player).children('name').html() + " has also crafted " +
+				mod_count + ' and knows ' + mod_known + " mod recipes.</span></span>\n";
+		}
+		output += '<ul class="ach_list"><li>';
 		output += (craft_count >= 15) ? getAchieveString('D.I.Y.', 'craft 15 different items', 1) :
 				getAchieveString('D.I.Y.', 'craft 15 different items', 0) + (15 - craft_count) + ' more';
 		output += '</li>\n<li>';
@@ -2678,4 +2691,18 @@ window.onload = function () {
 	}
 	document.getElementById('file_select').addEventListener('change', handleFileSelect, false);
 
+	function toggleVisible(evt) {
+		var t = evt.target;
+		if ($(t).next().is(':visible')) {
+			$(t).next().hide();
+			$(t).html("Show");
+		} else {
+			$(t).next().show();
+			$(t).html("Hide");
+		}
+	}
+	
+	$('.collapsible').each(function() {
+		$(this).children('button').click(toggleVisible);
+	});
 };

@@ -2,11 +2,14 @@
 
 About Stardew Checkup
 
-This app checks a Stardew Valley save file for various achievements and milestones and lets you know what is missing. Currently it checks for progress on 38 achievements (everything but the 2 Praire King minigame achieves) as well as Grandpa's evaluation.
+This app checks a Stardew Valley save file for various achievements and milestones and lets you know what is missing. Currently it checks for progress on 38 achievements (everything but the 2 Praire King minigame achieves) as well as Grandpa's evaluation. It also summarizes relationship progress, including cutscenes.
 
-The app is written in Javascript and uses jQuery it is hosted on GitHub Pages at https://mouseypounds.github.io/stardew-checkup/ and the source code repository is https://github.com/MouseyPounds/stardew-checkup. It is released under the MIT license.
+All changed &amp; added content from version 1.3 should be supported, including output for all players in a multiplayer save; 1.3-specific features will only appear in the results if the save is detected to be from that version. Please report any bugs, suggestions, or other feedback to the topic in the official forums (https://community.playstarbound.com/threads/webapp-stardew-checkup-achievement-completion-progress.141706/).
+
+The app is written in Javascript and uses jQuery (https://jquery.com/)it is hosted on GitHub Pages at https://mouseypounds.github.io/stardew-checkup/ and the source code repository is https://github.com/MouseyPounds/stardew-checkup/. It is released under the MIT license.
 
 Changelog
+*  1 Sept 2018 - v2.2.1 - Detect crafting recipes from mods; collapse older entries in changelog
 * 29 Aug  2018 - v2.2.0 - Added the polyamory events to social summary & clarified multi-NPC events
 * 20 Aug  2018 - v2.1.2 - Blobfish spelling fix and better input sanitization
 * 12 Aug  2018 - v2.1.1 - Another bugfix for fish count (Pearls)
