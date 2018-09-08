@@ -2289,6 +2289,7 @@ window.onload = function () {
 			hasSeenCeremony = 0,
 			done = {},
 			hybrid = 0,
+			hybridLeft = 0,
 			id,
 			r,
 			b,
@@ -2326,12 +2327,11 @@ window.onload = function () {
 			}
 		});
 		if (ccHave > 0 && isJojaMember) {
-			// Hybrid situation. Calculate remaining projects but ignore Bulletin Board
 			hybrid = 1;
-			jojaCount -= ccHave;
-			if (done.hasOwnProperty(ccMail.ccBulletin)) {
-				jojaCount++;
-			}
+		}
+		hybridLeft = jojaCount - ccHave;
+		if (done.hasOwnProperty(ccMail.ccBulletin)) {
+			hybridLeft++;
 		}
 		eventToCheck = (isJojaMember) ? jojaEvent : ccEvent;
 		$(xmlDoc).find('player > eventsSeen > int').each(function () {
@@ -2340,17 +2340,15 @@ window.onload = function () {
 			}
 		});
 
-		// There are reports that a hybrid playthrough will not trigger the Joja achieve, but in my
-		// test runs, the ceremony still played (and the achievement trigger is part of the ceremony).
-		// We will give out a warning if the player is doing Joja after some CC completion just in case.
-		// We will also pretend that the Joja achieve is impossible if player has not joined them yet but
-		// has done some CC rooms even though this may not be strictly true.
+		// New information from Gigafreak#4754 on Discord confirms that the Joja achieve does trigger even if
+		// most of the CC was completed through bundles. So warnings are removed and Joja will not be marked
+		// impossible unless the CC is actually done.
 		if (isJojaMember) {
 			if (hybrid) {
 				output += '<span class="result">' + farmer + ' completed ' + ccHave +
 					' Community Center room(s) and then became a Joja member.</span><br />\n';
 				output += '<span class="result">' + farmer + ' has since completed ' + jojaHave + ' of the remaining ' +
-					jojaCount + ' projects on the Community Development Form.</span><br />\n';
+					hybridLeft + ' projects on the Community Development Form.</span><br />\n';
 			} else {
 				output += '<span class="result">' + farmer + ' is a Joja member and has completed ' + jojaHave +
 					' of the ' + jojaCount + ' projects on the Community Development Form.</span><br />\n';
@@ -2359,9 +2357,6 @@ window.onload = function () {
 					' attended the completion ceremony</span><br />\n<ul class="ach_list"><li>';
 			output += getAchieveImpossibleString('Local Legend', 'restore the Pelican Town Community Center');
 			output += '</li><li>\n';
-			if (hybrid > 0) {
-				output += '<span class="warn">Warning: Some have reported that the Joja achievement will not trigger in a hybrid situation like this.</span></li><li>\n';
-			}
 			if (!hasSeenCeremony) {
 				if (jojaHave < jojaCount) {
 					temp = (jojaCount - jojaHave) + ' more project(s) and the ceremony';
@@ -2387,10 +2382,8 @@ window.onload = function () {
 					' attended the completion ceremony</span><br />\n<ul class="ach_list"><li>';
 			if (ccHave === 0) {
 				output += getAchieveString('Joja Co. Member Of The Year', '', 0) + 'to become a Joja member and purchase all community development perks';
-			/* removed this explanation as unnecessarily confusing even though Joja achieve might still be possible
 			} else if (ccHave < ccCount) {
-				output += getAchieveString('Joja Co. Member Of The Year', '', 0) + 'to become a Joja member and purchase all community development perks; doing so would cause <span = "ach">Local Legend</span> to be uncompletable';
-			*/
+				output += getAchieveString('Joja Co. Member Of The Year', '', 0) + 'to become a Joja member and purchase any remaining community development perks -- ' + hybridLeft + " left";
 			} else {
 				output += getAchieveImpossibleString('Joja Co. Member Of The Year', 'become a Joja member and purchase all community development perks');
 			}
