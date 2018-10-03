@@ -327,6 +327,7 @@ window.onload = function () {
 			hasSpouseStardrop = false,
 			eventsSeen = {},
 			hasNPCSpouse = false,
+			hasPamHouse = false,
 			polyamory = {
 				'All Bachelors': [195013,195099],
 				'All Bachelorettes': [195012,195019]
@@ -373,7 +374,9 @@ window.onload = function () {
 		$(player).find('mailReceived > string').each(function () {
 			if($(this).text() === 'CF_Spouse') {
 				hasSpouseStardrop = true;
-				return false;
+			}
+			if($(this).text() === 'pamHouseUpgrade') {
+				hasPamHouse = true;
 			}
 		});
 		var eventCheck = function (arr) {
@@ -386,8 +389,11 @@ window.onload = function () {
 				}
 			});
 			// checks for events which can be permanently missed; 1st is Clint 6H, second is Sam 3H
+			// Penny 4H & 6H added if Pam House Upgrade is done.
 			if ((arr[1] === 101 && (eventsSeen.hasOwnProperty(2123243) || eventsSeen.hasOwnProperty(2123343))) || 
-				(arr[1] === 733330 && daysPlayed > 84) ) {
+				(arr[1] === 733330 && daysPlayed > 84) ||
+				(arr[1] === 35 && hasPamHouse) || 
+				(arr[1] === 36 && hasPamHouse)) {
 					neg = 'imp';
 				}
 			// Now we are hardcoding 2 events that involve multiple NPCs too.
@@ -1848,7 +1854,7 @@ window.onload = function () {
 				'CF_Spouse': 'Given by NPC spouse at 13.5 hearts (3375 points).',
 				'CF_Sewer': 'Purchased from Krobus in the Sewers for 20,000g.',
 				'CF_Statue': 'Received from Old Master Cannoli in the Secret Woods.',
-				'CF_Fish': 'Mailed by Willy after catching all fish.',
+				'CF_Fish': 'Mailed by Willy after Master Angler achievement.',
 				'museumComplete': 'Reward for completing the Museum collection.'
 			};
 			
