@@ -10,6 +10,7 @@ The app is written in Javascript and uses [jQuery](https://jquery.com/) it is ho
 
 ## Changelog
 
+*  3 Oct  2018 - v2.2.3 - Mark some Penny heart events impossible after Pam house; stardrop wording fix
 *  7 Sept 2018 - v2.2.2 - Joja achievement no longer marked impossible unless CC is fully complete
 *  1 Sept 2018 - v2.2.1 - Detect crafting recipes from mods; collapse older entries in changelog
 * 29 Aug  2018 - v2.2.0 - Added the polyamory events to social summary & clarified multi-NPC events
