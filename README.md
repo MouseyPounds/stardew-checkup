@@ -6,7 +6,7 @@ This app checks a [Stardew Valley](http://stardewvalley.net/) save file for vari
 
 All changed & added content from version 1.3 should be supported, including output for all players in a multiplayer save; 1.3-specific features will only appear in the results if the save is detected to be from that version. Please report any bugs, suggestions, or other feedback to the [topic in the official forums](https://community.playstarbound.com/threads/webapp-stardew-checkup-achievement-completion-progress.141706/).
 
-The app is written in Javascript and uses [jQuery](https://jquery.com/) it is hosted on GitHub Pages at https://mouseypounds.github.io/stardew-checkup/ and the source code repository is https://github.com/MouseyPounds/stardew-checkup/. It is released under the MIT license.
+The app is written in Javascript and uses [jQuery](https://jquery.com/); it is hosted on GitHub Pages at https://mouseypounds.github.io/stardew-checkup/ and the source code repository is https://github.com/MouseyPounds/stardew-checkup/. It is released under the MIT license.
 
 ## Changelog
 
