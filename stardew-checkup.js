@@ -703,10 +703,17 @@ window.onload = function () {
 				"Dish o' The Sea": "Dish O' The Sea",
 				"Eggplant Parm.": "Eggplant Parmesan",
 				"Vegetable Stew": "Vegetable Medley"
-			};
+			},
+			id,
+			recipeReverse = {};
 
+		for (id in recipes) {
+			if (recipes.hasOwnProperty(id)) {
+				recipeReverse[recipes[id]] = id;
+			}
+		}
 
-		table[0] = parsePlayerCooking($(xmlDoc).find('SaveGame > player'), saveInfo, recipes, recipeTranslate);
+		table[0] = parsePlayerCooking($(xmlDoc).find('SaveGame > player'), saveInfo, recipes, recipeTranslate, recipeReverse);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
 				if (isValidFarmhand(this)) {
@@ -718,7 +725,7 @@ window.onload = function () {
 		return output;
 	}
 		
-	function parsePlayerCooking(player, saveInfo, recipes, recipeTranslate) {
+	function parsePlayerCooking(player, saveInfo, recipes, recipeTranslate, recipeReverse) {
 		/* cookingRecipes is keyed by name, but recipesCooked is keyed by ObjectInformation ID.
 		 * Also, some cookingRecipes names are different from the names in ObjectInformation (e.g. Cookies vs Cookie) */
 		var output = '',
@@ -729,6 +736,8 @@ window.onload = function () {
 			craft_count = 0,
 			need_k = [],
 			need_c = [],
+			mod_known = 0,
+			mod_craft = 0,
 			id,
 			r;
 
@@ -738,33 +747,47 @@ window.onload = function () {
 			if (recipeTranslate.hasOwnProperty(id)) {
 				id = recipeTranslate[id];
 			}
-			known[id] = num;
-			known_count++;
+			if (recipeReverse.hasOwnProperty(id)) {
+				known[id] = num;
+				known_count++;
+			} else {
+				mod_known++;
+			}
 		});
 		$(player).find('recipesCooked > item').each(function () {
 			var id = $(this).find('key > int').text(),
 				num = Number($(this).find('value > int').text());
-			// Sanity-check both recipe id and number cooked.
-			if (recipes.hasOwnProperty(id) && num > 0) {
-				crafted[recipes[id]] = num;
-				craft_count++;
+			if (recipes.hasOwnProperty(id)) {
+				if (num > 0) {
+					crafted[recipes[id]] = num;
+					craft_count++;
+				}
+			} else {
+				if (num > 0) {
+					mod_craft++;
+				}
 			}
 		});
-
+		
 		output += '<span class="result">' + $(player).children('name').html() + " has cooked " + craft_count + ' and knows ' +
-			known_count + ' of ' + recipe_count + ' recipes.</span><ul class="ach_list">\n';
-		output += '<li>';
-		output += (craft_count >= 10) ? getAchieveString('Cook', 'cook 10 different recipes', 1) :
-				getAchieveString('Cook', 'cook 10 different recipes', 0) + (10 - craft_count) + ' more';
+			known_count + ' of ' + recipe_count + ((mod_known > 0) ? " base game" : "") + ' recipes.</span>\n';
+		if (mod_known > 0) {
+			output += '<br /><span class="result"><span class="note">' + $(player).children('name').html() + " has also cooked " +
+				mod_craft + ' and knows ' + mod_known + " mod recipes (total unavailable).</span></span>\n";
+		}
+		output += '<ul class="ach_list"><li>';
+		output += ( (craft_count + mod_craft) >= 10) ? getAchieveString('Cook', 'cook 10 different recipes', 1) :
+				getAchieveString('Cook', 'cook 10 different recipes', 0) + (10 - craft_count - mod_craft) + ' more';
 		output += '</li>\n<li>';
-		output += (craft_count >= 25) ? getAchieveString('Sous Chef', 'cook 25 different recipes', 1) :
-				getAchieveString('Sous Chef', 'cook 25 different recipes', 0) + (25 - craft_count) + ' more';
+		output += ( (craft_count + mod_craft) >= 25) ? getAchieveString('Sous Chef', 'cook 25 different recipes', 1) :
+				getAchieveString('Sous Chef', 'cook 25 different recipes', 0) + (25 - craft_count - mod_craft) + ' more';
 		output += '</li>\n<li>';
-		output += (craft_count >= recipe_count) ? getAchieveString('Gourmet Chef', 'cook every recipe', 1) :
-				getAchieveString('Gourmet Chef', 'cook every recipe', 0) + (recipe_count - craft_count) + ' more';
+		output += ( (craft_count + mod_craft) >= (recipe_count + mod_known) ) ? getAchieveString('Gourmet Chef', 'cook every recipe', 1) :
+				getAchieveString('Gourmet Chef', 'cook every recipe', 0) + ((mod_known > 0) ? "at least " : "") +
+				(recipe_count + mod_known - craft_count - mod_craft) + ' more';
 		output += '</li></ul>\n';
 		// We are assuming it is impossible to craft something without knowing the recipe.
-		if (craft_count < recipe_count) {
+		if ( (craft_count + mod_craft) < (recipe_count + mod_known) ) {
 			for (id in recipes) {
 				if (recipes.hasOwnProperty(id)) {
 					r = recipes[id];
@@ -781,6 +804,13 @@ window.onload = function () {
 			}
 			if (need_k.length > 0) {
 				output += '<li>Unknown Recipes<ol>' + need_k.sort().join('') + '</ol></li>\n';
+			}
+			if (mod_known > 0) {
+				if (mod_craft >= mod_known) {
+					output += '<li>Possibly additional mod recipes</li>';
+				} else {
+					output += '<li>Plus at least ' + (mod_known - mod_craft) + ' mod recipes</li>';
+				}
 			}
 			output += '</ul></span>\n';
 		}
@@ -841,7 +871,7 @@ window.onload = function () {
 			need_k = [],
 			need_c = [],
 			mod_known = 0,
-			mod_count = 0,
+			mod_craft = 0,
 			id,
 			r;
 
@@ -858,7 +888,7 @@ window.onload = function () {
 			if (recipes.indexOf(id) === -1) {
 				mod_known++;
 				if (num > 0) {
-					mod_count++
+					mod_craft++
 				}
 				return true;
 			}
@@ -875,19 +905,20 @@ window.onload = function () {
 			known_count + ' of ' + recipe_count + ' recipes.</span>\n';
 		if (mod_known > 0) {
 			output += '<br /><span class="result"><span class="note">' + $(player).children('name').html() + " has also crafted " +
-				mod_count + ' and knows ' + mod_known + " mod recipes.</span></span>\n";
+				mod_craft + ' and knows ' + mod_known + " mod recipes (total unavailable).</span></span>\n";
 		}
 		output += '<ul class="ach_list"><li>';
-		output += (craft_count >= 15) ? getAchieveString('D.I.Y.', 'craft 15 different items', 1) :
-				getAchieveString('D.I.Y.', 'craft 15 different items', 0) + (15 - craft_count) + ' more';
+		output += ( (craft_count + mod_craft) >= 15) ? getAchieveString('D.I.Y.', 'craft 15 different items', 1) :
+				getAchieveString('D.I.Y.', 'craft 15 different items', 0) + (15 - craft_count - mod_craft) + ' more';
 		output += '</li>\n<li>';
-		output += (craft_count >= 30) ? getAchieveString('Artisan', 'craft 30 different items', 1) :
-				getAchieveString('Artisan', 'craft 30 different items', 0) + (30 - craft_count) + ' more';
+		output += ( (craft_count + mod_craft) >= 30) ? getAchieveString('Artisan', 'craft 30 different items', 1) :
+				getAchieveString('Artisan', 'craft 30 different items', 0) + (30 - craft_count - mod_craft) + ' more';
 		output += '</li>\n<li>';
-		output += (craft_count >= recipe_count) ? getAchieveString('Craft Master', 'craft every item', 1) :
-				getAchieveString('Craft Master', 'craft every item', 0) + (recipe_count - craft_count) + ' more';
+		output += ( (craft_count + mod_craft) >= (recipe_count + mod_known) ) ? getAchieveString('Craft Master', 'craft every item', 1) :
+				getAchieveString('Craft Master', 'craft every item', 0) + ((mod_known > 0) ? "at least " : "") +
+				(recipe_count + mod_known - craft_count - mod_craft) + ' more';
 		output += '</li></ul>\n';
-		if (craft_count < recipe_count) {
+		if ( (craft_count + mod_craft) < (recipe_count + mod_known) ) {
 			output += '<span class="need">Left to craft:<ul>';
 
 			if (need_c.length > 0) {
@@ -905,6 +936,13 @@ window.onload = function () {
 					}
 				}
 				output += '<li>Unknown Recipes<ol>' + need_k.sort().join('') + '</ol></li>';
+			}
+			if (mod_known > 0) {
+				if (mod_craft >= mod_known) {
+					output += '<li>Possibly additional mod recipes</li>';
+				} else {
+					output += '<li>Plus at least ' + (mod_known - mod_craft) + ' mod recipes</li>';
+				}
 			}
 			output += '</ul></span>\n';
 		}
