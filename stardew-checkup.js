@@ -2038,6 +2038,12 @@ window.onload = function () {
 			count++;
 			hasKeys.push('Skull Key');
 		}
+		if (saveInfo.is1_3) {
+			var	uid = $(xmlDoc).find('player').children('UniqueMultiplayerID').text();
+			if (saveInfo.partners.hasOwnProperty(uid)) {
+				spouse = saveInfo.players[saveInfo.partners[uid]];
+			}
+		}			
 		if (spouse.length > 0 && houseUpgrades >= 2) {
 			count++;
 		}

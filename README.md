@@ -10,7 +10,8 @@ The app is written in Javascript and uses [jQuery](https://jquery.com/); it is h
 
 ## Changelog
 
-*  1 Jan  2019 - v2.3.1 - Fixed bub with multiplayer processing introduced by last update
+*  2 Jan  2019 - v2.3.2 - Multiplayer marriage detection in Grandpa's evaluation
+*  1 Jan  2019 - v2.3.1 - Fixed bug with multiplayer processing introduced by last update
 * 30 Dec  2018 - v2.3.0 - Improved handling of mod content for cooking & crafting summaries
 *  3 Oct  2018 - v2.2.3 - Mark some Penny heart events impossible after Pam house; stardrop wording fix
 *  7 Sept 2018 - v2.2.2 - Joja achievement no longer marked impossible unless CC is fully complete
