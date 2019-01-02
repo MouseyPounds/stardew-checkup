@@ -717,7 +717,7 @@ window.onload = function () {
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
 				if (isValidFarmhand(this)) {
-					table.push(parsePlayerCooking(this, saveInfo, recipes, recipeTranslate));
+					table.push(parsePlayerCooking(this, saveInfo, recipes, recipeTranslate, recipeReverse));
 				}
 			});
 		}
