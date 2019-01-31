@@ -107,10 +107,14 @@ window.onload = function () {
 			name = $(xmlDoc).find('player > name').html(),
 			farmer = name,
 			farmhands = [];
-			
+		
+		// We need to know 2 things about the save file to customize the parsing. First, we check if it has a marker
+		// for version 1.3 since the save format changed some in that version to support multiplayer. Second, we check
+		// for which namespace prefix is being used since iOS saves seem to use 'p3' and PC saves use 'xsi'.
 		saveInfo.is1_3 = ($(xmlDoc).find('hasApplied1_3_UpdateChanges').text() === 'true');
-		// Farmer & farm names are read as html() because they come from user input and might contain characters
-		// which must be escaped. This will happen with child names later too.
+		saveInfo.ns_prefix = ($(xmlDoc).find('SaveGame[xmlns\\:xsi]').length > 0) ? 'xsi': 'p3';
+		// Farmer, farm, and child names are read as html() because they come from user input and might contain characters
+		// which must be escaped.
 		saveInfo.players = {};
 		saveInfo.children = {};
 		if (saveInfo.is1_3) {
@@ -118,7 +122,7 @@ window.onload = function () {
 		}
 		saveInfo.players[id] = name;
 		saveInfo.children[id] = [];
-		$(xmlDoc).find("[xsi\\:type='FarmHouse'] NPC[xsi\\:type='Child']").each(function () {
+		$(xmlDoc).find("[" + saveInfo.ns_prefix + "\\:type='FarmHouse'] NPC[" + saveInfo.ns_prefix + "\\:type='Child']").each(function () {
 			saveInfo.children[id].push($(this).find('name').html());
 		});
 		saveInfo.numPlayers = 1;
@@ -133,7 +137,7 @@ window.onload = function () {
 				farmhands.push(name);
 				saveInfo.players[id] = name;
 				saveInfo.children[id] = [];
-				$(this).parent('indoors[xsi\\:type="Cabin"]').find("NPC[xsi\\:type='Child']").each(function () {
+				$(this).parent('indoors[' + saveInfo.ns_prefix + '\\:type="Cabin"]').find("NPC[" + saveInfo.ns_prefix + "\\:type='Child']").each(function () {
 					saveInfo.children[id].push($(this).find('name').html());
 				});
 			}
@@ -273,7 +277,7 @@ window.onload = function () {
 		// lets us to grab children and search out relationship status for version 1.2 saves.
 		$(xmlDoc).find('locations > GameLocation').each(function () {
 			$(this).find('characters > NPC').each(function () {
-				var type = $(this).attr('xsi:type');
+				var type = $(this).attr(saveInfo.ns_prefix + ':type');
 				var who = $(this).find('name').html();
 				// Filter out animals and monsters
 				if (ignore.hasOwnProperty(type) || ignore.hasOwnProperty(who)) {
@@ -282,7 +286,7 @@ window.onload = function () {
 				npc[who] = {};
 				npc[who].isDatable = ($(this).find('datable').text() === 'true');
 				npc[who].isGirl = ($(this).find('gender').text() === '1');
-				npc[who].isChild = ($(this).attr('xsi:type') === 'Child');
+				npc[who].isChild = (type  === 'Child');
 				if (!saveInfo.is1_3) {
 					if ($(this).find('divorcedFromFarmer').text() === 'true') {
 						npc[who].relStatus = 'Divorced';
@@ -586,7 +590,7 @@ window.onload = function () {
 			child_name = saveInfo.children[saveInfo.partners[id]];
 			count += child_name.length;
 		} else {
-			$(player).parent().find("[xsi\\:type='" + houseType + "'] NPC[xsi\\:type='Child']").each(function () {
+			$(player).parent().find("[" + saveInfo.ns_prefix + "\\:type='" + houseType + "'] NPC[" + saveInfo.ns_prefix + "\\:type='Child']").each(function () {
 				count++;
 				child_name.push($(this).find('name').html());
 			});
@@ -1582,7 +1586,7 @@ window.onload = function () {
 			mineral_count = Object.keys(minerals).length,
 			museum_count = artifact_count + mineral_count,
 			donated_count = 0,
-			museum = $(xmlDoc).find("locations > GameLocation[xsi\\:type='LibraryMuseum']"),
+			museum = $(xmlDoc).find("locations > GameLocation[" + saveInfo.ns_prefix + "\\:type='LibraryMuseum']"),
 			farmName = $(xmlDoc).find('player > farmName').html();
 
 		$(museum).find('museumPieces > item').each(function () {
@@ -1951,7 +1955,7 @@ window.onload = function () {
 			max_count = 21,
 			candles = 1,
 			max_candles = 4,
-			currentCandles = Number($(xmlDoc).find("locations > GameLocation[xsi\\:type='Farm'] > grandpaScore").text()),
+			currentCandles = Number($(xmlDoc).find("locations > GameLocation[" + saveInfo.ns_prefix + "\\:type='Farm'] > grandpaScore").text()),
 			need = '',
 			money = Number($(xmlDoc).find('player > totalMoneyEarned').text()),
 			achieves = {
@@ -2069,7 +2073,7 @@ window.onload = function () {
 			count += 1;
 		}
 		$(xmlDoc).find('locations > GameLocation > Characters > NPC').each(function () {
-			if ($(this).attr('xsi:type') === 'Cat' || $(this).attr('xsi:type') === 'Dog') {
+			if ($(this).attr(saveInfo.ns_prefix + ':type') === 'Cat' || $(this).attr(saveInfo.ns_prefix + ':type') === 'Dog') {
 				hasPet = 1;
 				petLove = Number($(this).find('friendshipTowardFarmer').text());
 			}
@@ -2346,7 +2350,7 @@ window.onload = function () {
 			temp,
 			bundleNeed = [],
 			need = [],
-			ccLoc = $(xmlDoc).find("locations > GameLocation[xsi\\:type='CommunityCenter']");
+			ccLoc = $(xmlDoc).find("locations > GameLocation[" + saveInfo.ns_prefix + "\\:type='CommunityCenter']");
 
 		// First check basic completion
 		r = 0;

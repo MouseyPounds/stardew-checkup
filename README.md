@@ -10,19 +10,20 @@ The app is written in Javascript and uses [jQuery](https://jquery.com/); it is h
 
 ## Changelog
 
+* 30 Jan  2019 - v2.4   - Improved support for iOS save files
 *  2 Jan  2019 - v2.3.2 - Multiplayer marriage detection in Grandpa's evaluation
 *  1 Jan  2019 - v2.3.1 - Fixed bug with multiplayer processing introduced by last update
-* 30 Dec  2018 - v2.3.0 - Improved handling of mod content for cooking & crafting summaries
+* 30 Dec  2018 - v2.3   - Improved handling of mod content for cooking & crafting summaries
 *  3 Oct  2018 - v2.2.3 - Mark some Penny heart events impossible after Pam house; stardrop wording fix
 *  7 Sept 2018 - v2.2.2 - Joja achievement no longer marked impossible unless CC is fully complete
 *  1 Sept 2018 - v2.2.1 - Detect crafting recipes from mods; collapse older entries in changelog
-* 29 Aug  2018 - v2.2.0 - Added the polyamory events to social summary & clarified multi-NPC events
+* 29 Aug  2018 - v2.2   - Added the polyamory events to social summary & clarified multi-NPC events
 * 20 Aug  2018 - v2.1.2 - Blobfish spelling fix and better input sanitization
 * 12 Aug  2018 - v2.1.1 - Another bugfix for fish count (Pearls)
-* 12 Aug  2018 - v2.1.0 - Individual player output can now be toggled on/off on multiplayer saves
+* 12 Aug  2018 - v2.1   - Individual player output can now be toggled on/off on multiplayer saves
 * 11 Aug  2018 - v2.0.2 - Bugfix in fish count related to Secret Notes
 * 25 June 2018 - v2.0.1 - Sanity-checking on cooking results and NPCs
-*  6 June 2018 - v2.0.0 - Multiplayer support for all relevant sections
+*  6 June 2018 - v2.0   - Multiplayer support for all relevant sections
 * 26 May  2018 - v1.9.7 - Secret Note reward bugfixes
 * 24 May  2018 - v1.9.6 - Secret Note reward progress; favicon; change initial spouse friendship max to stardrop threshold
 * 21 May  2018 - v1.9.5 - Work around multiplayer mine level weirdness; add "angry" status after confrontation event
