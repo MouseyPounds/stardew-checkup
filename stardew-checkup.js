@@ -334,6 +334,8 @@ window.onload = function () {
 			eventsSeen = {},
 			hasNPCSpouse = false,
 			hasPamHouse = false,
+			hasCompletedIntroductions = true,
+			list_intro = [],
 			polyamory = {
 				'All Bachelors': [195013,195099],
 				'All Bachelorettes': [195012,195019]
@@ -493,7 +495,11 @@ window.onload = function () {
 				entry += ': [<span class="ms_' + span + '">10&#x2665;</span>]</li>';
 				list_poly.push(entry);
 			}
-		}	
+		}
+		$(player).find('questLog > [' + saveInfo.ns_prefix + "\\:type='SocializeQuest'] > whoToGreet > string").each(function () {
+			list_intro.push($(this).text());
+			hasCompletedIntroductions = false;
+		});
 
 		output += '<span class="result">' + farmer + ' has ' + count_5h + ' relationship(s) of 5+ hearts.</span><ul class="ach_list">\n';
 		output += '<li>';
@@ -518,6 +524,17 @@ window.onload = function () {
 		output += (count_10h >= 8) ? getAchieveString('The Beloved Farmer', '10&#x2665; with 8 people', 1) :
 				getAchieveString('The Beloved Farmer', '10&#x2665; with 8 people', 0) + (8 - count_10h) + ' more';
 		output += '</li></ul>\n';
+		table.push(output);
+		//HERE getMilestoneString('House fully upgraded', 1 <ul class="outer">
+		output += '<span class="result">' + farmer + ' has ' + (hasCompletedIntroductions ? "" : "not ") + 
+				'met everyone in town.</span><ul class="ach_list">\n';
+		output += '<li>';
+		output += (list_intro.length == 0) ? getMilestoneString('Complete <span class="ach">Introductions</span> quest', 1) :
+				getMilestoneString('Complete <span class="ach">Introductions</span> quest', 0) + (list_intro.length) + ' more';
+		output += '</li></ul>\n';
+		if (list_intro.length > 0) {
+			output += '<span class="need">Villagers left to meet<ol><li>' + list_intro.sort().join('</li><li>') + '</li></ol></span>\n';
+		}
 		table.push(output);
 		output = '<span class="result">Individual Friendship Progress for ' + farmer + '</span><ul class="outer">';
 		if (list_fam.length > 0) {
