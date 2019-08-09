@@ -526,7 +526,7 @@ window.onload = function () {
 		output += '</li></ul>\n';
 		table.push(output);
 		//HERE getMilestoneString('House fully upgraded', 1 <ul class="outer">
-		output += '<span class="result">' + farmer + ' has ' + (hasCompletedIntroductions ? "" : "not ") + 
+		output = '<span class="result">' + farmer + ' has ' + (hasCompletedIntroductions ? "" : "not ") + 
 				'met everyone in town.</span><ul class="ach_list">\n';
 		output += '<li>';
 		output += (list_intro.length == 0) ? getMilestoneString('Complete <span class="ach">Introductions</span> quest', 1) :
