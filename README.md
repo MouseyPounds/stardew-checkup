@@ -10,6 +10,7 @@ The app is written in Javascript and uses [jQuery](https://jquery.com/); it is h
 
 ## Changelog
 
+* 15 Aug  2019 - v2.5.1 - Fixed duplicate Social output; PR from debashisbiswas
 * 22 June 2019 - v2.5   - Added Introductions quest summary to Social
 * 22 Feb  2019 - v2.4.1 - Fixed bug with detecting valid farmhands on MP saves
 * 30 Jan  2019 - v2.4   - Improved support for iOS save files
