@@ -562,13 +562,14 @@ window.onload = function () {
 	 * - All potential bachelors
 	 * - All other villagers
 	 *
-	 * Each category is a list with objects of the following fields:
-	 * - name (String)
-	 * - status (String)
-	 * - hearts (Number)
-	 * - points (Number)
-	 * - points_needed (String)
-	 * - events (HTML)
+	 * Each category is a list with objects of the following fields,
+	 * each is a string containing HTML.
+	 * - name
+	 * - status
+	 * - hearts
+	 * - points
+	 * - points_needed
+	 * - events
 	 */
 	function renderSocialTable(family, bachelors, other) {
 		var output = [];
