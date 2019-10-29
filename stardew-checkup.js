@@ -412,13 +412,13 @@ window.onload = function () {
 					if (arr[1] === 3910979) {
 						extra = " (Jas &amp; Vincent both)";
 					}
-					eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + id + '&#x2665;' + extra + '</span>]';
+					eventInfo += ' <span class="ms_' + (seen ? 'yes':neg) + '">' + id + '&#x2665;' + extra + '</span>';
 				}
 			} else {
 				if (arr[1] === 639373) {
 					extra = " (Lewis &amp; Marnie both)";
 				}
-				eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + arr[0] + '&#x2665;' + extra + '</span>]';
+				eventInfo += ' <span class="ms_' + (seen ? 'yes':neg) + '">' + arr[0] + '&#x2665;' + extra + '</span>';
 			}
 		};
 		for (var who in npc) {
@@ -435,44 +435,52 @@ window.onload = function () {
 				npc[who].relStatus = "Unmet";
 			}
 			var hearts = Math.floor(pts/250);
-			var entry = '<li>';
-			entry += (npc[who].isChild) ? who + ' (' + wikify('Child', 'Children') + ')' : wikify(who);
-			entry += ': ' + npc[who].relStatus + ', ' + hearts + '&#x2665; (' + pts + ' pts) -- ';
-				
+			var entryObj = {
+				name: (npc[who].isChild) ? who + ' (' + wikify('Child', 'Children') + ')' : wikify(who),
+				status: npc[who].relStatus,
+				hearts: hearts + ' &#x2665;',
+				points: pts,
+				points_needed: "(unknown)",
+				events: "(unknown)",
+			};
+
 			// Check events
 			// We want to only make an Event list item if there are actually events for this NPC and now that there is different
 			// content for different versions, this is much harder without lame hardcoded checks.
 			var eventInfo = '';
 			if (eventList.hasOwnProperty(who)) {
 				if (saveInfo.is1_3 || (who !== 'Jas' && who != 'Vincent' && who != 'Pam' && who != 'Willy')) {
-					eventInfo += '<ul class="compact"><li>Event(s): ';
 					eventList[who].forEach(eventCheck);
-					eventInfo += '</li></ul>';
 				}
 			}
+			entryObj.events = eventInfo;
+
 			var max;
 			if (who === spouse) {
 				// Spouse Stardrop threshold is 3375 from StardewValley.NPC.checkAction()
 				max = hasSpouseStardrop ? 3250 : 3375;
-				entry += (pts >= max) ? '<span class="ms_yes">MAX (can still decay)</span></li>' :
-					'<span class="ms_no">need ' + (max - pts) + ' more</span></li>';
+				entryObj.points_needed = (pts >= max)
+					? '<span class="ms_yes">MAX (can still decay)</span>'
+					: '<span class="ms_no">' + (max - pts) + ' more</span>';
 				hasNPCSpouse = true;
-				list_fam.push(entry + eventInfo);
+				list_fam.push(entryObj);
 			} else if (npc[who].isDatable) {
 				max = 2000;
 				if (npc[who].relStatus === 'Dating') {
 					max = 2500;
 				}
-				entry += (pts >= max) ? '<span class="ms_yes">MAX</span></li>' :
-					'<span class="ms_no">need ' + (max - pts) + ' more</span></li>';
-				list_bach.push(entry + eventInfo);
+				entryObj.points_needed = (pts >= max)
+					? '<span class="ms_yes">MAX</span>'
+					: '<span class="ms_no">' + (max - pts) + ' more</span>';
+				list_bach.push(entryObj);
 			} else {
-				entry += (pts >= 2500) ? '<span class="ms_yes">MAX</span></li>' :
-					'<span class="ms_no">need ' + (2500 - pts) + ' more</span></li>';
+				entryObj.points_needed = (pts >= 2500)
+					? '<span class="ms_yes">MAX</span>'
+					: '<span class="ms_no">' + (2500 - pts) + ' more</span>';
 				if (npc[who].isChild) {
-					list_fam.push(entry + eventInfo);
+					list_fam.push(entryObj);
 				} else {
-					list_other.push(entry + eventInfo);
+					list_other.push(entryObj);
 				}
 			}
 		}
@@ -537,21 +545,89 @@ window.onload = function () {
 		}
 		table.push(output);
 		output = '<span class="result">Individual Friendship Progress for ' + farmer + '</span><ul class="outer">';
-		if (list_fam.length > 0) {
-			output += '<li>Family (includes all player children)<ol class="compact">' + list_fam.sort().join('') + '</ol></li>\n';
-		}
-		if (list_bach.length > 0) {
-			output += '<li>Datable Villagers<ol class="compact">' + list_bach.sort().join('') + '</ol></li>\n';
-		}
+
+		output += renderSocialTable(list_fam, list_bach, list_other);
+
 		if (list_poly.length > 0) {
 			output += '<li>Polyamory Events<ol class="compact">' + list_poly.sort().join('') + '</ol></li>\n';
-		}
-		if (list_other.length > 0) {
-			output += '<li>Other Villagers<ol class="compact">' + list_other.sort().join('') + '</ol></li>\n';
 		}
 		output += '</ul>\n';
 		table.push(output);
 		return table;
+	}
+
+	/**
+	 * Renders a table which contains all social villagers:
+	 * - Your own family
+	 * - All potential bachelors
+	 * - All other villagers
+	 *
+	 * Each category is a list with objects of the following fields:
+	 * - name (String)
+	 * - status (String)
+	 * - hearts (Number)
+	 * - points (Number)
+	 * - points_needed (String)
+	 * - events (HTML)
+	 */
+	function renderSocialTable(family, bachelors, other) {
+		var output = [];
+
+		console.log("Render", family, bachelors, other);
+
+		output.push("<table class='SocialTable' cellspacing='0'>");
+		output.push("    <thead>");
+		output.push("        <tr>");
+		output.push("            <th>Category</th>");
+		output.push("            <th>Name</th>");
+		output.push("            <th>Status</th>");
+		output.push("            <th>Hearts</th>");
+		output.push("            <th>Points</th>");
+		output.push("            <th>(needed)</th>");
+		output.push("            <th>Events</th>");
+		output.push("        </tr>");
+		output.push("    </thead>");
+		output.push("    <tbody>");
+
+		for (var i = 0; i < family.length; i++) {
+			output.push(renderSocialTableRow(
+				"Player's Family",
+				family[i]
+			));
+		}
+
+		for (var j = 0; j < bachelors.length; j++) {
+			output.push(renderSocialTableRow(
+				"Datable Villagers",
+				bachelors[j]
+			));
+		}
+
+		for (var k = 0; k < other.length; k++) {
+			output.push(renderSocialTableRow(
+				"Other Villagers",
+				other[k]
+			));
+		}
+
+		output.push("    </tbody>");
+		output.push("</table>");
+
+		return output.join("");
+	}
+
+	function renderSocialTableRow(category, row) {
+		var output = [];
+		output.push("<tr>");
+		output.push("  <td>" + category + "</td>");
+		output.push("  <td>" + row.name + "</td>");
+		output.push("  <td>" + row.status + "</td>");
+		output.push("  <td class='text-right'>" + row.hearts + "</td>");
+		output.push("  <td class='text-right'>" + row.points + "</td>");
+		output.push("  <td class='text-right'>" + row.points_needed + "</td>");
+		output.push("  <td>" + row.events + "</td>");
+		output.push("</tr>");
+		return output.join("");
 	}
 
 	function parseFamily(xmlDoc, saveInfo) {

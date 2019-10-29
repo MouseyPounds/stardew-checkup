@@ -197,3 +197,19 @@ tr td:not(:first-child) {
 #TOC li a:hover {
 	background-color: #ffe0b0;
 }
+
+.SocialTable {
+	border: 1px solid #555;
+	border-left: 0;
+}
+.SocialTable th {
+	text-align: left;
+}
+.SocialTable th, .SocialTable td {
+	border-left: 1px solid #555;
+	border-bottom: 1px solid #555;
+	padding: 2px 10px;
+}
+.SocialTable td.text-right {
+	text-align: right;
+}
