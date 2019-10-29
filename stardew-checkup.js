@@ -412,13 +412,13 @@ window.onload = function () {
 					if (arr[1] === 3910979) {
 						extra = " (Jas &amp; Vincent both)";
 					}
-					eventInfo += ' <span class="ms_' + (seen ? 'yes':neg) + '">' + id + '&#x2665;' + extra + '</span>';
+					eventInfo += ' <span class="ms_' + (seen ? 'yes':neg) + '">' + id + '&#x2665;' + extra + '</span>&nbsp;&nbsp;';
 				}
 			} else {
 				if (arr[1] === 639373) {
 					extra = " (Lewis &amp; Marnie both)";
 				}
-				eventInfo += ' <span class="ms_' + (seen ? 'yes':neg) + '">' + arr[0] + '&#x2665;' + extra + '</span>';
+				eventInfo += ' <span class="ms_' + (seen ? 'yes':neg) + '">' + arr[0] + '&#x2665;' + extra + '</span>&nbsp;&nbsp;';
 			}
 		};
 		for (var who in npc) {
