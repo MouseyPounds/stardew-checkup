@@ -205,6 +205,9 @@ tr td:not(:first-child) {
 .SocialTable th {
 	text-align: left;
 }
+.SocialTable th.sortable {
+	cursor: pointer;
+}
 .SocialTable th, .SocialTable td {
 	border-left: 1px solid #555;
 	border-bottom: 1px solid #555;

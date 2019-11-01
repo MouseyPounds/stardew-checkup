@@ -438,10 +438,11 @@ window.onload = function () {
 			var entryObj = {
 				name: (npc[who].isChild) ? who + ' (' + wikify('Child', 'Children') + ')' : wikify(who),
 				status: npc[who].relStatus,
-				hearts: hearts + ' &#x2665;',
+				hearts: hearts,
 				points: pts,
 				points_needed: "(unknown)",
 				events: "(unknown)",
+				spouse: false,
 			};
 
 			// Check events
@@ -459,9 +460,8 @@ window.onload = function () {
 			if (who === spouse) {
 				// Spouse Stardrop threshold is 3375 from StardewValley.NPC.checkAction()
 				max = hasSpouseStardrop ? 3250 : 3375;
-				entryObj.points_needed = (pts >= max)
-					? '<span class="ms_yes">MAX (can still decay)</span>'
-					: '<span class="ms_no">' + (max - pts) + ' more</span>';
+				entryObj.points_needed = (pts >= max) ? null : (max - pts);
+				entryObj.spouse = true;
 				hasNPCSpouse = true;
 				list_fam.push(entryObj);
 			} else if (npc[who].isDatable) {
@@ -469,14 +469,10 @@ window.onload = function () {
 				if (npc[who].relStatus === 'Dating') {
 					max = 2500;
 				}
-				entryObj.points_needed = (pts >= max)
-					? '<span class="ms_yes">MAX</span>'
-					: '<span class="ms_no">' + (max - pts) + ' more</span>';
+				entryObj.points_needed = (pts >= max) ? null : (max - pts);
 				list_bach.push(entryObj);
 			} else {
-				entryObj.points_needed = (pts >= 2500)
-					? '<span class="ms_yes">MAX</span>'
-					: '<span class="ms_no">' + (2500 - pts) + ' more</span>';
+				entryObj.points_needed = (pts >= 2500) ? null : (2500 - pts);
 				if (npc[who].isChild) {
 					list_fam.push(entryObj);
 				} else {
@@ -544,7 +540,7 @@ window.onload = function () {
 			output += '<span class="need">Villagers left to meet<ol><li>' + list_intro.sort().join('</li><li>') + '</li></ol></span>\n';
 		}
 		table.push(output);
-		output = '<span class="result">Individual Friendship Progress for ' + farmer + '</span><ul class="outer">';
+		output = '<span class="result">Individual Friendship Progress for ' + farmer + '. Click on a column header to sort it.</span><ul class="outer">';
 
 		output += renderSocialTable(list_fam, list_bach, list_other);
 
@@ -556,6 +552,12 @@ window.onload = function () {
 		return table;
 	}
 
+	// We need to keep the state of the social table even after rendering,
+	// to allow sorting it without parsing the entire file again.
+	// This is kinda ugly, but works fine for this project.
+	var SocialTableRows;
+	var SocialTableCurrentSort = ["category", "asc"];
+
 	/**
 	 * Renders a table which contains all social villagers:
 	 * - Your own family
@@ -564,51 +566,57 @@ window.onload = function () {
 	 *
 	 * Each category is a list with objects of the following fields,
 	 * each is a string containing HTML.
-	 * - name
-	 * - status
-	 * - hearts
-	 * - points
-	 * - points_needed
-	 * - events
+	 * - name (HTML)
+	 * - status (HTML)
+	 * - hearts (integer)
+	 * - points (integer)
+	 * - points_needed (integer or NULL)
+	 * - events (HTML)
+	 * - spouse (bool)
+	 *
+	 * Allows sorting by all keys (sort_key parameter).
+	 * Use sort_order = "desc" to reverse ordering.
 	 */
 	function renderSocialTable(family, bachelors, other) {
-		var output = [];
+		// Reset the semi-global cache to prevent leftovers from previous parsings
+		SocialTableRows = [];
 
-		console.log("Render", family, bachelors, other);
+		// Merge all types of people and set their categories.
+		for (var i = 0; i < family.length; i++) {
+			family[i].category = "Player's Family";
+			SocialTableRows.push(family[i]);
+		}
+		for (var j = 0; j < bachelors.length; j++) {
+			bachelors[j].category = "Datable Villagers";
+			SocialTableRows.push(bachelors[j]);
+		}
+		for (var k = 0; k < other.length; k++) {
+			other[k].category = "Other Villager";
+			SocialTableRows.push(other[k]);
+		}
+
+		function renderSortableHeader(field, title) {
+			return '<th class="sortable" onclick="sortSocialTable(\''+field+'\')">' + title + '</th>';
+		}
+
+		var output = [];
 
 		output.push("<table class='SocialTable' cellspacing='0'>");
 		output.push("    <thead>");
 		output.push("        <tr>");
-		output.push("            <th>Category</th>");
-		output.push("            <th>Name</th>");
-		output.push("            <th>Status</th>");
-		output.push("            <th>Hearts</th>");
-		output.push("            <th>Points</th>");
-		output.push("            <th>(needed)</th>");
+		output.push("            " + renderSortableHeader("category", "Category"));
+		output.push("            " + renderSortableHeader("name", "Name"));
+		output.push("            " + renderSortableHeader("status", "Status"));
+		output.push("            " + renderSortableHeader("hearts", "Hearts"));
+		output.push("            " + renderSortableHeader("points", "Points"));
+		output.push("            " + renderSortableHeader("points_needed", "(needed)"));
 		output.push("            <th>Events</th>");
 		output.push("        </tr>");
 		output.push("    </thead>");
 		output.push("    <tbody>");
 
-		for (var i = 0; i < family.length; i++) {
-			output.push(renderSocialTableRow(
-				"Player's Family",
-				family[i]
-			));
-		}
-
-		for (var j = 0; j < bachelors.length; j++) {
-			output.push(renderSocialTableRow(
-				"Datable Villagers",
-				bachelors[j]
-			));
-		}
-
-		for (var k = 0; k < other.length; k++) {
-			output.push(renderSocialTableRow(
-				"Other Villagers",
-				other[k]
-			));
+		for (var l = 0; l < SocialTableRows.length; l++) {
+			output.push(renderSocialTableRow(SocialTableRows[l]));
 		}
 
 		output.push("    </tbody>");
@@ -617,15 +625,55 @@ window.onload = function () {
 		return output.join("");
 	}
 
-	function renderSocialTableRow(category, row) {
+	/**
+	 * Re-render the social table again with different sort options.
+	 * Needs to be window global, as we call it from the clickable headers.
+	 */
+	window.sortSocialTable = function(sort_key) {
+		var last_sort_key = SocialTableCurrentSort[0];
+		var last_sort_order = SocialTableCurrentSort[1];
+
+		var sort_order = "asc";
+		if ( sort_key === last_sort_key ) {
+			// Swap sort order
+			sort_order = last_sort_order === "asc" ? "desc" : "asc";
+		}
+
+		SocialTableRows.sort(function(a, b) {
+			var value_a = a[sort_key];
+			var value_b = b[sort_key];
+			if ( value_a < value_b ) return -1;
+			if ( value_a > value_b ) return  1;
+			return 0;
+		})
+		if ( sort_order === "desc" ) {
+			SocialTableRows.reverse();
+		}
+
+		var tbody = [];
+		for (var i = 0; i < SocialTableRows.length; i++) {
+			tbody.push(renderSocialTableRow(SocialTableRows[i]));
+		}
+		$('.SocialTable tbody').html(tbody.join(""));
+
+		SocialTableCurrentSort = [sort_key, sort_order];
+	}
+
+	function renderSocialTableRow(row) {
 		var output = [];
+
+		var spouseInfo = row.spouse ? '(can still decay)' : '';
+		var points_needed = row.points_needed === null
+			? '<span class="ms_yes">MAX ' + spouseInfo + '</span>'
+			:'<span class="ms_no">' + row.points_needed + ' more</span>';
+
 		output.push("<tr>");
-		output.push("  <td>" + category + "</td>");
+		output.push("  <td>" + row.category + "</td>");
 		output.push("  <td>" + row.name + "</td>");
 		output.push("  <td>" + row.status + "</td>");
-		output.push("  <td class='text-right'>" + row.hearts + "</td>");
+		output.push("  <td class='text-right'>" + row.hearts + "  &#x2665;</td>");
 		output.push("  <td class='text-right'>" + row.points + "</td>");
-		output.push("  <td class='text-right'>" + row.points_needed + "</td>");
+		output.push("  <td class='text-right'>" + points_needed + "</td>");
 		output.push("  <td>" + row.events + "</td>");
 		output.push("</tr>");
 		return output.join("");
