@@ -110,16 +110,21 @@ window.onload = function () {
 			farmer = name,
 			farmhands = [];
 		
-		// We need to know 2 things about the save file to customize the parsing. First, we check if it has a marker
-		// for version 1.3 since the save format changed some in that version to support multiplayer. Second, we check
-		// for which namespace prefix is being used since iOS saves seem to use 'p3' and PC saves use 'xsi'.
-		saveInfo.is1_3 = ($(xmlDoc).find('hasApplied1_3_UpdateChanges').text() === 'true');
+		// Version processing has changed and is now a number rather than bools.
+		saveInfo.version = 1.2;
+		if ($(xmlDoc).find('hasApplied1_4_UpdateChanges').text() === 'true') {
+			saveInfo.version = 1.4;
+		}
+		else if ($(xmlDoc).find('hasApplied1_3_UpdateChanges').text() === 'true') {
+			saveInfo.version = 1.3;
+		}
+		// Namespace prefix varies by platform; iOS saves seem to use 'p3' and PC saves use 'xsi'.
 		saveInfo.ns_prefix = ($(xmlDoc).find('SaveGame[xmlns\\:xsi]').length > 0) ? 'xsi': 'p3';
 		// Farmer, farm, and child names are read as html() because they come from user input and might contain characters
 		// which must be escaped.
 		saveInfo.players = {};
 		saveInfo.children = {};
-		if (saveInfo.is1_3) {
+		if (saveInfo.version >= 1.3) {
 			id = $(xmlDoc).find('player > UniqueMultiplayerID').text();
 		}
 		saveInfo.players[id] = name;
@@ -172,8 +177,11 @@ window.onload = function () {
 			output += playMin + ' min ';
 		}
 		output += '</span><br />';
-		output += '<span class="result">Save is ' +
-			(saveInfo.is1_3 ? 'from version 1.3 or later' : 'from version 1.2 or earlier') + '</span><br />';
+		var version_num = saveInfo.version;
+		if ($(xmlDoc).find('gameVersion').text() !== '') {
+			version_num = $(xmlDoc).find('gameVersion').text();
+		}
+		output += '<span class="result">Save is from version ' + version_num + '</span><br />';
 		return output;
 	}
 
@@ -240,7 +248,6 @@ window.onload = function () {
 			},
 			npc = {},
 			// <NPC>: [ [<numHearts>, <id>], ... ]
-			// if numHearts starts with 'a', this is content added in patch 1.3
 			eventList = {
 				'Abigail': [ [2, 1], [4, 2], [6, 4], [8, 3], [10, 901756] ],
 				'Alex': [ [2, 20], [4, 2481135], [5, 21], [6, 2119820], [8, 288847], [10, 911526] ],
@@ -261,18 +268,46 @@ window.onload = function () {
 				'Evelyn': [ [4, 19] ],
 				'George': [ [6, 18] ],
 				'Gus': [ [4, 96] ],
-				'Jas': [ ['a8', 3910979] ],
+				'Jas': [  ],
 				'Jodi': [ [4, '94|95'] ], // 94 y1, 95 y2
 				'Kent': [ [3, 100] ],
+				'Krobus': [ ],
 				'Lewis': [ [6, 639373] ],
-				'Linus': [ ['0.2', 502969], [4, 26], ['a8', 371652] ],
+				'Linus': [ ['0.2', 502969], [4, 26] ],
 				'Marnie': [ [6, 639373] ],
-				'Pam': [ ['a9', 503180] ],
+				'Pam': [ ],
 				'Pierre': [ [6, 16] ],
 				'Robin': [ [6, 33] ],
-				'Vincent': [ ['a8', 3910979] ],
-				'Willy': [ ['a6', 711130] ]
+				'Vincent': [ ],
+				'Willy': [ ]
 			};
+			if (saveInfo.version >= 1.3) {
+				eventList.Jas.push([8, 3910979]);
+				eventList.Vincent.push([8, 3910979]);
+				eventList.Linus.push([8, 371652]);
+				eventList.Pam.push([9, 503180]);
+				eventList.Willy.push([6, 711130]);
+			}
+			if (saveInfo.version >= 1.4) {
+				eventList.Gus.push([5, 980558]);
+				// This event does not require 2 hearts, but getting into the room does
+				eventList.Caroline.push([2, 719926]);
+				// 14-Heart spouse events. Many have multiple parts; to preserve their proper order,
+				//  we will use 14.2, 14.3, etc. even though it the requirements are exactly 14
+				eventList.Abigail.push([14, 6963327]);
+				eventList.Emily.push([14.1, 3917600], [14.2, 3917601]);
+				eventList.Haley.push([14.1, 6184643], [14.2, 8675611], [14.3, 6184644]);
+				eventList.Leah.push([14.1, 3911124], [14.2, 3091462]);
+				eventList.Maru.push([14.1, 3997666], [14.2, 5183338]);
+				eventList.Penny.push([14.1, 4325434], [14.2, 4324303]);
+				eventList.Alex.push([14.1, 3917587], [14.2, 3917589], [14.3, 3917590]);
+				eventList.Elliott.push([14.1, 3912125], [14.2, 3912132]);
+				eventList.Harvey.push([14, 3917626]);
+				eventList.Sam.push([14.1, 3918600], [14.2, 3918601], [14.3, 3918602], [14.4, 3918603]);
+				eventList.Sebastian.push([14.1, 9333219], [14.2, 9333220]);
+				eventList.Shane.push([14.1, 3917584], [14.2, 3917585], [14.3, 3917586]);
+				eventList.Krobus.push([14, 7771191]);
+			}
 
 
 		// Search locations for NPCs. They could be hardcoded, but this is somewhat more mod-friendly and it also
@@ -289,7 +324,7 @@ window.onload = function () {
 				npc[who].isDatable = ($(this).find('datable').text() === 'true');
 				npc[who].isGirl = ($(this).find('gender').text() === '1');
 				npc[who].isChild = (type  === 'Child');
-				if (!saveInfo.is1_3) {
+				if (saveInfo.version < 1.3) {
 					if ($(this).find('divorcedFromFarmer').text() === 'true') {
 						npc[who].relStatus = 'Divorced';
 					} else if (countdown > 0 && who === spouse.slice(0,-7)) {
@@ -340,7 +375,7 @@ window.onload = function () {
 				'All Bachelors': [195013,195099],
 				'All Bachelorettes': [195012,195019]
 				};
-		if (saveInfo.is1_3) {
+		if (saveInfo.version >= 1.3) {
 			$(player).find('activeDialogueEvents > item').each(function () {
 				var which = $(this).find('key > string').text();
 				var num = Number($(this).find('value > int').text());
@@ -362,6 +397,10 @@ window.onload = function () {
 					npc[who] = {'isDatable': false, 'isGirl': false, 'isChild': false};
 				}
 				npc[who].relStatus = $(this).find('value > Friendship > Status').html();
+				var isRoommate = ($(this).find('value > Friendship > RoommateMarriage').text() === 'true');
+				if (npc[who].relStatus === 'Married' && isRoommate) {
+					npc[who].relStatus = 'Roommate'
+				}
 			});
 		} else {
 			$(player).find('friendships > item').each(function () {
@@ -387,7 +426,7 @@ window.onload = function () {
 				hasPamHouse = true;
 			}
 		});
-		var eventCheck = function (arr) {
+		var eventCheck = function (arr, who) {
 			var seen = false;
 			var neg = 'no';
 			// Note we are altering eventInfo from parent function
@@ -404,22 +443,22 @@ window.onload = function () {
 				(arr[1] === 36 && hasPamHouse)) {
 					neg = 'imp';
 				}
+			// 10-heart events will be tagged impossible if there is no bouquet.
+			if (arr[0] == 10 && npc[who].isDatable && npc[who].relStatus == 'Friendly') {
+				neg = 'imp';
+			}			
+			// 14-heart events will be tagged impossible if the player is married to someone else.
+			if (arr[0] >= 14 && who !== spouse) {
+				neg = 'imp';
+			}
 			// Now we are hardcoding 2 events that involve multiple NPCs too.
 			var extra = '';
-			if (String(arr[0]).substr(0,1) === 'a') {
-				if (saveInfo.is1_3) {
-					var id = arr[0].substr(1);
-					if (arr[1] === 3910979) {
-						extra = " (Jas &amp; Vincent both)";
-					}
-					eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + id + '&#x2665;' + extra + '</span>]';
-				}
-			} else {
-				if (arr[1] === 639373) {
-					extra = " (Lewis &amp; Marnie both)";
-				}
-				eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + arr[0] + '&#x2665;' + extra + '</span>]';
+			if (arr[1] === 3910979) {
+				extra = " (Jas &amp; Vincent both)";
+			} else if (arr[1] === 639373) {
+				extra = " (Lewis &amp; Marnie both)";
 			}
+			eventInfo += ' [<span class="ms_' + (seen ? 'yes':neg) + '">' + arr[0] + '&#x2665;' + extra + '</span>]';
 		};
 		for (var who in npc) {
 			// Overriding status for the confrontation events
@@ -440,20 +479,23 @@ window.onload = function () {
 			entry += ': ' + npc[who].relStatus + ', ' + hearts + '&#x2665; (' + pts + ' pts) -- ';
 				
 			// Check events
-			// We want to only make an Event list item if there are actually events for this NPC and now that there is different
-			// content for different versions, this is much harder without lame hardcoded checks.
+			// We want to only make an Event list item if there are actually events for this NPC.
 			var eventInfo = '';
 			if (eventList.hasOwnProperty(who)) {
-				if (saveInfo.is1_3 || (who !== 'Jas' && who != 'Vincent' && who != 'Pam' && who != 'Willy')) {
+				if (eventList[who].length > 0) {
 					eventInfo += '<ul class="compact"><li>Event(s): ';
-					eventList[who].forEach(eventCheck);
+					eventList[who].sort(function (a,b) { return a[0] - b[0]; });
+					eventList[who].forEach(function (a) { eventCheck(a, who); });
 					eventInfo += '</li></ul>';
 				}
 			}
 			var max;
 			if (who === spouse) {
-				// Spouse Stardrop threshold is 3375 from StardewValley.NPC.checkAction()
+				// Spouse Stardrop threshold is 3375 from StardewValley.NPC.checkAction(); 3500 (14 hearts) in 1.4
 				max = hasSpouseStardrop ? 3250 : 3375;
+				if (saveInfo.version >= 1.4) {
+					max = 3500;
+				}
 				entry += (pts >= max) ? '<span class="ms_yes">MAX (can still decay)</span></li>' :
 					'<span class="ms_no">need ' + (max - pts) + ' more</span></li>';
 				hasNPCSpouse = true;
@@ -476,7 +518,7 @@ window.onload = function () {
 				}
 			}
 		}
-		if (saveInfo.is1_3) {
+		if (saveInfo.version >= 1.3) {
 			for (var who in polyamory) {
 				// Rather than trying to force these to work in the eventCheck function, we make a new checker.
 				var seen = false;
@@ -588,7 +630,7 @@ window.onload = function () {
 			id = "0";
 		}
 		if (typeof(spouse) !== 'undefined' && spouse.length > 0) {
-			if (wedding > 0 && !saveInfo.is1_3) {
+			if (wedding > 0 && saveInfo.version < 1.3) {
 				spouse = spouse.slice(0,-7);
 			}
 			count++;
@@ -599,7 +641,12 @@ window.onload = function () {
 			spouse = '(None)';
 			needs.push('spouse');
 		}
-		output += '<span class="result">' + farmer + "'s spouse: " + spouse + 
+		// Technically, we should be searching the Friendship data for RoommateMarriage here, but for now we are hardcoding
+		var title = "spouse";
+		if (spouse === "Krobus") {
+			title = "roommate"
+		}
+		output += '<span class="result">' + farmer + "'s " + title + ": " + spouse + 
 			((wedding) ? ' -- wedding in ' + wedding + ' day(s)' : '') + '</span><br />\n';
 		if (saveInfo.children.hasOwnProperty(id) && saveInfo.children[id].length > 0) {
 			child_name = saveInfo.children[id];
@@ -622,7 +669,7 @@ window.onload = function () {
 		} else {
 			needs.push("2 children");
 		}
-		output += '<span class="result">' + farmer + "'s Children: " + children + '</span><ul class="ach_list"><li>\n';
+		output += '<span class="result">' + farmer + "'s children: " + children + '</span><ul class="ach_list"><li>\n';
 		output += (count >= 3) ? getAchieveString('Full House', 'Married + 2 kids', 1) :
 				getAchieveString('Full House', 'Married + 2 kids', 0) + needs.join(' and ');
 		output += '</li></ul>\n';
@@ -730,6 +777,11 @@ window.onload = function () {
 			id,
 			recipeReverse = {};
 
+		if (saveInfo.version >= 1.4) {
+			recipes[733] = "Shrimp Cocktail";
+			recipes[253] = "Triple Shot Espresso";
+			recipes[265] = "Seafoam Pudding";
+		}
 		for (id in recipes) {
 			if (recipes.hasOwnProperty(id)) {
 				recipeReverse[recipes[id]] = id;
@@ -868,11 +920,14 @@ window.onload = function () {
 				"Oil Of Garlic": "Oil of Garlic"
 			};
 
-		if (saveInfo.is1_3) {
+		if (saveInfo.version >= 1.3) {
 			// Wedding Ring is specifically excluded in StardewValley.Stats.checkForCraftingAchievments() so it is not listed here.
 			recipes.push('Wood Sign', 'Stone Sign', 'Garden Pot');
 		}
 
+		if (saveInfo.version >= 1.4) {
+			recipes.push('Brick Floor', 'Grass Starter', 'Deluxe Scarecrow', 'Mini-Jukebox', 'Tree Fertilizer', 'Tea Sapling', 'Warp Totem: Desert');
+		}
 		table[0] = parsePlayerCrafting($(xmlDoc).find('SaveGame > player'), saveInfo, recipes, recipeTranslate);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
@@ -1038,10 +1093,14 @@ window.onload = function () {
 				795: "Void Salmon",
 				796: "Slimejack"
 			};
-		if (saveInfo.is1_3) {
+		if (saveInfo.version >= 1.3) {
 			recipes[798] = 'Midnight Squid';
 			recipes[799] = 'Spook Fish';
 			recipes[800] = 'Blobfish';
+		}
+		if (saveInfo.version >= 1.4) {
+			recipes[269] = 'Midnight Carp';
+			recipes[267] = 'Flounder';
 		}
 		table[0] = parsePlayerFishing($(xmlDoc).find('SaveGame > player'), saveInfo, recipes);
 		if (saveInfo.numPlayers > 1) {
@@ -1067,7 +1126,9 @@ window.onload = function () {
 				372: 1, // Clam is category "Basic -23"
 				308: 1, // Void Mayo can be caught in Witch's Swamp during "Goblin Problems"
 				79: 1,  // Secret Notes can be caught directly
-				797: 1  // Pearl can be caught directly in Night Market Submarine
+				797: 1, // Pearl can be caught directly in Night Market Submarine
+				191: 1, // Ornate necklace, from secret note quest added in 1.4
+				103: 1  // Ancient doll, can be caught on 4 corners once after viewing the "doving" TV easter egg
 			},
 			id,
 			r;
@@ -1095,13 +1156,17 @@ window.onload = function () {
 		output += (craft_count >= 24) ? getAchieveString('Ol\' Mariner', 'catch 24 different fish', 1) :
 				getAchieveString('Ol\' Mariner', 'catch 24 different fish', 0) + (24 - craft_count) + ' more';
 		output += '</li>\n<li>';
-		// Count currently hardcoded; min should be removed and description adjusted if this is fixed in the game
-		output += (craft_count >= Math.min(59, recipe_count)) ? getAchieveString('Master Angler', 'catch 59 different fish', 1) :
-				getAchieveString('Master Angler', 'catch 59 different fish', 0) + (Math.min(59, recipe_count) - craft_count) + ' more';
-		if (saveInfo.is1_3) {
-			output += '</li>\n<li>';
-			output += (craft_count >= recipe_count) ? getMilestoneString('Catch every type of fish', 1) :
-				getMilestoneString('Catch every type of fish', 0) + (recipe_count - craft_count) + ' more';
+		if (saveInfo.version >= 1.4) {
+			output += (craft_count >= recipe_count) ? getAchieveString('Master Angler', 'catch every type of fish', 1) :
+					getAchieveString('Master Angler', 'catch every type of fish', 0) + (recipe_count - craft_count) + ' more';
+		} else {
+			output += (craft_count >= Math.min(59, recipe_count)) ? getAchieveString('Master Angler', 'catch 59 different fish', 1) :
+					getAchieveString('Master Angler', 'catch 59 different fish', 0) + (Math.min(59, recipe_count) - craft_count) + ' more';
+			if (saveInfo.version === 1.3) {
+				output += '</li>\n<li>';
+				output += (craft_count >= recipe_count) ? getMilestoneString('Catch every type of fish', 1) :
+					getMilestoneString('Catch every type of fish', 0) + (recipe_count - craft_count) + ' more';				
+			}
 		}
 		output += '</li></ul>\n';
 		if (craft_count < recipe_count) {
@@ -1255,7 +1320,17 @@ window.onload = function () {
 				771: "Fiber",
 				787: "Battery Pack"
 			};
-			
+		
+		if (saveInfo.version >= 1.4) {
+			recipes[807] = "Dinosaur Mayonnaise";
+			recipes[812] = "Roe";
+			recipes[445] = "Caviar";
+			recipes[814] = "Squid Ink";
+			recipes[815] = "Tea Leaves";
+			recipes[447] = "Aged Roe";
+			recipes[614] = "Green Tea";
+			recipes[271] = "Unmilled Rice";
+		}
 		table[0] = parsePlayerBasicShipping($(xmlDoc).find('SaveGame > player'), saveInfo, recipes);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
@@ -1745,7 +1820,7 @@ window.onload = function () {
 				"Skeletons": 50,
 				"Cave Insects": 125,
 				"Duggies": 30,
-				"Dust Sprites": 500
+				"Dust Sprites": 500,
 			},
 			categories = {
 				"Green Slime": "Slimes",
@@ -1754,6 +1829,7 @@ window.onload = function () {
 				"Shadow Brute": "Void Spirits",
 				"Shadow Shaman": "Void Spirits",
 				"Shadow Guy": "Void Spirits", // not in released game
+				"Shadow Girl": "Void Spirits", // not in released game
 				"Bat": "Bats",
 				"Frost Bat": "Bats",
 				"Lava Bat": "Bats",
@@ -1774,6 +1850,22 @@ window.onload = function () {
 				"Duggies": ["Duggy"],
 				"Dust Sprites": ["Dust Spirit"]
 			};
+		if (saveInfo.version >= 1.4) {
+			goals["Rock Crabs"] = 60;
+			goals["Mummies"] = 100;
+			goals["Pepper Rex"] = 50;
+			goals["Serpents"] = 250;
+			categories["Rock Crab"] = "Rock Crabs";
+			categories["Lava Crab"] = "Rock Crabs";
+			categories["Iridium Crab"] = "Rock Crabs";
+			categories["Mummy"] = "Mummies";
+			categories["Pepper Rex"] = "Pepper Rex";
+			categories["Serpent"] = "Serpents";
+			monsters["Rock Crabs"] = ["Rock Crab", "Lava Crab", "Iridium Crab"];
+			monsters["Mummies"] = ["Mummy"];
+			monsters["Pepper Rex"] = ["Pepper Rex"];
+			monsters["Serpents"] = ["Serpent"];
+		}
 		table[0] = parsePlayerMonsters($(xmlDoc).find('SaveGame > player'), saveInfo, goals, categories, monsters);
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
@@ -1819,7 +1911,7 @@ window.onload = function () {
 				getAchieveString('The Bottom', 'reach mine level 120', 0) + (120 - mineLevel) + ' more';
 		output += '</li></ul>\n';
 		
-		if (saveInfo.is1_3) {
+		if (saveInfo.version >= 1.3) {
 			stats = $(player).find('stats > specificMonstersKilled');
 		} else {
 			// In 1.2, stats are under the root SaveGame so we must go back up the tree
@@ -1886,7 +1978,7 @@ window.onload = function () {
 		var output = '',
 			count;
 			
-		if (saveInfo.is1_3) {
+		if (saveInfo.version >= 1.3) {
 			count = Number($(player).find('stats > questsCompleted').text());
 		} else {
 			// In 1.2, stats are under the root SaveGame so we must go back up the tree
@@ -2061,7 +2153,7 @@ window.onload = function () {
 			count++;
 			hasKeys.push('Skull Key');
 		}
-		if (saveInfo.is1_3) {
+		if (saveInfo.version >= 1.3) {
 			var	uid = $(xmlDoc).find('player').children('UniqueMultiplayerID').text();
 			if (saveInfo.partners.hasOwnProperty(uid)) {
 				spouse = saveInfo.players[saveInfo.partners[uid]];
@@ -2070,7 +2162,7 @@ window.onload = function () {
 		if (spouse.length > 0 && houseUpgrades >= 2) {
 			count++;
 		}
-		if (saveInfo.is1_3) {
+		if (saveInfo.version >= 1.3) {
 			$(xmlDoc).find('player> friendshipData > item').each(function () {
 				var num = Number($(this).find('value > Friendship > Points').text());
 				if (num >= 1975) { heart_count++; }
@@ -2431,11 +2523,12 @@ window.onload = function () {
 			output += getAchieveImpossibleString('Local Legend', 'restore the Pelican Town Community Center');
 			output += '</li><li>\n';
 			if (!hasSeenCeremony) {
-				if (jojaHave < jojaCount) {
-					temp = (jojaCount - jojaHave) + ' more project(s) and the ceremony';
-					for (id in jojaMail) {
-						if (jojaMail.hasOwnProperty(id)) {
-							if (!done.hasOwnProperty(jojaMail[id])) {
+				if (hybridLeft > 0) {
+					temp = hybridLeft + ' more project(s) and the ceremony';
+					// Since we are supporting hybrid playthrough, we check the CC versions of mail, not joja
+					for (id in ccMail) {
+						if (ccMail.hasOwnProperty(id) && id !== ccBulletin) {
+							if (!done.hasOwnProperty(ccMail[id])) {
 								need.push('<li> Purchase ' + project[jojaMail[id]] + ' project for ' + price[jojaMail[id]] + '</li>');
 							}
 						}
@@ -2445,7 +2538,7 @@ window.onload = function () {
 				}
 				need.push('<li>Attend the completion ceremony at the Joja Warehouse</li>');
 			}
-			output += (jojaHave >= jojaCount && hasSeenCeremony) ? getAchieveString('Joja Co. Member Of The Year', '', 1) :
+			output += (hasSeenCeremony) ? getAchieveString('Joja Co. Member Of The Year', '', 1) :
 					getAchieveString('Joja Co. Member Of The Year', '', 0) + temp;
 			output += '</li></ul>\n';
 		} else {
@@ -2504,7 +2597,7 @@ window.onload = function () {
 			table = [],
 			hasStoneJunimo = false;
 		
-		if (!saveInfo.is1_3) {
+		if (saveInfo.version < 1.3) {
 			return '';
 		}
 		
@@ -2569,6 +2662,11 @@ window.onload = function () {
 			reward_re,
 			i;
 
+		if (saveInfo.version >= 1.4) {
+			note_count = 25;
+			reward_count = 12;
+			reward_skip[24] = true;
+		}
 		// Check Krobus event, then check for magnifier, then check number of notes
 		// Also checking for one of the reward events here, so don't use "return false" to end early.
 		$(player).find('eventsSeen > int').each(function () {
@@ -2612,12 +2710,15 @@ window.onload = function () {
 			} else if ($(this).text() === 'gotPearl') {
 				rewards[15] = true;
 				found_rewards++;
-				} else if ($(this).text() === 'junimoPlush') {
+			} else if ($(this).text() === 'junimoPlush') {
 				rewards[13] = true;
 				found_rewards++;
-				} else if ($(this).text() === 'TH_Tunnel') {
+			} else if ($(this).text() === 'TH_Tunnel') {
 				// Qi quest we just check for the start. Full completion is 'TH_Lumberpile'
 				rewards[22] = true;
+				found_rewards++;
+			} else if ($(this).text() === 'carolinesNecklace') {
+				rewards[25] = true;
 				found_rewards++;
 			} else if ($(this).text() === 'JojaMember') {
 				isJojaMember = true;

@@ -51,7 +51,7 @@ h3 {
 .ach,.warn,.note {
 	font-style: italic;
 }
-.pts {
+.pts, .strong {
 	font-weight: bold;
 }
 .ach_yes,.ms_yes,.pt_yes {
