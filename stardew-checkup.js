@@ -112,11 +112,14 @@ window.onload = function () {
 		
 		// Version processing has changed and is now a number rather than bools.
 		saveInfo.version = 1.2;
-		if ($(xmlDoc).find('hasApplied1_4_UpdateChanges').text() === 'true') {
-			saveInfo.version = 1.4;
-		}
-		else if ($(xmlDoc).find('hasApplied1_3_UpdateChanges').text() === 'true') {
-			saveInfo.version = 1.3;
+		if (Number($(xmlDoc).find('gameVersion').first().text()) > 0) {
+			saveInfo.version = Number($(xmlDoc).find('gameVersion').first().text());
+		} else {
+			if ($(xmlDoc).find('hasApplied1_4_UpdateChanges').text() === 'true') {
+				saveInfo.version = 1.4;
+			} else if ($(xmlDoc).find('hasApplied1_3_UpdateChanges').text() === 'true') {
+				saveInfo.version = 1.3;
+			}
 		}
 		// Namespace prefix varies by platform; iOS saves seem to use 'p3' and PC saves use 'xsi'.
 		saveInfo.ns_prefix = ($(xmlDoc).find('SaveGame[xmlns\\:xsi]').length > 0) ? 'xsi': 'p3';
@@ -178,9 +181,6 @@ window.onload = function () {
 		}
 		output += '</span><br />';
 		var version_num = saveInfo.version;
-		if ($(xmlDoc).find('gameVersion').text() !== '') {
-			version_num = $(xmlDoc).find('gameVersion').text();
-		}
 		output += '<span class="result">Save is from version ' + version_num + '</span><br />';
 		return output;
 	}

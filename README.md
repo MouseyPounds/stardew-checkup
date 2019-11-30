@@ -10,6 +10,7 @@ The app is written in Javascript and uses [jQuery](https://jquery.com/); it is h
 
 ## Changelog
 
+* 30 Nov  2019 - v3.0.1 - Version detection should now properly identify day one 1.4 saves
 * 26 Nov  2019 - v3.0   - Support for Stardew Valley 1.4
 * 15 Aug  2019 - v2.5.1 - Fixed duplicate Social output; PR from debashisbiswas
 * 22 June 2019 - v2.5   - Added Introductions quest summary to Social
