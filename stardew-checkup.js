@@ -2518,6 +2518,7 @@ window.onload = function () {
 				output += '<span class="result">' + farmer + ' is a Joja member and has completed ' + jojaHave +
 					' of the ' + jojaCount + ' projects on the Community Development Form.</span><br />\n';
 			}
+			hybridLeft -= jojaHave;
 			output += '<span class="result">' + farmer + ((hasSeenCeremony) ? ' has' : ' has not') +
 					' attended the completion ceremony</span><br />\n<ul class="ach_list"><li>';
 			output += getAchieveImpossibleString('Local Legend', 'restore the Pelican Town Community Center');
@@ -2527,9 +2528,12 @@ window.onload = function () {
 					temp = hybridLeft + ' more project(s) and the ceremony';
 					// Since we are supporting hybrid playthrough, we check the CC versions of mail, not joja
 					for (id in ccMail) {
-						if (ccMail.hasOwnProperty(id) && id !== ccBulletin) {
+						console.log("Checking id " + id);
+						if (ccMail.hasOwnProperty(id) && id !== "ccBulletin") {
+							console.log("  Passed first if");
 							if (!done.hasOwnProperty(ccMail[id])) {
-								need.push('<li> Purchase ' + project[jojaMail[id]] + ' project for ' + price[jojaMail[id]] + '</li>');
+								console.log("  Passed second if");
+								need.push('<li> Purchase ' + project[ccMail[id]] + ' project for ' + price[ccMail[id]] + '</li>');
 							}
 						}
 					}
