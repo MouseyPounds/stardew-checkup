@@ -17,7 +17,7 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>window.jQuery || document.write('<script src="./jquery-3.2.1.min.js"><\/script>')</script>
-<script src="./stardew-checkup.js?v=2.4.1"></script>
+<script src="./stardew-checkup.js?v=3.0.3"></script>
 
 </head>
 <body>
@@ -33,7 +33,7 @@
 <p>This app checks a <a href="http://stardewvalley.net/">Stardew Valley</a> save file for various achievements and milestones and
 lets you know what is missing. Currently it checks for progress on 38 achievements (everything but the 2 Praire King minigame achieves) and Grandpa's evaluation. It also summarizes relationship progress, including cutscenes.</p>
 <p>Most changed &amp; added content from version 1.4 is supported, and 1.4-specific features should only appear in the results if the save is detected to be from that version. <span class="strong note">If you load a 1.4 save into the app, expect to see some spoilers.</span> </p>
-<p>The app is written in Javascript and uses <a href="https://jquery.com/">jQuery</a>; it is hosted on GitHub Pages at <a href="https://mouseypounds.github.io/stardew-checkup/">https://mouseypounds.github.io/stardew-checkup/</a> and the source code repository is <a href="https://github.com/MouseyPounds/stardew-checkup">https://github.com/MouseyPounds/stardew-checkup</a>.
+<p>The app is written in Javascript and uses <a href="https://jquery.com/">jQuery</a> and <a href="https://github.com/substack/semver-compare">semver-compare</a>; it is hosted on GitHub Pages at <a href="https://mouseypounds.github.io/stardew-checkup/">https://mouseypounds.github.io/stardew-checkup/</a> and the source code repository is <a href="https://github.com/MouseyPounds/stardew-checkup">https://github.com/MouseyPounds/stardew-checkup</a>.
 Please report any bugs, suggestions, or other feedback to <a href="https://community.playstarbound.com/threads/webapp-stardew-checkup-achievement-completion-progress.141706/">the topic in the official forums.</a></p>
 </div>
 
@@ -64,6 +64,7 @@ Please report any bugs, suggestions, or other feedback to <a href="https://commu
 <noscript><span class="error">Javascript appears to be unsupported by or disabled in your browser. Stardew Checkup will not work without it.</span></noscript>
 <h2 id="sec_changelog">Changelog</h2>
 <ul>
+<li> 7 Dec  2019 - v3.0.3 - Version detection changed again to handle semver like 1.4.2</li>
 <li> 1 Dec  2019 - v3.0.2 - Fixed bug in Joja development summary</li>
 <li>30 Nov  2019 - v3.0.1 - Version detection should now properly identify day one 1.4 saves</li>
 <li>26 Nov  2019 - v3.0   - Support for Stardew Valley 1.4</li>

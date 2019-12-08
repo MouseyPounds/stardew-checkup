@@ -28,6 +28,21 @@ window.onload = function () {
 		return s && s[0].toUpperCase() + s.slice(1);
 	}
 
+	function compareSemVer(a, b) {
+		// semver-compare by James Halliday ("substack") @ https://github.com/substack/semver-compare
+		var pa = a.split('.');
+		var pb = b.split('.');
+		for (var i = 0; i < 3; i++) {
+			var na = Number(pa[i]);
+			var nb = Number(pb[i]);
+			if (na > nb) return 1;
+			if (nb > na) return -1;
+			if (!isNaN(na) && isNaN(nb)) return 1;
+			if (isNaN(na) && !isNaN(nb)) return -1;
+		}
+		return 0;
+	}
+
 	function getAchieveString(name, desc, yes) {
 		if (desc.length > 0) {
 			desc = '(' + desc + ') ';
@@ -101,7 +116,7 @@ window.onload = function () {
 	// Each receives the xmlDoc object to parse & the saveInfo information structure and returns HTML to output.
 	function parseSummary(xmlDoc, saveInfo) {
 		var output = '<h3>Summary</h3>\n',
-			farmTypes = ['Standard', 'Riverland', 'Forest', 'Hill-top', 'Wilderness'],
+			farmTypes = ['Standard', 'Riverland', 'Forest', 'Hill-top', 'Wilderness', 'Four Corners'],
 			playTime = Number($(xmlDoc).find('player > millisecondsPlayed').text()),
 			playHr = Math.floor(playTime / 36e5),
 			playMin = Math.floor((playTime % 36e5) / 6e4),
@@ -110,24 +125,24 @@ window.onload = function () {
 			farmer = name,
 			farmhands = [];
 		
-		// Version processing has changed and is now a number rather than bools.
-		saveInfo.version = 1.2;
-		if (Number($(xmlDoc).find('gameVersion').first().text()) > 0) {
-			saveInfo.version = Number($(xmlDoc).find('gameVersion').first().text());
-		} else {
+		// Versioning has changed from bools to numers, to now a semver string.
+		saveInfo.version = $(xmlDoc).find('gameVersion').first().text();
+		if (saveInfo.version === "") {
+			saveInfo.version = "1.2";
 			if ($(xmlDoc).find('hasApplied1_4_UpdateChanges').text() === 'true') {
-				saveInfo.version = 1.4;
+				saveInfo.version = "1.4";
 			} else if ($(xmlDoc).find('hasApplied1_3_UpdateChanges').text() === 'true') {
-				saveInfo.version = 1.3;
+				saveInfo.version = "1.3";
 			}
 		}
+
 		// Namespace prefix varies by platform; iOS saves seem to use 'p3' and PC saves use 'xsi'.
 		saveInfo.ns_prefix = ($(xmlDoc).find('SaveGame[xmlns\\:xsi]').length > 0) ? 'xsi': 'p3';
 		// Farmer, farm, and child names are read as html() because they come from user input and might contain characters
 		// which must be escaped.
 		saveInfo.players = {};
 		saveInfo.children = {};
-		if (saveInfo.version >= 1.3) {
+		if (compareSemVer(saveInfo.version, "1.3") >= 0) {
 			id = $(xmlDoc).find('player > UniqueMultiplayerID').text();
 		}
 		saveInfo.players[id] = name;
@@ -171,13 +186,16 @@ window.onload = function () {
 		// Date originally used XXForSaveGame elements, but those were not always present on saves downloaded from upload.farm
 		output += '<span class="result">Day ' + Number($(xmlDoc).find('dayOfMonth').text()) + ' of ' +
 			capitalize($(xmlDoc).find('currentSeason').html()) + ', Year ' + Number($(xmlDoc).find('year').text()) + '</span><br />';
-		// Playtime of < 1 min will be blank.
 		output += '<span class="result">Played for ';
-		if (playHr > 0) {
-			output += playHr + ' hr ';
-		}
-		if (playMin > 0) {
-			output += playMin + ' min ';
+		if (playHr === 0 && playMin === 0) {
+			output += "less than 1 minute";
+		} else {
+			if (playHr > 0) {
+				output += playHr + ' hr ';
+			}
+			if (playMin > 0) {
+				output += playMin + ' min ';
+			}
 		}
 		output += '</span><br />';
 		var version_num = saveInfo.version;
@@ -281,14 +299,14 @@ window.onload = function () {
 				'Vincent': [ ],
 				'Willy': [ ]
 			};
-			if (saveInfo.version >= 1.3) {
+			if (compareSemVer(saveInfo.version, "1.3") >= 0) {
 				eventList.Jas.push([8, 3910979]);
 				eventList.Vincent.push([8, 3910979]);
 				eventList.Linus.push([8, 371652]);
 				eventList.Pam.push([9, 503180]);
 				eventList.Willy.push([6, 711130]);
 			}
-			if (saveInfo.version >= 1.4) {
+			if (compareSemVer(saveInfo.version, "1.4") >= 0) {
 				eventList.Gus.push([5, 980558]);
 				// This event does not require 2 hearts, but getting into the room does
 				eventList.Caroline.push([2, 719926]);
@@ -324,7 +342,7 @@ window.onload = function () {
 				npc[who].isDatable = ($(this).find('datable').text() === 'true');
 				npc[who].isGirl = ($(this).find('gender').text() === '1');
 				npc[who].isChild = (type  === 'Child');
-				if (saveInfo.version < 1.3) {
+				if (compareSemVer(saveInfo.version, "1.3") < 0) {
 					if ($(this).find('divorcedFromFarmer').text() === 'true') {
 						npc[who].relStatus = 'Divorced';
 					} else if (countdown > 0 && who === spouse.slice(0,-7)) {
@@ -375,7 +393,7 @@ window.onload = function () {
 				'All Bachelors': [195013,195099],
 				'All Bachelorettes': [195012,195019]
 				};
-		if (saveInfo.version >= 1.3) {
+		if (compareSemVer(saveInfo.version, "1.3") >= 0) {
 			$(player).find('activeDialogueEvents > item').each(function () {
 				var which = $(this).find('key > string').text();
 				var num = Number($(this).find('value > int').text());
@@ -493,7 +511,7 @@ window.onload = function () {
 			if (who === spouse) {
 				// Spouse Stardrop threshold is 3375 from StardewValley.NPC.checkAction(); 3500 (14 hearts) in 1.4
 				max = hasSpouseStardrop ? 3250 : 3375;
-				if (saveInfo.version >= 1.4) {
+				if (compareSemVer(saveInfo.version, "1.4") >= 0) {
 					max = 3500;
 				}
 				entry += (pts >= max) ? '<span class="ms_yes">MAX (can still decay)</span></li>' :
@@ -630,7 +648,7 @@ window.onload = function () {
 			id = "0";
 		}
 		if (typeof(spouse) !== 'undefined' && spouse.length > 0) {
-			if (wedding > 0 && saveInfo.version < 1.3) {
+			if (wedding > 0 && compareSemVer(saveInfo.version, "1.3") < 0) {
 				spouse = spouse.slice(0,-7);
 			}
 			count++;
@@ -777,7 +795,7 @@ window.onload = function () {
 			id,
 			recipeReverse = {};
 
-		if (saveInfo.version >= 1.4) {
+		if (compareSemVer(saveInfo.version, "1.4") >= 0) {
 			recipes[733] = "Shrimp Cocktail";
 			recipes[253] = "Triple Shot Espresso";
 			recipes[265] = "Seafoam Pudding";
@@ -920,12 +938,12 @@ window.onload = function () {
 				"Oil Of Garlic": "Oil of Garlic"
 			};
 
-		if (saveInfo.version >= 1.3) {
+		if (compareSemVer(saveInfo.version, "1.3") >= 0) {
 			// Wedding Ring is specifically excluded in StardewValley.Stats.checkForCraftingAchievments() so it is not listed here.
 			recipes.push('Wood Sign', 'Stone Sign', 'Garden Pot');
 		}
 
-		if (saveInfo.version >= 1.4) {
+		if (compareSemVer(saveInfo.version, "1.4") >= 0) {
 			recipes.push('Brick Floor', 'Grass Starter', 'Deluxe Scarecrow', 'Mini-Jukebox', 'Tree Fertilizer', 'Tea Sapling', 'Warp Totem: Desert');
 		}
 		table[0] = parsePlayerCrafting($(xmlDoc).find('SaveGame > player'), saveInfo, recipes, recipeTranslate);
@@ -1093,12 +1111,12 @@ window.onload = function () {
 				795: "Void Salmon",
 				796: "Slimejack"
 			};
-		if (saveInfo.version >= 1.3) {
+		if (compareSemVer(saveInfo.version, "1.3") >= 0) {
 			recipes[798] = 'Midnight Squid';
 			recipes[799] = 'Spook Fish';
 			recipes[800] = 'Blobfish';
 		}
-		if (saveInfo.version >= 1.4) {
+		if (compareSemVer(saveInfo.version, "1.4") >= 0) {
 			recipes[269] = 'Midnight Carp';
 			recipes[267] = 'Flounder';
 		}
@@ -1156,13 +1174,13 @@ window.onload = function () {
 		output += (craft_count >= 24) ? getAchieveString('Ol\' Mariner', 'catch 24 different fish', 1) :
 				getAchieveString('Ol\' Mariner', 'catch 24 different fish', 0) + (24 - craft_count) + ' more';
 		output += '</li>\n<li>';
-		if (saveInfo.version >= 1.4) {
+		if (compareSemVer(saveInfo.version, "1.4") >= 0) {
 			output += (craft_count >= recipe_count) ? getAchieveString('Master Angler', 'catch every type of fish', 1) :
 					getAchieveString('Master Angler', 'catch every type of fish', 0) + (recipe_count - craft_count) + ' more';
 		} else {
 			output += (craft_count >= Math.min(59, recipe_count)) ? getAchieveString('Master Angler', 'catch 59 different fish', 1) :
 					getAchieveString('Master Angler', 'catch 59 different fish', 0) + (Math.min(59, recipe_count) - craft_count) + ' more';
-			if (saveInfo.version === 1.3) {
+			if (compareSemVer(saveInfo.version, "1.3") === 0) {
 				output += '</li>\n<li>';
 				output += (craft_count >= recipe_count) ? getMilestoneString('Catch every type of fish', 1) :
 					getMilestoneString('Catch every type of fish', 0) + (recipe_count - craft_count) + ' more';				
@@ -1321,7 +1339,7 @@ window.onload = function () {
 				787: "Battery Pack"
 			};
 		
-		if (saveInfo.version >= 1.4) {
+		if (compareSemVer(saveInfo.version, "1.4") >= 0) {
 			recipes[807] = "Dinosaur Mayonnaise";
 			recipes[812] = "Roe";
 			recipes[445] = "Caviar";
@@ -1850,7 +1868,7 @@ window.onload = function () {
 				"Duggies": ["Duggy"],
 				"Dust Sprites": ["Dust Spirit"]
 			};
-		if (saveInfo.version >= 1.4) {
+		if (compareSemVer(saveInfo.version, "1.4") >= 0) {
 			goals["Rock Crabs"] = 60;
 			goals["Mummies"] = 100;
 			goals["Pepper Rex"] = 50;
@@ -1911,7 +1929,7 @@ window.onload = function () {
 				getAchieveString('The Bottom', 'reach mine level 120', 0) + (120 - mineLevel) + ' more';
 		output += '</li></ul>\n';
 		
-		if (saveInfo.version >= 1.3) {
+		if (compareSemVer(saveInfo.version, "1.3") >= 0) {
 			stats = $(player).find('stats > specificMonstersKilled');
 		} else {
 			// In 1.2, stats are under the root SaveGame so we must go back up the tree
@@ -1978,7 +1996,7 @@ window.onload = function () {
 		var output = '',
 			count;
 			
-		if (saveInfo.version >= 1.3) {
+		if (compareSemVer(saveInfo.version, "1.3") >= 0) {
 			count = Number($(player).find('stats > questsCompleted').text());
 		} else {
 			// In 1.2, stats are under the root SaveGame so we must go back up the tree
@@ -2153,7 +2171,7 @@ window.onload = function () {
 			count++;
 			hasKeys.push('Skull Key');
 		}
-		if (saveInfo.version >= 1.3) {
+		if (compareSemVer(saveInfo.version, "1.3") >= 0) {
 			var	uid = $(xmlDoc).find('player').children('UniqueMultiplayerID').text();
 			if (saveInfo.partners.hasOwnProperty(uid)) {
 				spouse = saveInfo.players[saveInfo.partners[uid]];
@@ -2162,7 +2180,7 @@ window.onload = function () {
 		if (spouse.length > 0 && houseUpgrades >= 2) {
 			count++;
 		}
-		if (saveInfo.version >= 1.3) {
+		if (compareSemVer(saveInfo.version, "1.3") >= 0) {
 			$(xmlDoc).find('player> friendshipData > item').each(function () {
 				var num = Number($(this).find('value > Friendship > Points').text());
 				if (num >= 1975) { heart_count++; }
@@ -2598,7 +2616,7 @@ window.onload = function () {
 			table = [],
 			hasStoneJunimo = false;
 		
-		if (saveInfo.version < 1.3) {
+		if (compareSemVer(saveInfo.version, "1.3") < 0) {
 			return '';
 		}
 		
@@ -2663,7 +2681,7 @@ window.onload = function () {
 			reward_re,
 			i;
 
-		if (saveInfo.version >= 1.4) {
+		if (compareSemVer(saveInfo.version, "1.4") >= 0) {
 			note_count = 25;
 			reward_count = 12;
 			reward_skip[24] = true;
