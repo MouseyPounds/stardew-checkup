@@ -316,7 +316,7 @@ window.onload = function () {
 				eventList.Emily.push([14.1, 3917600], [14.2, 3917601]);
 				eventList.Haley.push([14.1, 6184643], [14.2, 8675611], [14.3, 6184644]);
 				eventList.Leah.push([14.1, 3911124], [14.2, 3091462]);
-				eventList.Maru.push([14.1, 3997666], [14.2, 5183338]);
+				eventList.Maru.push([14.1, 3917666], [14.2, 5183338]);
 				eventList.Penny.push([14.1, 4325434], [14.2, 4324303]);
 				eventList.Alex.push([14.1, 3917587], [14.2, 3917589], [14.3, 3917590]);
 				eventList.Elliott.push([14.1, 3912125], [14.2, 3912132]);

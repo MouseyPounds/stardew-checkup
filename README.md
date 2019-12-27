@@ -10,6 +10,7 @@ The app is written in Javascript and uses [jQuery](https://jquery.com/); it is h
 
 ## Changelog
 
+* 27 Dec  2019 - v3.0.4 - Fixed event ID for Maru's 14-heart (thanks SweetGarage) and another spelling error (thanks debashisbiswas)
 *  7 Dec  2019 - v3.0.3 - Version detection changed again to handle semver like 1.4.2
 *  1 Dec  2019 - v3.0.2 - Fixed bug in Joja development summary
 * 30 Nov  2019 - v3.0.1 - Version detection should now properly identify day one 1.4 saves
