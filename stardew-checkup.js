@@ -78,6 +78,8 @@ window.onload = function () {
 		var trimmed = item.replace(' (White)', '');
 		trimmed = trimmed.replace(' (Brown)', '');
 		trimmed = trimmed.replace(/ /g, '_');
+		// fix 'Secure Notes' links:
+		trimmed = trimmed.replace('#', '.23');
 		return (page) ? ('<a href="http://stardewvalleywiki.com/' + page + '#' + trimmed + '">' + item + '</a>') :
 					('<a href="http://stardewvalleywiki.com/' + trimmed + '">' + item + '</a>');
 	}
@@ -2711,7 +2713,7 @@ window.onload = function () {
 		if (found_notes < note_count) {
 			for (i = 1; i <= note_count; i++) {
 				if (!notes.hasOwnProperty(i)) {
-					need.push('<li>' + wikify('Secret Note ' + i, 'Secret Notes') + '</li>');
+					need.push('<li>' + wikify('Secret Note #' + i, 'Secret Notes') + '</li>');
 				}
 			}
 			if (need.length > 0) {
@@ -2762,7 +2764,7 @@ window.onload = function () {
 			need = [];
 			for (i = reward_start; i <= note_count; i++) {
 				if (!reward_skip.hasOwnProperty(i) && !rewards.hasOwnProperty(i)) {
-					need.push('<li> Reward from ' + wikify('Secret Note ' + i, 'Secret Notes') + '</li>');
+					need.push('<li> Reward from ' + wikify('Secret Note #' + i, 'Secret Notes') + '</li>');
 				}
 			}
 			if (need.length > 0) {
