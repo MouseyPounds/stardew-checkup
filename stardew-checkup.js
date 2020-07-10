@@ -516,25 +516,28 @@ window.onload = function () {
 				if (compareSemVer(saveInfo.version, "1.4") >= 0) {
 					max = 3500;
 				}
-				entry += (pts >= max) ? '<span class="ms_yes">MAX (can still decay)</span></li>' :
-					'<span class="ms_no">need ' + (max - pts) + ' more</span></li>';
+				entry += (pts >= max) ? '<span class="ms_yes">MAX (can still decay)</span>' :
+					'<span class="ms_no">need ' + (max - pts) + ' more</span>';
+				entry += eventInfo + '</li>';
 				hasNPCSpouse = true;
-				list_fam.push(entry + eventInfo);
+				list_fam.push(entry);
 			} else if (npc[who].isDatable) {
 				max = 2000;
 				if (npc[who].relStatus === 'Dating') {
 					max = 2500;
 				}
-				entry += (pts >= max) ? '<span class="ms_yes">MAX</span></li>' :
-					'<span class="ms_no">need ' + (max - pts) + ' more</span></li>';
-				list_bach.push(entry + eventInfo);
+				entry += (pts >= max) ? '<span class="ms_yes">MAX</span>' :
+					'<span class="ms_no">need ' + (max - pts) + ' more</span>';
+				entry += eventInfo + '</li>';
+				list_bach.push(entry);
 			} else {
-				entry += (pts >= 2500) ? '<span class="ms_yes">MAX</span></li>' :
-					'<span class="ms_no">need ' + (2500 - pts) + ' more</span></li>';
+				entry += (pts >= 2500) ? '<span class="ms_yes">MAX</span>' :
+					'<span class="ms_no">need ' + (2500 - pts) + ' more</span>';
+				entry += eventInfo + '</li>';
 				if (npc[who].isChild) {
-					list_fam.push(entry + eventInfo);
+					list_fam.push(entry);
 				} else {
-					list_other.push(entry + eventInfo);
+					list_other.push(entry);
 				}
 			}
 		}
