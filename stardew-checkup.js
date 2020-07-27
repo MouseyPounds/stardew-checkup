@@ -77,6 +77,7 @@ window.onload = function () {
 		// removing egg colors & changing spaces to underscores
 		var trimmed = item.replace(' (White)', '');
 		trimmed = trimmed.replace(' (Brown)', '');
+		trimmed = trimmed.replace(/#/g, '.23');
 		trimmed = trimmed.replace(/ /g, '_');
 		// fix 'Secure Notes' links:
 		trimmed = trimmed.replace('#', '.23');
@@ -457,10 +458,11 @@ window.onload = function () {
 			});
 			// checks for events which can be permanently missed; 1st is Clint 6H, second is Sam 3H
 			// Penny 4H & 6H added if Pam House Upgrade is done.
+			// 6H is technically only missable in version 1.3, but the hasPamHouse check would fail on pre-1.3
 			if ((arr[1] === 101 && (eventsSeen.hasOwnProperty(2123243) || eventsSeen.hasOwnProperty(2123343))) || 
 				(arr[1] === 733330 && daysPlayed > 84) ||
 				(arr[1] === 35 && hasPamHouse) || 
-				(arr[1] === 36 && hasPamHouse)) {
+				(arr[1] === 36 && hasPamHouse && (compareSemVer(saveInfo.version, "1.4") < 0))) {
 					neg = 'imp';
 				}
 			// 10-heart events will be tagged impossible if there is no bouquet.
@@ -2767,7 +2769,11 @@ window.onload = function () {
 			need = [];
 			for (i = reward_start; i <= note_count; i++) {
 				if (!reward_skip.hasOwnProperty(i) && !rewards.hasOwnProperty(i)) {
-					need.push('<li> Reward from ' + wikify('Secret Note #' + i, 'Secret Notes') + '</li>');
+					var extra = "";
+					if (i == 14) {
+						extra = " (Note: may be inaccurate if item was collected and destroyed.)";
+					}
+					need.push('<li> Reward from ' + wikify('Secret Note #' + i, 'Secret Notes') + extra + '</li>');
 				}
 			}
 			if (need.length > 0) {
