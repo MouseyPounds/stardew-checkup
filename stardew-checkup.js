@@ -79,8 +79,6 @@ window.onload = function () {
 		trimmed = trimmed.replace(' (Brown)', '');
 		trimmed = trimmed.replace(/#/g, '.23');
 		trimmed = trimmed.replace(/ /g, '_');
-		// fix 'Secure Notes' links:
-		trimmed = trimmed.replace('#', '.23');
 		return (page) ? ('<a href="http://stardewvalleywiki.com/' + page + '#' + trimmed + '">' + item + '</a>') :
 					('<a href="http://stardewvalleywiki.com/' + trimmed + '">' + item + '</a>');
 	}
