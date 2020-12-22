@@ -20,6 +20,7 @@ a:hover { color: #d08000; }
 a:active { color: #ffa000; }
 h3 {
 	margin: 20px 0 4px;
+	display: inline-block;
 }
 .panel {
 	background-color: #ffe0b0;
@@ -85,6 +86,15 @@ h3 {
 .result {
 	padding-left: 15px;
 }
+.explain:before {
+	content: "* ";
+	margin-right: 3px;
+}
+.explain {
+	padding-left: 15px;
+	font-style: italic;
+}
+
 .need:before,.warn:before {
 	content: "! ";
 	font-weight: bold;
@@ -196,4 +206,31 @@ tr td:not(:first-child) {
 }
 #TOC li a:hover {
 	background-color: #ffe0b0;
+}
+.radio_set {
+	display: inline-block;
+	width: 18em;
+}
+/* tooltip implementation based on code from Andrea Ligios
+   https://stackoverflow.com/questions/7117073/how-to-add-a-tooltip-to-a-div
+   http://jsfiddle.net/AndreaLigios/jtLbpy62/
+ */
+[data-tooltip]:before {
+	position: absolute;
+	content: attr(data-tooltip);
+	opacity: 0;
+	box-shadow: 2px 2px 1px #603000;
+	padding: .5em;
+	color: #603000;
+	white-space: pre;
+}
+[data-tooltip]:hover:before {        
+	opacity: 0.9;
+	background: #ec9;
+	margin-top: -1.5em;
+	margin-left: .5em;
+	z-index: 2;
+}
+[data-tooltip]:not([data-tooltip-persistent]):before {
+	pointer-events: none;
 }

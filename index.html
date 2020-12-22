@@ -17,7 +17,9 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>window.jQuery || document.write('<script src="./jquery-3.2.1.min.js"><\/script>')</script>
-<script src="./stardew-checkup.js?v=3.0.3"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
+<script>window.Cookies || document.write('<script src="./js.cookie-2.2.1.min.js"><\/script>')</script>
+<script src="./stardew-checkup.js?v=4.0"></script>
 
 </head>
 <body>
@@ -32,15 +34,29 @@
 <h2 id="sec_about">About</h2>
 <p>This app checks a <a href="http://stardewvalley.net/">Stardew Valley</a> save file for various achievements and milestones and
 lets you know what is missing. Currently it checks for progress on 38 achievements (everything but the 2 Prairie King minigame achieves) and Grandpa's evaluation. It also summarizes relationship progress, including cutscenes.</p>
-<p>Most changed &amp; added content from version 1.4 is supported, and 1.4-specific features should only appear in the results if the save is detected to be from that version. <span class="strong note">If you load a 1.4 save into the app, expect to see some spoilers.</span> </p>
-<p>The app is written in Javascript and uses <a href="https://jquery.com/">jQuery</a> and <a href="https://github.com/substack/semver-compare">semver-compare</a>; it is hosted on GitHub Pages at <a href="https://mouseypounds.github.io/stardew-checkup/">https://mouseypounds.github.io/stardew-checkup/</a> and the source code repository is <a href="https://github.com/MouseyPounds/stardew-checkup">https://github.com/MouseyPounds/stardew-checkup</a>.
-Please report any bugs, suggestions, or other feedback to <a href="https://community.playstarbound.com/threads/webapp-stardew-checkup-achievement-completion-progress.141706/">the topic in the official forums.</a></p>
+<p>Most changed &amp; added content from version 1.5 is supported, and 1.5-specific features should only appear in the results if the save is detected to be from that version. <span class="strong note">If you load a 1.5 save into the app, expect to see spoilers. There is now some spoiler protection for major systems by using the Output Preferences to hide some section results, but the titles of the new sections will still be visible and new items will still appear in the details of old sections.</span> </p>
+<p>The app is written in Javascript and uses <a href="https://jquery.com/">jQuery</a>, <a href="https://github.com/substack/semver-compare">semver-compare</a> and <a href="https://github.com/js-cookie/js-cookie">Javascript Cookie</a>; it is hosted on GitHub Pages at <a href="https://mouseypounds.github.io/stardew-checkup/">https://mouseypounds.github.io/stardew-checkup/</a> and the source code repository is <a href="https://github.com/MouseyPounds/stardew-checkup">https://github.com/MouseyPounds/stardew-checkup</a>.
+Please report any bugs, suggestions, or other feedback to <a href="https://community.playstarbound.com/threads/webapp-stardew-checkup-achievement-completion-progress.141706/">the topic in the Chucklefish forums.</a></p>
 </div>
 
 <div id="input-container" class="panel">
-<h2 id="sec_save_file">Save File</h2>
+<h2 id="sec_save_file">Choose Save File</h2>
+<p>Select Output Preferences below and then choose your save file. The <span class="note">summary</span> is the part that lists whether or not an achievement / goal has been met and the <span class="note">details</span> are things like the NPC event checklist or full list of still-needed items. <span class="note">New Sections</span> are those which have been added for Stardew 1.5.</p>
+<fieldset id="output-prefs-old" class="radio_set">
+<legend>Output Preferences (Old Sections)</legend>
+<label><input type="radio" name="opt-old" value="show_all"> Show summary and details</label><br />
+<label><input type="radio" name="opt-old" value="hide_details" checked="checked"> Show summary but hide details</label><br />
+<label><input type="radio" name="opt-old" value="hide_all"> Hide summary and details</label><br />
+</fieldset>
+<fieldset id="output-prefs-new" class="radio_set">
+<legend>Output Preferences (New Sections)</legend>
+<label><input type="radio" name="opt-new" value="show_all"> Show summary and details</label><br />
+<label><input type="radio" name="opt-new" value="hide_details"> Show summary but hide details</label><br />
+<label><input type="radio" name="opt-new" value="hide_all" checked="checked"> Hide summary and details</label><br />
+</fieldset>
+
 <p>Select a save file to check: <input type="file" id="file_select" /></p>
-<p>Please use the full save file named with your farmer's name and a 9-digit ID number (e.g. <span class="path">Fred_148093307</span>); do not use the <span class="path">SaveGameInfo</span> file as it does not contain all the necessary information.
+<p>Please use the full save file named with your farmer's name (or farm name) and an ID number (e.g. <span class="path">Fred_148093307</span>); do not use the <span class="path">SaveGameInfo</span> file as it does not contain all the necessary information.
 <p>Default save file locations are:
 <ul><li>Windows: <span class="path">%AppData%\StardewValley\Saves\</span></li>
 <li>Mac OSX &amp; Linux: <span class="path">~/.config/StardewValley/Saves/</span></li>
@@ -64,6 +80,7 @@ Please report any bugs, suggestions, or other feedback to <a href="https://commu
 <noscript><span class="error">Javascript appears to be unsupported by or disabled in your browser. Stardew Checkup will not work without it.</span></noscript>
 <h2 id="sec_changelog">Changelog</h2>
 <ul>
+<li>22 Dec  2020 - v4.0   - Output Preferences and initial support for Stardew Valley 1.5</li>
 <li>24 Jul  2020 - v3.0.5 - Small bugfix on missable event check; updated forum link in footer</li>
 <li>27 Dec  2019 - v3.0.4 - Fixed event ID for Maru's 14-heart (thanks SweetGarage) and another spelling error (thanks debashisbiswas)</li>
 <li> 7 Dec  2019 - v3.0.3 - Version detection changed again to handle semver like 1.4.2</li>
@@ -78,10 +95,9 @@ Please report any bugs, suggestions, or other feedback to <a href="https://commu
 <li> 1 Jan  2019 - v2.3.1 - Fixed bug with multiplayer processing introduced by last update</li>
 <li>30 Dec  2018 - v2.3   - Improved handling of mod content for cooking &amp; crafting summaries</li>
 </ul>
-<h3>Older changes</h3>
 <div id="changelog_old" class="collapsible">
-<button id="changelog_toggle" type="button">Show</button>
-<ul class="initial_hide">
+<h3>Older changes</h3> <button id="changelog_toggle" type="button" data-target="changelog_old_details">Show</button>
+<ul class="initial_hide changelog_old_details">
 <li> 3 Oct  2018 - v2.2.3 - Mark some Penny heart events impossible after Pam house; stardrop wording fix</li>
 <li> 7 Sept 2018 - v2.2.2 - Joja achievement no longer marked impossible unless CC is fully complete</li>
 <li> 1 Sept 2018 - v2.2.1 - Detect crafting recipes from mods; collapse older entries in changelog</li>

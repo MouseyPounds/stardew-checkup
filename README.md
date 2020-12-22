@@ -9,6 +9,8 @@ All changed & added content from version 1.3 should be supported, including outp
 The app is written in Javascript and uses [jQuery](https://jquery.com/); it is hosted on GitHub Pages at https://mouseypounds.github.io/stardew-checkup/ and the source code repository is https://github.com/MouseyPounds/stardew-checkup/. It is released under the MIT license.
 
 ## Changelog
+
+* 22 Dec  2020 - v4.0   - Output Preferences and initial support for Stardew Valley 1.5
 * 24 Jul  2020 - v3.0.5 - Small bugfix on missable event check; updated forum link in footer
 * 27 Dec  2019 - v3.0.4 - Fixed event ID for Maru's 14-heart (thanks SweetGarage) and another spelling error (thanks debashisbiswas)
 *  7 Dec  2019 - v3.0.3 - Version detection changed again to handle semver like 1.4.2
