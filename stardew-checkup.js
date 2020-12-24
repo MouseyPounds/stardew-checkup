@@ -1530,7 +1530,7 @@ window.onload = function () {
 			meta.isHost = false;
 			$(xmlDoc).find('farmhand').each(function () {
 				if (isValidFarmhand(this)) {
-					table.push(parsePlayerFamily(this, saveInfo, wedding, meta));
+					table.push(parsePlayerFamily(this, saveInfo, meta));
 				}
 			});
 		}
@@ -3177,7 +3177,7 @@ window.onload = function () {
 		if (saveInfo.numPlayers > 1) {
 			$(xmlDoc).find('farmhand').each(function () {
 				if (isValidFarmhand(this)) {
-					table.push(parsePlayerQuests(this, saveInfo));
+					table.push(parsePlayerQuests(this, saveInfo, meta));
 				}
 			});
 		}

@@ -4,12 +4,13 @@
 
 This app checks a [Stardew Valley](http://stardewvalley.net/) save file for various achievements and milestones and lets you know what is missing. Currently it checks for progress on 38 achievements (everything but the 2 Prairie King minigame achieves) as well as Grandpa's evaluation. It also summarizes relationship progress, including cutscenes.
 
-All changed & added content from version 1.3 should be supported, including output for all players in a multiplayer save; 1.3-specific features will only appear in the results if the save is detected to be from that version. Please report any bugs, suggestions, or other feedback to the [topic in the official forums](https://community.playstarbound.com/threads/webapp-stardew-checkup-achievement-completion-progress.141706/).
+Most changed & added content from version 1.5 is supported, and 1.5-specific features should only appear in the results if the save is detected to be from that version. If you load a 1.5 save into the app, expect to see spoilers. There is now some spoiler protection for major systems by using the Output Preferences to hide some section results, but the titles of the new sections will still be visible and new items will still appear in the details of old sections.
 
-The app is written in Javascript and uses [jQuery](https://jquery.com/); it is hosted on GitHub Pages at https://mouseypounds.github.io/stardew-checkup/ and the source code repository is https://github.com/MouseyPounds/stardew-checkup/. It is released under the MIT license.
+The app is written in Javascript and uses [jQuery](https://jquery.com/), [emver-compare](https://github.com/substack/semver-compare) and [Javascript Cookie](https://github.com/js-cookie/js-cookie); it is hosted on GitHub Pages at https://mouseypounds.github.io/stardew-checkup/ and the source code repository is https://github.com/MouseyPounds/stardew-checkup. Please report any bugs, suggestions, or other feedback to [the topic in the Chucklefish forums](https://community.playstarbound.com/threads/webapp-stardew-checkup-achievement-completion-progress.141706/).
 
 ## Changelog
 
+* 23 Dec  2020 - v4.0.1 - Fixed some multiplayer parsing bugs.
 * 22 Dec  2020 - v4.0   - Output Preferences and initial support for Stardew Valley 1.5
 * 24 Jul  2020 - v3.0.5 - Small bugfix on missable event check; updated forum link in footer
 * 27 Dec  2019 - v3.0.4 - Fixed event ID for Maru's 14-heart (thanks SweetGarage) and another spelling error (thanks debashisbiswas)
