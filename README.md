@@ -10,6 +10,7 @@ The app is written in Javascript and uses [jQuery](https://jquery.com/), [emver-
 
 ## Changelog
 
+*  3 Jan  2021 - v4.0.2 - Updated Monster Hunting counts, ignoring special furniture items in fishing, fix museum details
 * 23 Dec  2020 - v4.0.1 - Fixed some multiplayer parsing bugs.
 * 22 Dec  2020 - v4.0   - Output Preferences and initial support for Stardew Valley 1.5
 * 24 Jul  2020 - v3.0.5 - Small bugfix on missable event check; updated forum link in footer

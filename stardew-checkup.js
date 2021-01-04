@@ -105,7 +105,6 @@ window.onload = function () {
 	}
 
 	function getPerfectionBoolString(max, desc, yes) {
-		console.log(max + "," + desc + "," + yes);
 		return (yes) ? ('<span class="pt_yes"><span class="pts">' + max + '%</span> from completion of ' + desc + '</span>') :
 					('<span class="pt_no"><span class="pts"> 0%</span> (of ' + max + '% possible) from ' + desc + '</span>');
 	}
@@ -321,18 +320,13 @@ window.onload = function () {
 				saveInfo.partners[id2] = id1;
 			}
 		});
-		// All objects, needed for Bundle processing. Should probably be filtered.
+		// Dump of most items in ObjectInformation, needed for Bundle processing.
 		saveInfo.objects = {
-			0: "Weeds",
-			2: "Stone",
-			4: "Stone",
 			16: "Wild Horseradish",
 			18: "Daffodil",
 			20: "Leek",
 			22: "Dandelion",
 			24: "Parsnip",
-			25: "Stone",
-			30: "Lumber",
 			60: "Emerald",
 			62: "Aquamarine",
 			64: "Ruby",
@@ -340,15 +334,9 @@ window.onload = function () {
 			68: "Topaz",
 			69: "Banana Sapling",
 			70: "Jade",
-			71: "Trimmed Lucky Purple Shorts",
 			72: "Diamond",
-			73: "Golden Walnut",
 			74: "Prismatic Shard",
-			75: "Stone",
-			76: "Stone",
-			77: "Stone",
 			78: "Cave Carrot",
-			79: "Secret Note",
 			80: "Quartz",
 			82: "Fire Quartz",
 			84: "Frozen Tear",
@@ -358,15 +346,12 @@ window.onload = function () {
 			91: "Banana",
 			92: "Sap",
 			93: "Torch",
-			94: "Spirit Torch",
-			95: "Stone",
 			96: "Dwarf Scroll I",
 			97: "Dwarf Scroll II",
 			98: "Dwarf Scroll III",
 			99: "Dwarf Scroll IV",
 			100: "Chipped Amphora",
 			101: "Arrowhead",
-			102: "Lost Book",
 			103: "Ancient Doll",
 			104: "Elvish Jewelry",
 			105: "Chewing Stick",
@@ -443,7 +428,6 @@ window.onload = function () {
 			186: "Large Milk",
 			188: "Green Bean",
 			190: "Cauliflower",
-			191: "Ornate Necklace",
 			192: "Potato",
 			194: "Fried Egg",
 			195: "Omelet",
@@ -524,7 +508,6 @@ window.onload = function () {
 			274: "Artichoke",
 			275: "Artifact Trove",
 			276: "Pumpkin",
-			277: "Wilted Bouquet",
 			278: "Bok Choy",
 			279: "Magic Rock Candy",
 			280: "Yam",
@@ -536,11 +519,8 @@ window.onload = function () {
 			287: "Bomb",
 			288: "Mega Bomb",
 			289: "Ostrich Egg",
-			290: "Stone",
 			292: "Mahogany Seed",
 			293: "Brick Floor",
-			294: "Twig",
-			295: "Twig",
 			296: "Salmonberry",
 			297: "Grass Starter",
 			298: "Hardwood Fence",
@@ -557,20 +537,10 @@ window.onload = function () {
 			309: "Acorn",
 			310: "Maple Seed",
 			311: "Pine Cone",
-			313: "Weeds",
-			314: "Weeds",
-			315: "Weeds",
-			316: "Weeds",
-			317: "Weeds",
-			318: "Weeds",
-			319: "Weeds",
-			320: "Weeds",
-			321: "Weeds",
 			322: "Wood Fence",
 			323: "Stone Fence",
 			324: "Iron Fence",
 			325: "Gate",
-			326: "Dwarvish Translation Guide",
 			328: "Wood Floor",
 			329: "Stone Floor",
 			330: "Clay",
@@ -584,7 +554,6 @@ window.onload = function () {
 			340: "Honey",
 			341: "Tea Set",
 			342: "Pickles",
-			343: "Stone",
 			344: "Jelly",
 			346: "Beer",
 			347: "Rare Seed",
@@ -648,7 +617,6 @@ window.onload = function () {
 			431: "Sunflower Seeds",
 			432: "Truffle Oil",
 			433: "Coffee Bean",
-			434: "Stardrop",
 			436: "Goat Milk",
 			437: "Red Slime Egg",
 			438: "L. Goat Milk",
@@ -660,18 +628,12 @@ window.onload = function () {
 			445: "Caviar",
 			446: "Rabbit's Foot",
 			447: "Aged Roe",
-			449: "Stone Base",
-			450: "Stone",
-			452: "Weeds",
 			453: "Poppy Seeds",
 			454: "Ancient Fruit",
 			455: "Spangle Seeds",
 			456: "Algae Soup",
 			457: "Pale Broth",
-			458: "Bouquet",
 			459: "Mead",
-			460: "Mermaid's Pendant",
-			461: "Decorative Pot",
 			463: "Drum Block",
 			464: "Flute Block",
 			465: "Speed-Gro",
@@ -704,25 +666,6 @@ window.onload = function () {
 			497: "Fall Seeds",
 			498: "Winter Seeds",
 			499: "Ancient Seeds",
-			516: "Small Glow Ring",
-			517: "Glow Ring",
-			518: "Small Magnet Ring",
-			519: "Magnet Ring",
-			520: "Slime Charmer Ring",
-			521: "Warrior Ring",
-			522: "Vampire Ring",
-			523: "Savage Ring",
-			524: "Ring of Yoba",
-			525: "Sturdy Ring",
-			526: "Burglar's Ring",
-			527: "Iridium Band",
-			528: "Jukebox Ring",
-			529: "Amethyst Ring",
-			530: "Topaz Ring",
-			531: "Aquamarine Ring",
-			532: "Jade Ring",
-			533: "Emerald Ring",
-			534: "Ruby Ring",
 			535: "Geode",
 			536: "Frozen Geode",
 			537: "Magma Geode",
@@ -778,7 +721,6 @@ window.onload = function () {
 			587: "Amphibian Fossil",
 			588: "Palm Fossil",
 			589: "Trilobite",
-			590: "Artifact Spot",
 			591: "Tulip",
 			593: "Summer Spangle",
 			595: "Fairy Rose",
@@ -812,14 +754,6 @@ window.onload = function () {
 			648: "Coleslaw",
 			649: "Fiddlehead Risotto",
 			651: "Poppyseed Muffin",
-			668: "Stone",
-			670: "Stone",
-			674: "Weeds",
-			675: "Weeds",
-			676: "Weeds",
-			677: "Weeds",
-			678: "Weeds",
-			679: "Weeds",
 			680: "Green Slime Egg",
 			681: "Rain Totem",
 			682: "Mutant Carp",
@@ -873,12 +807,6 @@ window.onload = function () {
 			747: "Rotten Plant",
 			748: "Rotten Plant",
 			749: "Omni Geode",
-			750: "Weeds",
-			751: "Stone",
-			760: "Stone",
-			762: "Stone",
-			764: "Stone",
-			765: "Stone",
 			766: "Slime",
 			767: "Bat Wing",
 			768: "Solar Essence",
@@ -889,39 +817,19 @@ window.onload = function () {
 			773: "Life Elixir",
 			774: "Wild Bait",
 			775: "Glacierfish",
-			784: "Weeds",
-			785: "Weeds",
-			786: "Weeds",
 			787: "Battery Pack",
-			788: "Lost Axe",
-			789: "Lucky Purple Shorts",
-			790: "Berry Basket",
-			791: "Golden Coconut",
-			792: "Weeds",
-			793: "Weeds",
-			794: "Weeds",
 			795: "Void Salmon",
 			796: "Slimejack",
 			797: "Pearl",
 			798: "Midnight Squid",
 			799: "Spook Fish",
 			800: "Blobfish",
-			801: "Wedding Ring",
 			802: "Cactus Seeds",
-			803: "Iridium Milk",
 			805: "Tree Fertilizer",
 			807: "Dinosaur Mayonnaise",
-			808: "Void Ghost Pendant",
-			809: "Movie Ticket",
-			810: "Crabshell Ring",
-			811: "Napalm Ring",
 			812: "Roe",
 			814: "Squid Ink",
 			815: "Tea Leaves",
-			816: "Stone",
-			817: "Stone",
-			818: "Stone",
-			819: "Stone",
 			820: "Fossilized Skull",
 			821: "Fossilized Spine",
 			822: "Fossilized Tail",
@@ -941,51 +849,21 @@ window.onload = function () {
 			836: "Stingray",
 			837: "Lionfish",
 			838: "Blue Discus",
-			839: "Thorns Ring",
 			840: "Rustic Plank Floor",
 			841: "Stone Walkway Floor",
-			842: "Journal Scrap",
-			843: "Stone",
-			844: "Stone",
-			845: "Stone",
-			846: "Stone",
-			847: "Stone",
 			848: "Cinder Shard",
-			849: "Stone",
-			850: "Stone",
 			851: "Magma Cap",
 			852: "Dragon Tooth",
 			856: "Curiosity Lure",
 			857: "Tiger Slime Egg",
-			858: "Qi Gem",
-			859: "Lucky Ring",
-			860: "Hot Java Ring",
-			861: "Protection Ring",
-			862: "Soul Sapper Ring",
-			863: "Phoenix Ring",
-			864: "War Memento",
-			865: "Gourmet Tomato Salt",
-			866: "Stardew Valley Rose",
-			867: "Advanced TV Remote",
-			868: "Arctic Shard",
-			869: "Wriggling Worm",
-			870: "Pirate's Locket",
 			872: "Fairy Dust",
 			873: "Piña Colada",
 			874: "Bug Steak",
-			875: "Ectoplasm",
-			876: "Prismatic Jelly",
 			877: "Quality Bobber",
 			879: "Monster Musk",
-			880: "Combined Ring",
 			881: "Bone Fragment",
-			882: "Weeds",
-			883: "Weeds",
-			884: "Weeds",
 			885: "Fiber Seeds",
 			886: "Warp Totem: Island",
-			887: "Immunity Band",
-			888: "Glowstone Ring",
 			889: "Qi Fruit",
 			890: "Qi Bean",
 			891: "Mushroom Tree Seed",
@@ -994,7 +872,6 @@ window.onload = function () {
 			894: "Fireworks (Purple)",
 			895: "Fireworks (Green)",
 			896: "Galaxy Soul",
-			897: "Pierre's Missing Stocklist",
 			898: "Son of Crimsonfish",
 			899: "Ms. Angler",
 			900: "Legend II",
@@ -1016,14 +893,9 @@ window.onload = function () {
 			919: "Deluxe Fertilizer",
 			920: "Deluxe Retaining Soil",
 			921: "Squid Ink Ravioli",
-			922: "SupplyCrate",
-			923: "SupplyCrate",
-			924: "SupplyCrate",
-			925: "Slime Crate",
 			926: "Cookout Kit",
-			927: "Camping Stove",
 			928: "Golden Egg",
-		}		
+		}
 		// Date originally used XXForSaveGame elements, but those were not always present on saves downloaded from upload.farm
 		output += '<span class="result">Day ' + Number($(xmlDoc).find('dayOfMonth').text()) + ' of ' +
 			capitalize($(xmlDoc).find('currentSeason').html()) + ', Year ' + Number($(xmlDoc).find('year').text()) + '</span><br />';
@@ -2136,7 +2008,20 @@ window.onload = function () {
 				899: 1, // 1.5 "Extended Family" Legendary -- Ms. Angler
 				900: 1, // 1.5 "Extended Family" Legendary -- Legend II
 				901: 1, // 1.5 "Extended Family" Legendary -- Radioactive Carp
-				902: 1  // 1.5 "Extended Family" Legendary -- Glacierfish Jr.
+				902: 1, // 1.5 "Extended Family" Legendary -- Glacierfish Jr.
+				388: 1, // 1.5 Town Fountain Wood
+				390: 1, // 1.5 Town Fountain Stone
+				2332: 1, // 1.5 Special Furniture
+				2334: 1, // 1.5 Special Furniture
+				2418: 1, // 1.5 Special Furniture
+				2419: 1, // 1.5 Special Furniture
+				2421: 1, // 1.5 Special Furniture
+				2423: 1, // 1.5 Special Furniture
+				2425: 1, // 1.5 Special Furniture
+				2427: 1, // 1.5 Special Furniture
+				2428: 1, // 1.5 Special Furniture
+				2732: 1, // 1.5 Special Furniture
+				2814: 1, // 1.5 Special Furniture
 			},
 			id,
 			umid = $(player).children('UniqueMultiplayerID').text(),
@@ -2153,6 +2038,7 @@ window.onload = function () {
 					craft_count++;
 					known[meta.recipes[id]] = num;
 				} else {
+					console.log("Mod fish? ID =" + id);
 					mod_count++;
 				}
 			}
@@ -2851,8 +2737,7 @@ window.onload = function () {
 		});
 		donated_count = Object.keys(meta.donated).length;
 
-		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version);
-		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
+		output = '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
 		var intro;
 		if (saveInfo.numPlayers > 1) {
 			intro = 'Inhabitants of ' + $(xmlDoc).find('player > farmName').html(); + ' Farm have';
@@ -2872,6 +2757,7 @@ window.onload = function () {
 				getAchieveString('A Complete Collection', 'donate every item', 0) + (museum_count - donated_count) + ' more';
 		output += '</li></ul></div>';
 		if (donated_count < museum_count) {
+			meta.hasDetails = true;
 			output += '<div class="' + meta.anchor + '_details ' + meta.det_class + '">';
 			output += '<span class="need">See below for items left to donate</span><br /><br /></div>';
 		}
@@ -2885,7 +2771,7 @@ window.onload = function () {
 			});
 		}
 		playerOutput += printTranspose(table);
-		output += playerOutput + getSectionFooter();
+		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + output + playerOutput + getSectionFooter();
 		return output;
 	}
 
@@ -3052,6 +2938,10 @@ window.onload = function () {
 			meta.categories["Magma Sprite"] = "Flame Spirits";
 			meta.categories["Magma Sparker"] = "Flame Spirits";
 			meta.monsters["Flame Spirits"] = ["Magma Sprite", "Magma Sparker"];
+			meta.categories["Tiger Slime"] = "Slimes";
+			meta.monsters["Slimes"].push("Tiger Slime");
+			meta.categories["Shadow Sniper"] = "Void Spirits";
+			meta.monsters["Void Spirits"].push("Shadow Sniper");
 			// These are included now
 			meta.categories["Iridium Bat"] = "Bats";
 			meta.monsters["Bats"].push("Iridum Bat");
@@ -3849,7 +3739,53 @@ window.onload = function () {
 		//  the full bundle information to be placed in the save. Since we are going to at least have to partly
 		//  parse the bundle definitions now, we might as well hardcode the default bundles and handle older
 		//  versions that way.
-		var version = "1.5",
+		var title = 'Community Center / Joja Community Development',
+			anchor = makeAnchor(title),
+			version = "1.5",
+			sum_class = getSummaryClass(saveInfo, version),
+			det_class = getDetailsClass(saveInfo, version),
+			output = '',
+			farmer = $(xmlDoc).find('player > name').html(),
+			hasDetails = false,
+			isJojaMember = 0,
+			room = {},
+			bundleHave = {},
+			bundleCount = {},
+			ccMail = {
+				'ccBoilerRoom': 3,
+				'ccCraftsRoom': 1,
+				'ccPantry': 0,
+				'ccFishTank': 2,
+				'ccVault': 4,
+				'ccBulletin': 5
+			},
+			ccCount = 6,
+			ccHave = 0,
+			ccEvent = '191393',
+			project = ['Greenhouse', 'Bridge', 'Panning', 'Minecarts', 'Bus'],
+			price = ['35,000g', '25,000g', '20,000g', '15,000g', '40,000g'],
+			jojaMail = {
+				'jojaBoilerRoom': 3,
+				'jojaCraftsRoom': 1,
+				'jojaPantry': 0,
+				'jojaFishTank': 2,
+				'jojaVault': 4
+			},
+			jojaCount = 5,
+			jojaHave = 0,
+			jojaEvent = '502261',
+			eventToCheck = '',
+			hasSeenCeremony = 0,
+			done = {},
+			hybrid = 0,
+			hybridLeft = 0,
+			id,
+			r,
+			b,
+			temp,
+			bundleNeed = [],
+			need = [],
+			ccLoc = $(xmlDoc).find("locations > GameLocation[" + saveInfo.ns_prefix + "\\:type='CommunityCenter']"),
 			defaultData = {
 				"Pantry/0": "Spring Crops/O 465 20/24 1 0 188 1 0 190 1 0 192 1 0/0",
 				"Pantry/1": "Summer Crops/O 621 1/256 1 0 260 1 0 258 1 0 254 1 0/3",
@@ -3883,22 +3819,16 @@ window.onload = function () {
 				"Bulletin Board/35": "Fodder/BO 104 1/262 10 0 178 10 0 613 3 0/3",
 				"Abandoned Joja Mart/36": "The Missing//348 1 1 807 1 0 74 1 0 454 5 2 795 1 2 445 1 0/1/5"
 			};
-		
-		//if (compareSemVer(saveInfo.version, version) < 0) {
+
+		if (compareSemVer(saveInfo.version, version) < 0) {
 			return parseBundlesOld(xmlDoc, saveInfo);
-		//}
+		} else {
+			return parseBundlesOld(xmlDoc, saveInfo);
+		}
 		
-		
+/*		
 		// TODO - boy howdy is 1.5 different
 		// Bundle info from Data\Bundles.xnb & StardewValley.Locations.CommunityCenter class
-		var title = 'Community Center / Joja Community Development',
-			anchor = makeAnchor(title),
-			sum_class = getSummaryClass(saveInfo, version),
-			det_class = getDetailsClass(saveInfo, version),
-			output = '',
-			farmer = $(xmlDoc).find('player > name').html(),
-			hasDetails = false,
-			isJojaMember = 0,
 			room = {
 				0: {
 					'name': 'Pantry',
@@ -3961,7 +3891,6 @@ window.onload = function () {
 					}
 				}
 			},
-			bundleHave = {},
 			bundleCount = { // number of items in each bundle
 				0: 4,
 				1: 4,
@@ -3994,42 +3923,7 @@ window.onload = function () {
 				34: 6,
 				35: 3
 			},
-			ccMail = {
-				'ccBoilerRoom': 3,
-				'ccCraftsRoom': 1,
-				'ccPantry': 0,
-				'ccFishTank': 2,
-				'ccVault': 4,
-				'ccBulletin': 5
-			},
-			ccCount = 6,
-			ccHave = 0,
-			ccEvent = '191393',
-			project = ['Greenhouse', 'Bridge', 'Panning', 'Minecarts', 'Bus'],
-			price = ['35,000g', '25,000g', '20,000g', '15,000g', '40,000g'],
-			jojaMail = {
-				'jojaBoilerRoom': 3,
-				'jojaCraftsRoom': 1,
-				'jojaPantry': 0,
-				'jojaFishTank': 2,
-				'jojaVault': 4
-			},
-			jojaCount = 5,
-			jojaHave = 0,
-			jojaEvent = '502261',
-			eventToCheck = '',
-			hasSeenCeremony = 0,
-			done = {},
-			hybrid = 0,
-			hybridLeft = 0,
-			id,
-			r,
-			b,
-			temp,
-			bundleNeed = [],
-			need = [],
-			ccLoc = $(xmlDoc).find("locations > GameLocation[" + saveInfo.ns_prefix + "\\:type='CommunityCenter']");
-
+*/
 		// First check basic completion
 		r = 0;
 		$(ccLoc).find('areasComplete > boolean').each(function () {
