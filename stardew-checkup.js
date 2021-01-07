@@ -109,14 +109,18 @@ window.onload = function () {
 					('<span class="pt_no"><span class="pts"> 0%</span> (of ' + max + '% possible) from ' + desc + '</span>');
 	}
 
-	function wikify(item, page) {
+	function wikify(item, page, no_anchor) {
 		// removing egg colors & changing spaces to underscores
 		var trimmed = item.replace(' (White)', '');
 		trimmed = trimmed.replace(' (Brown)', '');
 		trimmed = trimmed.replace(/#/g, '.23');
 		trimmed = trimmed.replace(/ /g, '_');
-		return (page) ? ('<a href="http://stardewvalleywiki.com/' + page + '#' + trimmed + '">' + item + '</a>') :
-					('<a href="http://stardewvalleywiki.com/' + trimmed + '">' + item + '</a>');
+		if (page) {
+			return (no_anchor) ? ('<a href="http://stardewvalleywiki.com/' + page + '">' + item + '</a>') :
+				('<a href="http://stardewvalleywiki.com/' + page + '#' + trimmed + '">' + item + '</a>');
+		} else {
+			return ('<a href="http://stardewvalleywiki.com/' + trimmed + '">' + item + '</a>');
+		}
 	}
 
 	function wikimap(item, index, arr) {
@@ -2004,6 +2008,7 @@ window.onload = function () {
 				842: 1, // 1.5 Journal Scraps
 				821: 1, // 1.5 Fossilized Spine
 				825: 1, // 1.5 Snake Skull
+				890: 1, // 1.5 Qi Bean
 				898: 1, // 1.5 "Extended Family" Legendary -- Son of Crimsonfish
 				899: 1, // 1.5 "Extended Family" Legendary -- Ms. Angler
 				900: 1, // 1.5 "Extended Family" Legendary -- Legend II
@@ -2013,6 +2018,7 @@ window.onload = function () {
 				390: 1, // 1.5 Town Fountain Stone
 				2332: 1, // 1.5 Special Furniture
 				2334: 1, // 1.5 Special Furniture
+				2396: 1, // 1.5 Special Furniture
 				2418: 1, // 1.5 Special Furniture
 				2419: 1, // 1.5 Special Furniture
 				2421: 1, // 1.5 Special Furniture
@@ -2943,8 +2949,12 @@ window.onload = function () {
 			meta.categories["Shadow Sniper"] = "Void Spirits";
 			meta.monsters["Void Spirits"].push("Shadow Sniper");
 			// These are included now
+			meta.categories["Magma Duggy"] = "Duggies";
+			meta.monsters["Duggies"].push("Magma Duggy");
 			meta.categories["Iridium Bat"] = "Bats";
 			meta.monsters["Bats"].push("Iridum Bat");
+			meta.categories["Royal Serpent"] = "Serpents";
+			meta.monsters["Serpents"].push("Royal Serpent");
 			// These exist now in hard mode so need to be included in output
 			meta.monsters["Skeletons"].push("Skeleton Mage");
 		}
@@ -4362,6 +4372,67 @@ window.onload = function () {
 		return table;
 	}
 
+	function parseSpecialOrders(xmlDoc, saveInfo) {
+		var title = 'Special Orders',
+			anchor = makeAnchor(title),
+			version = "1.5",
+			sum_class = getSummaryClass(saveInfo, version),
+			det_class = getDetailsClass(saveInfo, version),
+			output = '',
+			playerOutput = '',
+			meta = { "hasDetails": false, "anchor": anchor, "sum_class": sum_class, "det_class": det_class },
+			found = {},
+			found_count = 0,
+			need = [],
+			hasWalnutRoomAccess = false,
+			town = { "Caroline": "Island Ingredients", "Clint": "Cave Patrol", "Demetrius": "Aquatic Overpopulation", "Demetrius2": "Biome Balance", "Emily": "Rock Rejuvenation", "Evelyn": "Gifts for George", "Gunther": "Fragments of the past", "Gus": "Gus' Famous Omelet", "Lewis": "Crop Order", "Linus": "Community Cleanup", "Pam": "The Strong Stuff", "Pierre": "Pierre's Prime Produce", "Robin": "Robin's Project", "Robin2": "Robin's Resource Rush", "Willy": "Juicy Bugs Wanted!", "Willy2": "Tropical Fish", "Wizard": "A Curious Substance", "Wizard2": "Prismatic Jelly" },
+			town_count = Object.keys(town).length,
+			qi = { "QiChallenge2": "Qi's Crop", "QiChallenge3": "Let's Play A Game", "QiChallenge4": "Four Precious Stones", "QiChallenge5": "Qi's Hungry Challenge", "QiChallenge6": "Qi's Cuisine", "QiChallenge7": "Qi's Kindness", "QiChallenge8": "Extended Family", "QiChallenge9": "Danger In The Deep", "QiChallenge10": "Skull Cavern Invasion", "QiChallenge12": "Qi's Prismatic Grange" },
+			id;
+		
+		if (compareSemVer(saveInfo.version, version) < 0) {
+			return '';
+		}
+		
+		$(xmlDoc).find('completedSpecialOrders > string').each(function () {
+			id = $(this).text();
+			
+			if (town.hasOwnProperty(id)) {
+				found[id] = true;
+				found_count++;
+			}
+		});
+
+		var intro;
+		if (saveInfo.numPlayers > 1) {
+			intro = 'Inhabitants of ' + $(xmlDoc).find('player > farmName').html(); + ' Farm have';
+		} else {
+			intro = $(xmlDoc).find('player > name').html() + ' has';
+		}
+		output = '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
+		output += '<span class="result">' + intro + ' completed ' + found_count + ' of ' +
+			town_count + ' town special orders.</span><br />\n';
+		output += '<ul class="ach_list"><li>';
+		output += (found_count >= town_count) ? getMilestoneString('Complete all Special Orders', 1) :
+				getMilestoneString('Complete all Special Orders', 0) + (town_count - found_count) + ' more';
+		output += '</li></ul></div>';
+		if (found_count < town_count) {
+			for (id in town) {
+				if (!found.hasOwnProperty(id)) {
+					need.push('<li>' + wikify(town[id], "Quests#List_of_Special_Orders", true) + '</li>');
+				}
+			}
+			if (need.length > 0) {
+				meta.hasDetails = true;
+				output += '<div class="' + meta.anchor + '_details ' + meta.det_class + '">';
+				output += '<span class="need">Left to complete:<ol>' + need.sort().join('') + '</ol></span></div>';
+			}
+		}
+
+		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + output + getSectionFooter();
+		return output;
+	}
+
 	function parseWalnuts(xmlDoc, saveInfo) {
 		var title = 'Golden Walnuts',
 			anchor = makeAnchor(title),
@@ -4929,6 +5000,7 @@ window.onload = function () {
 			output += parseSecretNotes(xmlDoc, saveInfo);
 			output += parseBundles(xmlDoc, saveInfo);
 			output += parseGrandpa(xmlDoc, saveInfo);
+			output += parseSpecialOrders(xmlDoc, saveInfo);
 			output += parseJournalScraps(xmlDoc, saveInfo);
 			output += parseWalnuts(xmlDoc, saveInfo);
 			output += parseIslandUpgrades(xmlDoc, saveInfo);
