@@ -1085,7 +1085,7 @@ window.onload = function () {
 				if (compareSemVer(saveInfo.version, "1.3") < 0) {
 					if ($(this).find('divorcedFromFarmer').text() === 'true') {
 						meta.npc[who].relStatus = 'Divorced';
-					} else if (countdown > 0 && who === spouse.slice(0,-7)) {
+					} else if (meta.countdown > 0 && who === spouse.slice(0,-7)) {
 						meta.npc[who].relStatus = 'Engaged';
 					} else if ($(this).find('daysMarried').text() > 0) {
 						meta.npc[who].relStatus = 'Married';
