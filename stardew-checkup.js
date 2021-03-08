@@ -1085,7 +1085,7 @@ window.onload = function () {
 				if (compareSemVer(saveInfo.version, "1.3") < 0) {
 					if ($(this).find('divorcedFromFarmer').text() === 'true') {
 						meta.npc[who].relStatus = 'Divorced';
-					} else if (countdown > 0 && who === spouse.slice(0,-7)) {
+					} else if (meta.countdown > 0 && who === spouse.slice(0,-7)) {
 						meta.npc[who].relStatus = 'Engaged';
 					} else if ($(this).find('daysMarried').text() > 0) {
 						meta.npc[who].relStatus = 'Married';
@@ -1230,10 +1230,10 @@ window.onload = function () {
 		};
 		for (var who in meta.npc) {
 			// Overriding status for the confrontation events
-			if (dumped_Girls > 0 && npc[who].isDatable && npc[who].isGirl) {
+			if (dumped_Girls > 0 && meta.npc[who].isDatable && meta.npc[who].isGirl) {
 				meta.npc[who].relStatus = 'Angry (' + dumped_Girls + ' more day(s))';
-			} else if (dumped_Guys > 0 && npc[who].isDatable && !npc[who].isGirl) {
-				nmeta.pc[who].relStatus = 'Angry (' + dumped_Guys + ' more day(s))';
+			} else if (dumped_Guys > 0 && meta.npc[who].isDatable && !meta.npc[who].isGirl) {
+				meta.npc[who].relStatus = 'Angry (' + dumped_Guys + ' more day(s))';
 			} 
 			var pts = 0;
 			if (points.hasOwnProperty(who)) {
