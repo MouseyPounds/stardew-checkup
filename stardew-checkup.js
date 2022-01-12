@@ -4880,7 +4880,7 @@ window.onload = function () {
 				getPerfectionPctString(pct["Fishing"], 10, 'Fish Caught', 0) + ' -- <a href="#sec_Fishing">see above for needs</a>';
 		output += '</li><li>';
 		output += (pct["Walnuts"] >= 1) ? getPerfectionPctNumString(pct["Walnuts"], 5, 130, 'Golden Walnuts Found', 1) :
-				getPerfectionPctNumString(pct["Walnuts"], 5, 130, 'Golden Walnuts Found', 0) + ' -- <a href="#sec_Skills">see above for needs</a>';
+				getPerfectionPctNumString(pct["Walnuts"], 5, 130, 'Golden Walnuts Found', 0) + ' -- <a href="#sec_Golden_Walnuts">see above for needs</a>';
 		output += '</li></ul></div>';
 		table.push(output);
 
