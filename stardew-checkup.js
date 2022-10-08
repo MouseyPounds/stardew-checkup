@@ -2952,7 +2952,7 @@ window.onload = function () {
 			meta.categories["Magma Duggy"] = "Duggies";
 			meta.monsters["Duggies"].push("Magma Duggy");
 			meta.categories["Iridium Bat"] = "Bats";
-			meta.monsters["Bats"].push("Iridum Bat");
+			meta.monsters["Bats"].push("Iridium Bat");
 			meta.categories["Royal Serpent"] = "Serpents";
 			meta.monsters["Serpents"].push("Royal Serpent");
 			// These exist now in hard mode so need to be included in output
