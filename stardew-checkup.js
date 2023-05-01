@@ -4495,7 +4495,7 @@ window.onload = function () {
 				"Bush_IslandWest_15_3": { 'num':1, 'name':'Island West Bush', 'hint':'Follow coastline N past walnut door (15,3)' },
 				"Buried_IslandWest_21_81": { 'num':1, 'name':'Island West Buried', 'hint':'In dark sand on SW coast, between circular indentations. (21,81)' },
 				"Buried_IslandWest_62_76": { 'num':1, 'name':'Island West Buried', 'hint':'Among debris pile S of farm, between blue starfish (62,76)' },
-				"Buried_IslandWest_39_24": { 'num':1, 'name':'Island West Buried', 'hint':'In Tiget Slime area, between tufts of long grass (39,24)' },
+				"Buried_IslandWest_39_24": { 'num':1, 'name':'Island West Buried', 'hint':'In Tiger Slime area, between tufts of long grass (39,24)' },
 				"Buried_IslandWest_88_14": { 'num':1, 'name':'Island West Buried', 'hint':'In grass in NE corner, between animated tiles (88,14)' },
 				"Buried_IslandWest_43_74": { 'num':1, 'name':'Island West Buried', 'hint':'Near tidal pools between blue and yellow starfish, initially blocked by boulder (43,74)' },
 				"Buried_IslandWest_30_75": { 'num':1, 'name':'Island West Buried', 'hint':'Between tidal pools, marked by X (30,75)' },
