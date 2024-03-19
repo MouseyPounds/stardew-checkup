@@ -19,7 +19,7 @@
 <script>window.jQuery || document.write('<script src="./jquery-3.2.1.min.js"><\/script>')</script>
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
 <script>window.Cookies || document.write('<script src="./js.cookie-2.2.1.min.js"><\/script>')</script>
-<script src="./stardew-checkup.js?v=4.0.3"></script>
+<script src="./stardew-checkup.js?v=5.0.0"></script>
 
 </head>
 <body>
@@ -33,15 +33,15 @@
 <h1>Stardew Checkup</h1>
 <h2 id="sec_about">About</h2>
 <p>This app checks a <a href="http://stardewvalley.net/">Stardew Valley</a> save file for various achievements and milestones and
-lets you know what is missing. Currently it checks for progress on 38 achievements (everything but the 2 Prairie King minigame achieves) and Grandpa's evaluation. It also summarizes relationship progress, including cutscenes.</p>
-<p>Most changed &amp; added content from version 1.5 is supported, and 1.5-specific features should only appear in the results if the save is detected to be from that version. <span class="strong note">If you load a 1.5 save into the app, expect to see spoilers. There is now some spoiler protection for major systems by using the Output Preferences to hide some section results, but the titles of the new sections will still be visible and new items will still appear in the details of old sections.</span> </p>
+lets you know what is missing. Currently it checks for progress on 46 achievements as well as other progression and completion mechanics including Grandpa's evaluation, Ginger Island upgrades, Perfection, and social relationships.</p>
+<p>Most changed &amp; added content from version 1.6 is supported, and 1.6-specific features should only appear in the results if the save is detected to be from that version. <span class="strong note">If you load a 1.6 save into the app, expect to see spoilers. There is some spoiler protection for major systems by using the Output Preferences to hide some section results, but the titles of the new sections will still be visible and new items will still appear in the details of old sections.</span> </p>
 <p>The app is written in Javascript and uses <a href="https://jquery.com/">jQuery</a>, <a href="https://github.com/substack/semver-compare">semver-compare</a> and <a href="https://github.com/js-cookie/js-cookie">Javascript Cookie</a>; it is hosted on GitHub Pages at <a href="https://mouseypounds.github.io/stardew-checkup/">https://mouseypounds.github.io/stardew-checkup/</a> and the source code repository is <a href="https://github.com/MouseyPounds/stardew-checkup">https://github.com/MouseyPounds/stardew-checkup</a>.
 Please report any bugs, suggestions, or other feedback to <a href="https://community.playstarbound.com/threads/webapp-stardew-checkup-achievement-completion-progress.141706/">the topic in the Chucklefish forums.</a></p>
 </div>
 
 <div id="input-container" class="panel">
 <h2 id="sec_save_file">Choose Save File</h2>
-<p>Select Output Preferences below and then choose your save file. The <span class="note">summary</span> is the part that lists whether or not an achievement / goal has been met and the <span class="note">details</span> are things like the NPC event checklist or full list of still-needed items. <span class="note">New Sections</span> are those which have been added for Stardew 1.5.</p>
+<p>Select Output Preferences below and then choose your save file. The <span class="note">summary</span> is the part that lists whether or not an achievement / goal has been met and the <span class="note">details</span> are things like the NPC event checklist or full list of still-needed items. <span class="note">New Sections</span> are those which have been added for Stardew 1.6.</p>
 <fieldset id="output-prefs-old" class="radio_set">
 <legend>Output Preferences (Old Sections)</legend>
 <label><input type="radio" name="opt-old" value="show_all"> Show summary and details</label><br />
@@ -79,7 +79,7 @@ Please report any bugs, suggestions, or other feedback to <a href="https://commu
 <div id="changelog" class="panel">
 <noscript><span class="error">Javascript appears to be unsupported by or disabled in your browser. Stardew Checkup will not work without it.</span></noscript>
 <h2 id="sec_changelog">Changelog</h2>
-<ul>
+<ul><li>19 Mar 2024 - v5.0 - Support for Stardew Valley 1.6</li>
 <li> 7 Jan  2021 - v4.0.3 - More Monster Hunting updates, added Special Orders tracking</li>
 <li> 3 Jan  2021 - v4.0.2 - Updated Monster Hunting counts, ignoring special furniture items in fishing, fix museum details</li>
 <li>23 Dec  2020 - v4.0.1 - Fixed some multiplayer parsing bugs.</li>
@@ -92,15 +92,15 @@ Please report any bugs, suggestions, or other feedback to <a href="https://commu
 <li>26 Nov  2019 - v3.0   - Support for Stardew Valley 1.4</li>
 <li>15 Aug  2019 - v2.5.1 - Fixed duplicate Social output; PR from debashisbiswas</li>
 <li>22 June 2019 - v2.5   - Added Introductions quest summary to Social</li>
+</ul>
+<div id="changelog_old" class="collapsible">
+<h3>Older changes</h3> <button id="changelog_toggle" type="button" data-target="changelog_old_details">Show</button>
+<ul class="initial_hide changelog_old_details">
 <li>22 Feb  2019 - v2.4.1 - Fixed bug with detecting valid farmhands on MP saves</li>
 <li>30 Jan  2019 - v2.4   - Improved support for iOS save files</li>
 <li> 2 Jan  2019 - v2.3.2 - Multiplayer marriage detection in Grandpa's evaluation</li>
 <li> 1 Jan  2019 - v2.3.1 - Fixed bug with multiplayer processing introduced by last update</li>
 <li>30 Dec  2018 - v2.3   - Improved handling of mod content for cooking &amp; crafting summaries</li>
-</ul>
-<div id="changelog_old" class="collapsible">
-<h3>Older changes</h3> <button id="changelog_toggle" type="button" data-target="changelog_old_details">Show</button>
-<ul class="initial_hide changelog_old_details">
 <li> 3 Oct  2018 - v2.2.3 - Mark some Penny heart events impossible after Pam house; stardrop wording fix</li>
 <li> 7 Sept 2018 - v2.2.2 - Joja achievement no longer marked impossible unless CC is fully complete</li>
 <li> 1 Sept 2018 - v2.2.1 - Detect crafting recipes from mods; collapse older entries in changelog</li>

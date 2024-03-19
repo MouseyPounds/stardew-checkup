@@ -47,7 +47,7 @@ window.onload = function () {
 		if (desc.length > 0) {
 			desc = '(' + desc + ') ';
 		}
-		return (yes) ? '<span class="ach_yes"><span class="ach">' + name + '</span> ' + desc + ' done</span>' :
+		return (yes) ? '<span class="ach_yes"><span class="ach">' + name + '</span> ' + desc + ' achieved</span>' :
 					'<span class="ach_no"><span class="ach">' + name + '</span> ' + desc + '</span> -- need ';
 	}
 
@@ -73,39 +73,43 @@ window.onload = function () {
 		return '<span class="pt_imp"><span class="pts">+' + pts + '</span> impossible (' + desc + ')</span>';
 	}
 
-	function getPerfectionPctString(pct, max, desc, yes) {
+	function getPerfectionPctString(pct, max, desc, yes, who = "") {
 		var pts = max * pct;
 		var places = 2;
+		var extra = (who === "") ? "" : (pct === 0) ? "" : " thanks to " + who;
 		if (pct < .0001 || pct > .9999) { places = 0 };
 		pts = pts.toFixed(places);
 		var pretty_pct = 100*pct;
 		pretty_pct = pretty_pct.toFixed(Math.max(0, places-1));
-		return (yes) ? '<span class="pt_yes"><span class="pts">' + pts + '%</span> from completion of ' + desc + '</span>' :
-					'<span class="pt_no"><span class="pts"> ' + pts + '%</span> (of ' + max + '% possible) from ' + desc +
+		return (yes) ? '<span class="pt_yes"><span class="pts">' + pts + '%</span> from completion of ' + desc + extra + '</span>' :
+					'<span class="pt_no"><span class="pts"> ' + pts + '%</span> (of ' + max + '% possible) from ' + desc + extra +
 					' (' + pretty_pct + '%)</span>';
 	}
 	
-	function getPerfectionNumString(num, max, desc, yes) {
+	function getPerfectionNumString(num, max, desc, yes, who = "") {
 		var pts = num;
 		var pretty_pct = num + "/" + max;
-		return (yes) ? '<span class="pt_yes"><span class="pts">' + pts + '%</span> from completion of ' + desc + '</span>' :
-					'<span class="pt_no"><span class="pts"> ' + pts + '%</span> (of ' + max + '% possible) from ' + desc +
+		var extra = (who === "") ? "" : (num === 0) ? "" : " thanks to " + who;
+		return (yes) ? '<span class="pt_yes"><span class="pts">' + pts + '%</span> from completion of ' + desc + extra + '</span>' :
+					'<span class="pt_no"><span class="pts"> ' + pts + '%</span> (of ' + max + '% possible) from ' + desc + extra +
 					' (' + pretty_pct + ')</span>';
 	}
 	
-	function getPerfectionPctNumString(pct, max, count, desc, yes) {
+	function getPerfectionPctNumString(pct, max, count, desc, yes, who = "") {
 		var pts = max * pct;
 		var places = 2;
+		var extra = (who === "") ? "" : (pct === 0) ? "" : " thanks to " + who;
 		if (pct < .0001 || pct > .9999) { places = 0 };
 		pts = pts.toFixed(places);
 		var pretty_pct = Math.round(count * pct) + "/" + count + " or " + Number(100*pct).toFixed(Math.max(0, places-1)) + "%";
-		return (yes) ? '<span class="pt_yes"><span class="pts">' + pts + '%</span> from completion of ' + desc + '</span>' :
-					'<span class="pt_no"><span class="pts"> ' + pts + '%</span> (of ' + max + '% possible) from ' + desc +
+		return (yes) ? '<span class="pt_yes"><span class="pts">' + pts + '%</span> from completion of ' + desc + extra + '</span>' :
+					'<span class="pt_no"><span class="pts"> ' + pts + '%</span> (of ' + max + '% possible) from ' + desc + extra +
 					' (' + pretty_pct + ')</span>';
 	}
 
-	function getPerfectionBoolString(max, desc, yes) {
-		return (yes) ? ('<span class="pt_yes"><span class="pts">' + max + '%</span> from completion of ' + desc + '</span>') :
+	function getPerfectionBoolString(max, desc, yes, who = "") {
+		var extra = (who === "") ? "" : " thanks to " + who;
+		return (yes) ? ('<span class="pt_yes"><span class="pts">' + max + '%</span> from completion of ' + desc + extra + '</span>') :
 					('<span class="pt_no"><span class="pts"> 0%</span> (of ' + max + '% possible) from ' + desc + '</span>');
 	}
 
@@ -113,6 +117,7 @@ window.onload = function () {
 		// removing egg colors & changing spaces to underscores
 		var trimmed = item.replace(' (White)', '');
 		trimmed = trimmed.replace(' (Brown)', '');
+		trimmed = trimmed.replace(' (Any)', '');
 		trimmed = trimmed.replace(/#/g, '.23');
 		trimmed = trimmed.replace(/ /g, '_');
 		if (page) {
@@ -155,7 +160,7 @@ window.onload = function () {
 	
 	function getSummaryClass(saveInfo, version) {
 		// Relatively simple conditional checks that need to be done a whole lot
-		var prefs = (compareSemVer(version, "1.5") < 0) ? saveInfo.outputPrefOld : saveInfo.outputPrefNew;
+		var prefs = (compareSemVer(version, "1.6") < 0) ? saveInfo.outputPrefOld : saveInfo.outputPrefNew;
 		var sum_class = "initial_hide";
 		if (prefs === 'show_all' || prefs === 'hide_details') {
 			sum_class = "initial_show";
@@ -165,7 +170,7 @@ window.onload = function () {
 	
 	function getDetailsClass(saveInfo, version) {
 		// Relatively simple conditional checks that need to be done a whole lot
-		var prefs = (compareSemVer(version, "1.5") < 0) ? saveInfo.outputPrefOld : saveInfo.outputPrefNew;
+		var prefs = (compareSemVer(version, "1.6") < 0) ? saveInfo.outputPrefOld : saveInfo.outputPrefNew;
 		var det_class = "initial_show";
 		if (prefs === 'hide_all' || prefs === 'hide_details') {
 			det_class = "initial_hide";
@@ -191,7 +196,7 @@ window.onload = function () {
 		// version is when that section was added and is used for old vs new interpretation
 		//   version 1.2 is the baseline value for most original sections
 		//   "old" currently means before version 1.5 and "new" is 1.5 & later
-		var prefs = (compareSemVer(version, "1.5") < 0) ? saveInfo.outputPrefOld : saveInfo.outputPrefNew;
+		var prefs = (compareSemVer(version, "1.6") < 0) ? saveInfo.outputPrefOld : saveInfo.outputPrefNew;
 		
 		var output = '<div class="collapsible" id="wrap_' + anchor + '"><h3>' + title + '</h3>';
 		var sum_button, sum_class, det_button, det_class;
@@ -236,6 +241,8 @@ window.onload = function () {
 	// Each receives the xmlDoc object to parse & the saveInfo information structure and returns HTML to output.
 	// Most also create a meta object which is passed to the per-player info subroutine primarily to find out if 
 	// there are any details so that we know whether to show a button later.
+	// saveInfo stores meta information like object ID -> name mappings and also things that we were parsing
+	// way too often such as mail flags and player stats
 	function parseSummary(xmlDoc, saveInfo) {
 		var title = "Summary",
 			anchor = makeAnchor(title),
@@ -243,16 +250,26 @@ window.onload = function () {
 			sum_class = getSummaryClass(saveInfo, version),
 			output = '',
 			details = '',
-			farmTypes = ['Standard', 'Riverland', 'Forest', 'Hill-top', 'Wilderness', 'Four Corners', 'Beach'],
+			farmTypes = {
+				0: 'Standard',
+				1: 'Riverland',
+				2: 'Forest',
+				3: 'Hill-top', 
+				4: 'Wilderness',
+				5: 'Four Corners',
+				6: 'Beach',
+				"MeadowlandsFarm": 'Meadowlands',
+			},
 			playTime = Number($(xmlDoc).find('player > millisecondsPlayed').text()),
 			playHr = Math.floor(playTime / 36e5),
 			playMin = Math.floor((playTime % 36e5) / 6e4),
 			id = "0",
-			name = $(xmlDoc).find('player > name').html(),
-			farmer = name,
-			farmhands = [];
+			farmer,
+			versionLabel,
+			farmhands = [],
+			farmhandSelector = 'farmhand';
 		
-		// Versioning has changed from bools to numers, to now a semver string.
+		// Versioning has changed from bools to numbers, to now a semver string.
 		saveInfo.version = $(xmlDoc).find('gameVersion').first().text();
 		if (saveInfo.version === "") {
 			saveInfo.version = "1.2";
@@ -262,6 +279,12 @@ window.onload = function () {
 				saveInfo.version = "1.3";
 			}
 		}
+		versionLabel = $(xmlDoc).find('gameVersionLabel').first().text();
+		if (versionLabel === "") {
+			saveInfo.versionLabel = "";
+		} else {
+			saveInfo.versionLabel = "(" + versionLabel + ")";
+		}
 
 		// Namespace prefix varies by platform; iOS saves seem to use 'p3' and PC saves use 'xsi'.
 		saveInfo.ns_prefix = ($(xmlDoc).find('SaveGame[xmlns\\:xsi]').length > 0) ? 'xsi': 'p3';
@@ -269,15 +292,18 @@ window.onload = function () {
 		// which must be escaped.
 		saveInfo.players = {};
 		saveInfo.children = {};
-		if (compareSemVer(saveInfo.version, "1.3") >= 0) {
-			id = $(xmlDoc).find('player > UniqueMultiplayerID').text();
-		}
-		saveInfo.players[id] = name;
+		saveInfo.data = {};
+		id = populateData($(xmlDoc).find('player'), saveInfo);
+		saveInfo.farmerId = id;
+		farmer = saveInfo.data[id].name;
+		
+		saveInfo.players[id] = saveInfo.data[id].name;
 		saveInfo.children[id] = [];
 		$(xmlDoc).find("[" + saveInfo.ns_prefix + "\\:type='FarmHouse'] NPC[" + saveInfo.ns_prefix + "\\:type='Child']").each(function () {
 			saveInfo.children[id].push($(this).find('name').html());
 		});
 		saveInfo.numPlayers = 1;
+		saveInfo.farmName = $(xmlDoc).find('player > farmName').html();
 		// Initializing structures needed for perfectionTracker since a lot of it builds on other milestones
 		saveInfo.perfectionTracker = { 'global': {
 			'Gold Clock': false,
@@ -291,29 +317,35 @@ window.onload = function () {
 		
 		output = getSectionHeader(saveInfo, title, anchor, false, version);
 		output += '<div class="' + anchor + '_summary ' + sum_class + '">';
-		output += '<span class="result">' + $(xmlDoc).find('player > farmName').html() + ' Farm (' + 
+		output += '<span class="result">' + saveInfo.farmName + ' Farm (' + 
 			farmTypes[$(xmlDoc).find('whichFarm').text()] + ')</span><br />';
-		output += '<span class="result">Farmer ' + name ;
-		$(xmlDoc).find('farmhand').each(function() {
+		output += '<span class="result">Farmer ' + farmer ;
+		
+		if (compareSemVer(saveInfo.version, "1.6") >= 0) {
+			farmhandSelector = "farmhands > Farmer";
+		}
+		$(xmlDoc).find(farmhandSelector).each(function() {
 			if (isValidFarmhand(this)) {
 				saveInfo.numPlayers++;
-				id = $(this).children('UniqueMultiplayerID').text();
-				name = $(this).children('name').html();
-				farmhands.push(name);
-				saveInfo.players[id] = name;
+				var id = populateData($(this), saveInfo);
+				farmhands.push(saveInfo.data[id].name);
+				saveInfo.players[id] = saveInfo.data[id].name;
 				saveInfo.children[id] = [];
-				$(this).parent('indoors[' + saveInfo.ns_prefix + '\\:type="Cabin"]').find("NPC[" + saveInfo.ns_prefix + "\\:type='Child']").each(function () {
-					saveInfo.children[id].push($(this).find('name').html());
-				});
 				saveInfo.perfectionTracker[id] = {};
 			}
+		});
+		// We used to accumulate the list of children while scanning the farmhands, but since farmhands are no longer stored under
+		// the Cabins we have moved this to a separate filter.
+		$(xmlDoc).find('indoors[' + saveInfo.ns_prefix + '\\:type="Cabin"]').find("NPC[" + saveInfo.ns_prefix + "\\:type='Child']").each(function() {
+			id = $(this).children('idOfParent').text();
+			saveInfo.children[id].push($(this).find('name').html());
 		});
 		if (saveInfo.numPlayers > 1) {
 			output += ' and Farmhand(s) ' + farmhands.join(', ');
 			createPlayerList(saveInfo.numPlayers, farmer, farmhands);
 		}
 		output += '</span><br />';
-		// Searching for marriage between players & their children
+		// Searching for marriage between players
 		saveInfo.partners = {};
 		$(xmlDoc).find('farmerFriendships > item').each(function() {
 			var item = this;
@@ -325,7 +357,10 @@ window.onload = function () {
 			}
 		});
 		// Dump of most items in ObjectInformation, needed for Bundle processing.
+		// includes some categories as well
 		saveInfo.objects = {
+			'-5': "Egg (Any)",
+			'-6': "Milk (Any)",
 			16: "Wild Horseradish",
 			18: "Daffodil",
 			20: "Leek",
@@ -899,6 +934,57 @@ window.onload = function () {
 			921: "Squid Ink Ravioli",
 			926: "Cookout Kit",
 			928: "Golden Egg",
+			"MixedFlowerSeeds": "Mixed Flower Seeds",
+			"MysteryBox": "Mystery Box",
+			"DeluxeBait": "Deluxe Bait",
+			"Moss": "Moss",
+			"MossySeed": "Mossy Seed",
+			"SonarBobber": "Sonar Bobber",
+			"TentKit": "Tent Kit",
+			"MysticTreeSeed": "Mystic Tree Seed",
+			"MysticSyrup": "Mystic Syrup",
+			"Raisins": "Raisins",
+			"DriedFruit": "Dried Fruit",
+			"DriedMushrooms": "Dried Mushrooms",
+			"StardropTea": "Stardrop Tea",
+			"PrizeTicket": "Prize Ticket",
+			"TreasureTotem": "Treasure Totem",
+			"ChallengeBait": "Challenge Bait",
+			"CarrotSeeds": "Carrot Seeds",
+			"Carrot": "Carrot",
+			"SummerSquashSeeds": "Summer Squash Seeds",
+			"SummerSquash": "Summer Squash",
+			"BroccoliSeeds": "Broccoli Seeds",
+			"Broccoli": "Broccoli",
+			"PowdermelonSeeds": "Powdermelon Seeds",
+			"Powdermelon": "Powdermelon",
+			"SmokedFish": "Smoked Fish",
+			"Book_Trash": "The Alleyway Buffet",
+			"Book_Crabbing": "The Art O' Crabbing",
+			"Book_Bombs": "Dwarvish Safety Manual",
+			"Book_Roe": "Jewels Of The Sea",
+			"Book_WildSeeds": "Raccoon Journal",
+			"Book_Woodcutting": "Woody's Secret",
+			"Book_Defense": "Jack Be Nimble, Jack Be Thick",
+			"Book_Friendship": "Friendship 101",
+			"Book_Void": "Monster Compendium",
+			"Book_Speed": "Way Of The Wind pt. 1",
+			"Book_Marlon": "Mapping Cave Systems",
+			"Book_PriceCatalogue": "Price Catalogue",
+			"Book_QueenOfSauce": "Queen Of Sauce Cookbook",
+			"Book_Diamonds": "The Diamond Hunter",
+			"Book_Mystery": "Book of Mysteries",
+			"Book_AnimalCatalogue": "Animal Catalogue",
+			"Book_Speed2": "Way Of The Wind pt. 2",
+			"GoldenAnimalCracker": "Golden Animal Cracker",
+			"GoldenMysteryBox": "Golden Mystery Box",
+			"SeaJelly": "Sea Jelly",
+			"CaveJelly": "Cave Jelly",
+			"RiverJelly": "River Jelly",
+			"Goby": "Goby",
+			"Book_Artifact": "Ancient Treasures: Appraisal Guide",
+			"Book_Horse": "Horse: The Book",
+			"Book_Grass": "Ol' Slitherlegs",
 		}
 		// Date originally used XXForSaveGame elements, but those were not always present on saves downloaded from upload.farm
 		output += '<span class="result">Day ' + Number($(xmlDoc).find('dayOfMonth').text()) + ' of ' +
@@ -915,10 +1001,70 @@ window.onload = function () {
 			}
 		}
 		output += '</span><br />';
-		var version_num = saveInfo.version;
-		output += '<span class="result">Save is from version ' + version_num + '</span><br /></div>';
+		output += '<span class="result">Save is from version ' + saveInfo.version + ' ' + saveInfo.versionLabel + '</span><br /></div>';
 		output += getSectionFooter();
 		return output;
+	}
+	
+	// After Stardew 1.6 changes to how farmhands are stored in the save we have created this wrapper for all the farmhand handling.
+	function parseFarmhands(xmlDoc, saveInfo, table, func, ...args) {
+		if (saveInfo.numPlayers > 1) {
+			var farmhandSelector =  'farmhand';
+			if (compareSemVer(saveInfo.version, "1.6") >= 0) {
+				farmhandSelector = "farmhands > Farmer";
+			}
+			$(xmlDoc).find(farmhandSelector).each(function() {
+				if (isValidFarmhand(this)) {
+					table.push(func(this, saveInfo, ...args));
+				}
+			});
+		}
+	}
+	
+	function populateData(player, saveInfo) {
+		var id = "0";
+		var name = $(player).children('name').html();
+		if (compareSemVer(saveInfo.version, "1.3") >= 0) {
+			id = $(player).children('UniqueMultiplayerID').text();
+			if (BigInt(id) % BigInt(111) === 0) {
+				console.log("Player " + name + " is bad at music");
+			}
+		}
+		saveInfo.data[id] = {};
+		saveInfo.data[id].name = name;
+		// redundant but useful
+		saveInfo.data[id].umid = id;
+		saveInfo.data[id].stats = {};
+		var newStatFormat = (compareSemVer(saveInfo.version, "1.6") >= 0);
+		var selector = newStatFormat ? 'stats > Values > item' : 'stats > *';
+		var statBase = (compareSemVer(saveInfo.version, "1.3") >= 0) ? player : $(player).parent();
+		// This does not handle pre-1.6 "specificMonstersKilled" correctly since it assumes single elements
+		$(statBase).find(selector).each(function() {
+			var key, value;
+			if (newStatFormat) {
+				key = $(this).find('key > string').text();
+				value = $(this).find('value > *').text();
+			} else {
+				key = $(this)[0].nodeName;
+				value = $(this).text();
+			}
+			saveInfo.data[id].stats[key] = value;
+		});
+		saveInfo.data[id].mailReceived = {};
+		$(player).find("mailReceived > string").each(function() {
+			saveInfo.data[id].mailReceived[$(this).text()] = true;
+		});
+		saveInfo.data[id].eventsSeen = {};
+		$(player).find("eventsSeen > *").each(function() {
+			saveInfo.data[id].eventsSeen[($(this).text())] = true;
+		});
+		saveInfo.data[id].experiencePoints = [];
+		$(player).find('experiencePoints > int').each(function () {
+			// Note that we are recording the value for Luck here too
+			saveInfo.data[id].experiencePoints.push(Number($(this).text()));
+		});		
+		
+		return id;
 	}
 
 	function parseMoney(xmlDoc, saveInfo) {
@@ -930,27 +1076,14 @@ window.onload = function () {
 			output = '',
 			playerOutput = '',
 			meta = { "hasDetails": false, "anchor": anchor, "sum_class": sum_class, "det_class": det_class },
+			separateWallets = ($(xmlDoc).find('SaveGame > player > useSeparateWallets').text() === "true"),
+			money = Number($(xmlDoc).find('SaveGame > player > totalMoneyEarned').text()),
+			left = money,
 			table = [];
-		// This is pretty pointless with shared gold, but I separate everything else for multiplayer...
-		table[0] = parsePlayerMoney($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
-		if (saveInfo.numPlayers > 1) {
-			$(xmlDoc).find('farmhand').each(function () {
-				if (isValidFarmhand(this)) {
-					table.push(parsePlayerMoney(this, saveInfo, meta));
-				}
-			});
-		}
-		playerOutput += printTranspose(table);
-		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + playerOutput + getSectionFooter();
-		return output;
-	}
 
-	function parsePlayerMoney(player, saveInfo, meta) {
-		var output = '',
-			money = Number($(player).children('totalMoneyEarned').text());
-
+		// Money earned achievements appear to be relative to the farm even with split money in MP.
 		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
-		output += '<span class="result">' + $(player).children('name').html() + ' has earned ' +
+		output += '<span class="result">' + $(xmlDoc).find('SaveGame > player > farmName').html() + ' Farm has earned ' +
 			addCommas(money) + 'g.</span><br />\n';
 		output += '<ul class="ach_list"><li>';
 		output += (money >= 15e3) ? getAchieveString('Greenhorn', 'earn 15,000g', 1) :
@@ -968,7 +1101,26 @@ window.onload = function () {
 		output += (money >= 1e7) ? getAchieveString('Legend', 'earn 10,000,000g', 1) :
 				getAchieveString('Legend', 'earn 10,000,000g', 0) + addCommas(1e7 - money) + 'g more';
 		output += '</li></ul></div>';
-		return [output];
+		
+		if (separateWallets) {
+			meta.hasDetails = true;
+			output += '<div class="' + meta.anchor + '_details ' + meta.det_class + '">';
+			output += '<span class="result">Earnings Breakdown:</span><ul class="outer">';
+			Object.keys(saveInfo.players).forEach(function(id) {
+				var m = saveInfo.data[id].stats.individualMoneyEarned;
+				output += '<li>' + addCommas(m) + 'g earned by ' + saveInfo.players[id] + '</li>';
+				left -= m;
+			});
+			if (left > 0) {
+				output += '<li>(' + addCommas(left) + 'g surplus unexplained)</li>';
+			} else if (left < 0) {
+				output += '<li>(' + addCommas(0-left) + 'g deficit unexplained)</li>';
+			}
+			output += '</ul></div>'
+		}
+
+		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + output + getSectionFooter();
+		return output;
 	}
 
 	function parseSocial(xmlDoc, saveInfo) {
@@ -984,7 +1136,6 @@ window.onload = function () {
 			spouse = $(xmlDoc).find('player > spouse').text(); // only used for 1.2 engagement checking
 			
 			meta.countdown = Number($(xmlDoc).find('countdownToWedding').text());
-			meta.daysPlayed = Number($(xmlDoc).find('stats > daysPlayed').first().text());
 			// NPCs and NPC Types we are ignoring either in location data or friendship data
 			meta.ignore = {
 				'Horse': 1,
@@ -999,6 +1150,9 @@ window.onload = function () {
 				'Mister Qi': 1,
 				'Henchman': 1,
 				'Birdie': 1,
+				'Fizz' : 1,
+				'Pet' : 1,
+				'Raccoon' : 1,
 			};
 			meta.npc = {};
 			// <NPC>: [ [<numHearts>, <id>], ... ]
@@ -1065,7 +1219,7 @@ window.onload = function () {
 				meta.eventList.Krobus.push([14, 7771191]);
 			}
 			if (compareSemVer(saveInfo.version, "1.5") >= 0) {
-				meta.eventList['Leo'] = [ [2, 6497423], [4, 6497421], [6, 6497428], [9, 8959199] ];
+				meta.eventList['Leo'] = [ [0, 1039573], [2, 6497423], [4, 6497421], [6, 6497428], [9, 8959199] ];
 			}
 
 		// Search locations for NPCs. They could be hardcoded, but this is somewhat more mod-friendly and it also
@@ -1085,7 +1239,7 @@ window.onload = function () {
 				if (compareSemVer(saveInfo.version, "1.3") < 0) {
 					if ($(this).find('divorcedFromFarmer').text() === 'true') {
 						meta.npc[who].relStatus = 'Divorced';
-					} else if (countdown > 0 && who === spouse.slice(0,-7)) {
+					} else if (meta.countdown > 0 && who === spouse.slice(0,-7)) {
 						meta.npc[who].relStatus = 'Engaged';
 					} else if ($(this).find('daysMarried').text() > 0) {
 						meta.npc[who].relStatus = 'Married';
@@ -1098,13 +1252,7 @@ window.onload = function () {
 			});
 		});
 		table[0] = parsePlayerSocial($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
-		if (saveInfo.numPlayers > 1) {
-			$(xmlDoc).find('farmhand').each(function () {
-				if (isValidFarmhand(this)) {
-					table.push(parsePlayerSocial(this, saveInfo, meta));
-				}
-			});
-		}
+		parseFarmhands(xmlDoc, saveInfo, table, parsePlayerSocial, meta);
 		playerOutput = printTranspose(table);
 		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + playerOutput + getSectionFooter();
 		return output;
@@ -1117,7 +1265,7 @@ window.onload = function () {
 			count_10h = 0,
 			maxed_count = 0,
 			maxed_total = 0,
-			umid = $(player).children('UniqueMultiplayerID').text(),
+			umid = (compareSemVer(saveInfo.version, "1.3") >= 0) ? $(player).children('UniqueMultiplayerID').text() : saveInfo.farmerId,
 			pt_pct = '',
 			points = {},
 			list_fam = [],
@@ -1129,7 +1277,7 @@ window.onload = function () {
 			dumped_Girls = 0,
 			dumped_Guys = 0,
 			hasSpouseStardrop = false,
-			eventsSeen = {},
+			eventsSeen = saveInfo.data[umid].eventsSeen,
 			hasNPCSpouse = false,
 			hasPamHouse = false,
 			hasCompletedIntroductions = true,
@@ -1150,11 +1298,9 @@ window.onload = function () {
 			});
 			$(player).find('friendshipData > item').each(function () {
 				var who = $(this).find('key > string').html();
-				if (meta.ignore.hasOwnProperty(who)) { return; }
-				if (!meta.npc.hasOwnProperty(who)) {
-					// This shouldn't happen
-					meta.npc[who] = {'isDatable': false, 'isGirl': false, 'isChild': false};
-				}
+				// Doved children will still have friendshipData but will no longer exist as characters,
+				// so that is what the second check detects.
+				if (meta.ignore.hasOwnProperty(who) || !meta.npc.hasOwnProperty(who)) { return; }
 				var num = Number($(this).find('value > Friendship > Points').text());
 				if (num >= 2500) { count_10h++; }
 				if (num >= 1250) { count_5h++; }
@@ -1164,7 +1310,7 @@ window.onload = function () {
 					if ( (meta.npc[who].isDatable && num >= 2000) || (num >= 2500) ) { maxed_count++; }
 				}
 				points[who] = num;
-				meta.npc[who].relStatus = $(this).find('value > Friendship > Status').html();
+				meta.npc[who].relStatus = $(this).find('value > Friendship > Status').text();
 				var isRoommate = ($(this).find('value > Friendship > RoommateMarriage').text() === 'true');
 				if (meta.npc[who].relStatus === 'Married' && isRoommate) {
 					meta.npc[who].relStatus = 'Roommate'
@@ -1183,17 +1329,12 @@ window.onload = function () {
 			}
 		}
 
-		$(player).find('eventsSeen > int').each(function () {
-			eventsSeen[$(this).text()] = 1;
-		});
-		$(player).find('mailReceived > string').each(function () {
-			if($(this).text() === 'CF_Spouse') {
-				hasSpouseStardrop = true;
-			}
-			if($(this).text() === 'pamHouseUpgrade') {
-				hasPamHouse = true;
-			}
-		});
+		if (saveInfo.data[umid].mailReceived.hasOwnProperty('CF_Spouse')) {
+			hasSpouseStardrop = true;
+		}
+		if (saveInfo.data[umid].mailReceived.hasOwnProperty('pamHouseUpgrade')) {
+			hasPamHouse = true;
+		}
 		var eventCheck = function (arr, who) {
 			var seen = false;
 			var neg = 'no';
@@ -1206,7 +1347,7 @@ window.onload = function () {
 			// checks for events which can be permanently missed; 1st is Clint 6H, second is Sam 3H
 			// Penny 4H & 6H added if Pam House Upgrade is done in some versions.
 			if ((arr[1] === 101 && (eventsSeen.hasOwnProperty(2123243) || eventsSeen.hasOwnProperty(2123343))) || 
-				(arr[1] === 733330 && meta.daysPlayed > 84) ||
+				(arr[1] === 733330 && saveInfo.data[umid].stats.daysPlayed > 84) ||
 				(arr[1] === 35 && hasPamHouse && (compareSemVer(saveInfo.version, "1.5") < 0)) || 
 				(arr[1] === 36 && hasPamHouse && (compareSemVer(saveInfo.version, "1.4") < 0))) {
 					neg = 'imp';
@@ -1353,8 +1494,8 @@ window.onload = function () {
 		output += '</li></ul></div>';
 		table.push(output);
 
-		saveInfo.perfectionTracker[umid]["Great Friends"] = { 'count' : maxed_count, 'total' : maxed_total };
 		if (compareSemVer(saveInfo.version, "1.5") >= 0) {
+			saveInfo.perfectionTracker[umid]["Great Friends"] = { 'count' : maxed_count, 'total' : maxed_total };
 			pt_pct = getPTLink(maxed_count / maxed_total, true);
 		}
 		output = '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
@@ -1402,14 +1543,7 @@ window.onload = function () {
 			meta.isHost = true;
 
 		table[0] = parsePlayerFamily($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
-		if (saveInfo.numPlayers > 1) {
-			meta.isHost = false;
-			$(xmlDoc).find('farmhand').each(function () {
-				if (isValidFarmhand(this)) {
-					table.push(parsePlayerFamily(this, saveInfo, meta));
-				}
-			});
-		}
+		parseFarmhands(xmlDoc, saveInfo, table, parsePlayerFamily, meta);
 		playerOutput += printTranspose(table);
 		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + playerOutput + getSectionFooter();
 		return output;
@@ -1424,20 +1558,17 @@ window.onload = function () {
 			houseType = (meta.isHost ? "FarmHouse" : "Cabin"),
 			farmer = $(player).children('name').html(),
 			spouse = $(player).children('spouse').html(),
-			id = $(player).children('UniqueMultiplayerID').text(),
+			umid = (compareSemVer(saveInfo.version, "1.3") >= 0) ? $(player).children('UniqueMultiplayerID').text() : saveInfo.farmerId,
 			children = '(None)',
 			child_name = [],
 			houseUpgrades = Number($(player).children('houseUpgradeLevel').text());
-		if (typeof(id) === 'undefined' || id === '') {
-			id = "0";
-		}
 		if (typeof(spouse) !== 'undefined' && spouse.length > 0) {
 			if (meta.wedding > 0 && compareSemVer(saveInfo.version, "1.3") < 0) {
 				spouse = spouse.slice(0,-7);
 			}
 			count++;
-		} else if (saveInfo.partners.hasOwnProperty(id)) {
-			spouse = saveInfo.players[saveInfo.partners[id]];
+		} else if (saveInfo.partners.hasOwnProperty(umid)) {
+			spouse = saveInfo.players[saveInfo.partners[umid]];
 			count++;
 		} else {
 			spouse = '(None)';
@@ -1451,12 +1582,12 @@ window.onload = function () {
 		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
 		output += '<span class="result">' + farmer + "'s " + title + ": " + spouse + 
 			((meta.wedding) ? ' -- wedding in ' + meta.wedding + ' day(s)' : '') + '</span><br />\n';
-		if (saveInfo.children.hasOwnProperty(id) && saveInfo.children[id].length > 0) {
-			child_name = saveInfo.children[id];
+		if (saveInfo.children.hasOwnProperty(umid) && saveInfo.children[umid].length > 0) {
+			child_name = saveInfo.children[umid];
 			count += child_name.length;
-		} else if (saveInfo.partners.hasOwnProperty(id) && saveInfo.children.hasOwnProperty(saveInfo.partners[id]) &&
-					saveInfo.children[saveInfo.partners[id]].length > 0) {
-			child_name = saveInfo.children[saveInfo.partners[id]];
+		} else if (saveInfo.partners.hasOwnProperty(umid) && saveInfo.children.hasOwnProperty(saveInfo.partners[umid]) &&
+					saveInfo.children[saveInfo.partners[umid]].length > 0) {
+			child_name = saveInfo.children[saveInfo.partners[umid]];
 			count += child_name.length;
 		} else {
 			$(player).parent().find("[" + saveInfo.ns_prefix + "\\:type='" + houseType + "'] NPC[" + saveInfo.ns_prefix + "\\:type='Child']").each(function () {
@@ -1604,6 +1735,10 @@ window.onload = function () {
 			meta.recipes[921] = "Squid Ink Ravioli";
 		}
 
+		if (compareSemVer(saveInfo.version, "1.6") >= 0) {
+			meta.recipes["MossSoup"] = "Moss Soup";
+		}
+
 		for (id in meta.recipes) {
 			if (meta.recipes.hasOwnProperty(id)) {
 				meta.recipeReverse[meta.recipes[id]] = id;
@@ -1611,13 +1746,7 @@ window.onload = function () {
 		}
 
 		table[0] = parsePlayerCooking($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
-		if (saveInfo.numPlayers > 1) {
-			$(xmlDoc).find('farmhand').each(function () {
-				if (isValidFarmhand(this)) {
-					table.push(parsePlayerCooking(this, saveInfo, meta));
-				}
-			});
-		}
+		parseFarmhands(xmlDoc, saveInfo, table, parsePlayerCooking, meta);
 		playerOutput += printTranspose(table);
 		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + playerOutput + getSectionFooter();
 		return output;
@@ -1637,7 +1766,7 @@ window.onload = function () {
 			mod_known = 0,
 			mod_craft = 0,
 			id,
-			umid = $(player).children('UniqueMultiplayerID').text(),
+			umid = (compareSemVer(saveInfo.version, "1.3") >= 0) ? $(player).children('UniqueMultiplayerID').text() : saveInfo.farmerId,
 			pt_pct = '',
 			r;
 
@@ -1651,11 +1780,12 @@ window.onload = function () {
 				known[id] = num;
 				known_count++;
 			} else {
+				console.log("Unrecognized cooking recipe: " + id);
 				mod_known++;
 			}
 		});
 		$(player).find('recipesCooked > item').each(function () {
-			var id = $(this).find('key > int').text(),
+			var id = $(this).find('key > *').text(),
 				num = Number($(this).find('value > int').text());
 			if (meta.recipes.hasOwnProperty(id)) {
 				if (num > 0) {
@@ -1669,16 +1799,16 @@ window.onload = function () {
 			}
 		});
 
-		saveInfo.perfectionTracker[umid]["Cooking"] = { 'count' : craft_count, 'total' : recipe_count };
 		if (compareSemVer(saveInfo.version, "1.5") >= 0) {
+			saveInfo.perfectionTracker[umid]["Cooking"] = { 'count' : craft_count, 'total' : recipe_count };
 			pt_pct = getPTLink(craft_count / recipe_count, true);
 		}
 		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
 		output += '<span class="result">' + $(player).children('name').html() + " has cooked " + craft_count + ' and knows ' +
 			known_count + ' of ' + recipe_count + ((mod_known > 0) ? " base game" : "") + ' recipes.' + pt_pct + '</span>\n';
 		if (mod_known > 0) {
-			output += '<br /><span class="result"><span class="note">' + $(player).children('name').html() + " has also cooked " +
-				mod_craft + ' and knows ' + mod_known + " mod recipes (total unavailable).</span></span>\n";
+			output += '<br /><span class="result note">' + $(player).children('name').html() + " has also cooked " +
+				mod_craft + ' and knows ' + mod_known + " unrecognized (probably mod) recipes.</span>\n";
 		}
 		output += '<ul class="ach_list"><li>';
 		output += ( (craft_count + mod_craft) >= 10) ? getAchieveString('Cook', 'cook 10 different recipes', 1) :
@@ -1772,15 +1902,12 @@ window.onload = function () {
 		if (compareSemVer(saveInfo.version, "1.5") >= 0) {
 			meta.recipes.push("Rustic Plank Floor", "Stone Walkway Floor", "Fairy Dust", "Bug Steak", "Dark Sign", "Quality Bobber", "Stone Chest", "Monster Musk", "Mini-Obelisk", "Farm Computer", "Ostrich Incubator", "Geode Crusher", "Fiber Seeds", "Solar Panel", "Bone Mill", "Warp Totem: Island", "Thorns Ring", "Glowstone Ring", "Heavy Tapper", "Hopper", "Magic Bait", "Hyper Speed-Gro", "Deluxe Fertilizer", "Deluxe Retaining Soil", "Cookout Kit");
 		}
+		if (compareSemVer(saveInfo.version, "1.6") >= 0) {
+			meta.recipes.push("Anvil", "Bait Maker", "Big Chest", "Big Stone Chest", "Blue Grass Starter", "Challenge Bait", "Dehydrator", "Deluxe Bait", "Deluxe Worm Bin", "Fish Smoker", "Heavy Furnace", "Mini-Forge", "Mushroom Log", "Mystic Tree Seed", "Sonar Bobber", "Statue Of Blessings", "Statue Of The Dwarf King", "Tent Kit", "Text Sign", "Treasure Totem");
+		}
 
 		table[0] = parsePlayerCrafting($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
-		if (saveInfo.numPlayers > 1) {
-			$(xmlDoc).find('farmhand').each(function () {
-				if (isValidFarmhand(this)) {
-					table.push(parsePlayerCrafting(this, saveInfo, meta));
-				}
-			});
-		}
+		parseFarmhands(xmlDoc, saveInfo, table, parsePlayerCrafting, meta);
 		playerOutput += printTranspose(table);
 		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + playerOutput + getSectionFooter();
 		return output;
@@ -1797,7 +1924,7 @@ window.onload = function () {
 			mod_known = 0,
 			mod_craft = 0,
 			id,
-			umid = $(player).children('UniqueMultiplayerID').text(),
+			umid = (compareSemVer(saveInfo.version, "1.3") >= 0) ? $(player).children('UniqueMultiplayerID').text() : saveInfo.farmerId,
 			pt_pct = '',
 			r;
 
@@ -1816,6 +1943,7 @@ window.onload = function () {
 				if (num > 0) {
 					mod_craft++
 				}
+				console.log("Unrecognized crafting recipe: " + id);
 				return true;
 			}
 			known[id] = num;
@@ -1827,8 +1955,8 @@ window.onload = function () {
 			}
 		});
 
-		saveInfo.perfectionTracker[umid]["Crafting"] = { 'count' : craft_count, 'total' : recipe_count };
 		if (compareSemVer(saveInfo.version, "1.5") >= 0) {
+			saveInfo.perfectionTracker[umid]["Crafting"] = { 'count' : craft_count, 'total' : recipe_count };
 			pt_pct = getPTLink(craft_count / recipe_count, true);
 		}
 		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
@@ -1836,7 +1964,7 @@ window.onload = function () {
 			known_count + ' of ' + recipe_count + ' base game recipes.' + pt_pct + '</span>\n';
 		if (mod_known > 0) {
 			output += '<br /><span class="result"><span class="note">' + $(player).children('name').html() + " has also crafted " +
-				mod_craft + ' and knows ' + mod_known + " mod recipes (total unavailable).</span></span>\n";
+				mod_craft + ' and knows ' + mod_known + " unrecognized (probably mod) recipes.</span></span>\n";
 		}
 		output += '<ul class="ach_list"><li>';
 		output += ( (craft_count + mod_craft) >= 15) ? getAchieveString('D.I.Y.', 'craft 15 different items', 1) :
@@ -1955,6 +2083,7 @@ window.onload = function () {
 				795: "Void Salmon",
 				796: "Slimejack"
 			};
+			meta.bobber = {};
 		if (compareSemVer(saveInfo.version, "1.3") >= 0) {
 			meta.recipes[798] = 'Midnight Squid';
 			meta.recipes[799] = 'Spook Fish';
@@ -1968,21 +2097,23 @@ window.onload = function () {
 			meta.recipes[836] = 'Stingray';
 			meta.recipes[837] = 'Lionfish';
 			meta.recipes[838] = 'Blue Discus';
-			// Ones which don't count for collection/achieve must be commented out; we may look at handling them later
-			//meta.recipes[898] = 'Son of Crimsonfish';
-			//meta.recipes[899] = 'Ms. Angler';
-			//meta.recipes[900] = 'Legend II';
-			//meta.recipes[901] = 'Radioactive Carp';
-			//meta.recipes[902] = 'Glacierfish Jr.';
+		}
+		if (compareSemVer(saveInfo.version, "1.6") >= 0) {
+			meta.recipes["Goby"] = 'Goby';
+			meta.recipes["CaveJelly"] = 'Cave Jelly';
+			meta.recipes["RiverJelly"] = 'River Jelly';
+			meta.recipes["SeaJelly"] = 'Sea Jelly';
+			meta.recipes[372] = 'Clam';
+			// Extended Family legendaries were added in 1.5 but not tracked until 1.6 because they are only
+			// necessary for bobber unlocks
+			meta.bobber[898] = 'Son of Crimsonfish';
+			meta.bobber[899] = 'Ms. Angler';
+			meta.bobber[900] = 'Legend II';
+			meta.bobber[901] = 'Radioactive Carp';
+			meta.bobber[902] = 'Glacierfish Jr.';
 		}
 		table[0] = parsePlayerFishing($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
-		if (saveInfo.numPlayers > 1) {
-			$(xmlDoc).find('farmhand').each(function () {
-				if (isValidFarmhand(this)) {
-					table.push(parsePlayerFishing(this, saveInfo, meta));
-				}
-			});
-		}
+		parseFarmhands(xmlDoc, saveInfo, table, parsePlayerFishing, meta);
 		playerOutput += printTranspose(table);
 		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + playerOutput + getSectionFooter();
 		return output;
@@ -1994,64 +2125,84 @@ window.onload = function () {
 			recipe_count = Object.keys(meta.recipes).length,
 			count = 0,
 			craft_count = 0, // for fish types
+			bobber_count = 0,
 			mod_count = 0,
 			known = [],
 			need = [],
 			ignore = { // Things you can catch that aren't counted in fishing achieve
-				372: 1, // Clam is category "Basic -23"
 				308: 1, // Void Mayo can be caught in Witch's Swamp during "Goblin Problems"
 				79: 1,  // Secret Notes can be caught directly
 				797: 1, // Pearl can be caught directly in Night Market Submarine
-				191: 1, // Ornate necklace, from secret note quest added in 1.4
-				103: 1, // Ancient doll, can be caught on 4 corners once after viewing the "doving" TV easter egg
+				191: 1, // 1.4 Ornate necklace, from secret note quest
+				103: 1, // 1.4 Ancient doll, can be caught on 4 corners once after viewing the "doving" TV easter egg
 				73: 1,  // 1.5 Golden Walnuts
 				842: 1, // 1.5 Journal Scraps
 				821: 1, // 1.5 Fossilized Spine
 				825: 1, // 1.5 Snake Skull
 				890: 1, // 1.5 Qi Bean
-				898: 1, // 1.5 "Extended Family" Legendary -- Son of Crimsonfish
-				899: 1, // 1.5 "Extended Family" Legendary -- Ms. Angler
-				900: 1, // 1.5 "Extended Family" Legendary -- Legend II
-				901: 1, // 1.5 "Extended Family" Legendary -- Radioactive Carp
-				902: 1, // 1.5 "Extended Family" Legendary -- Glacierfish Jr.
 				388: 1, // 1.5 Town Fountain Wood
 				390: 1, // 1.5 Town Fountain Stone
-				2332: 1, // 1.5 Special Furniture
-				2334: 1, // 1.5 Special Furniture
-				2396: 1, // 1.5 Special Furniture
-				2418: 1, // 1.5 Special Furniture
-				2419: 1, // 1.5 Special Furniture
-				2421: 1, // 1.5 Special Furniture
-				2423: 1, // 1.5 Special Furniture
-				2425: 1, // 1.5 Special Furniture
-				2427: 1, // 1.5 Special Furniture
-				2428: 1, // 1.5 Special Furniture
-				2732: 1, // 1.5 Special Furniture
-				2814: 1, // 1.5 Special Furniture
+				2332: 1, // 1.5 Gourmand Statue from Pirate Cave
+				2334: 1, // 1.5 Pyramid Decal from Desert Southern Pond
+				2396: 1, // 1.5 Iridium Krobus from Forest South of Sewer Entrance
+				2418: 1, // 1.5 Lifesaver from Willy's Boat Dock
+				2419: 1, // 1.5 Foliage Print
+				2421: 1, // 1.5 'Boat' Painting
+				2423: 1, // 1.5 'Vista' Painting
+				2425: 1, // 1.5 Wall Basket
+				2427: 1, // 1.5 Decorative Trash Can
+				2732: 1, // 1.5 'Physics 101' Painting from Caldera
+				2814: 1, // 1.5 Squirrel Figurine from Island North NW corner
+				393: 1, // 1.5 Coral can be caught on Beach farm
+				78: 1, // 1.5 Frog Hat from Gourmand's Cave
 			},
 			id,
-			umid = $(player).children('UniqueMultiplayerID').text(),
+			umid = (compareSemVer(saveInfo.version, "1.3") >= 0) ? $(player).children('UniqueMultiplayerID').text() : saveInfo.farmerId,
 			pt_pct = '',
 			r;
+			
+		if (compareSemVer(saveInfo.version, "1.6") < 0) {
+			ignore[372] = 1; // Clams were not part of fishing collection until 1.6
+			ignore[898] = 1; // 1.5 "Extended Family" Legendary -- Son of Crimsonfish
+			ignore[899] = 1; // 1.5 "Extended Family" Legendary -- Ms. Angler
+			ignore[900] = 1; // 1.5 "Extended Family" Legendary -- Legend II
+			ignore[901] = 1; // 1.5 "Extended Family" Legendary -- Radioactive Carp
+			ignore[902] = 1; // 1.5 "Extended Family" Legendary -- Glacierfish Jr.
+		}
 
 		$(player).find('fishCaught > item').each(function () {
-			var id = $(this).find('key > int').text(),
+			var raw_id = $(this).find('key > *').text(),
 				num = Number($(this).find('value > ArrayOfInt > int').first().text());
-			if (!ignore.hasOwnProperty(id) && num > 0) {
-				// We are adding up the count ourselves, but the total is also stored in (stats > fishCaught) and (stats > FishCaught)
-				count += num;
-				if (meta.recipes.hasOwnProperty(id)) {
-					craft_count++;
-					known[meta.recipes[id]] = num;
-				} else {
-					console.log("Mod fish? ID =" + id);
-					mod_count++;
+			// 1.6 saves often have things like "<string>(O)145</string>" as keys so we need to account for that
+			var id = raw_id;
+			var paren = raw_id.indexOf(")");
+			if (paren > -1) {
+				id = raw_id.substring(paren + 1);
+			}
+			if (num > 0) {
+				bobber_count++;
+				if (!ignore.hasOwnProperty(id)) {
+					// We are adding up the count ourselves, but the total is also stored in (stats > fishCaught) and (stats > FishCaught)
+					count += num;
+					if (meta.recipes.hasOwnProperty(id)) {
+						craft_count++;
+						known[meta.recipes[id]] = num;
+					} else if (meta.bobber.hasOwnProperty(id)) {
+						known[meta.bobber[id]] = num;
+					} else {
+						console.log("Unrecognized fish ID: " + raw_id);
+						mod_count++;
+					}
 				}
+			}
+			if (ignore.hasOwnProperty(id)) {
+				// DEBUGGING BETA SHIT
+				console.log($(player).children('name').html() + " has caught non-fish item " + raw_id + " (" + num +")");
 			}
 		});
 
-		saveInfo.perfectionTracker[umid]["Fishing"] = { 'count' : craft_count, 'total' : recipe_count };
 		if (compareSemVer(saveInfo.version, "1.5") >= 0) {
+			saveInfo.perfectionTracker[umid]["Fishing"] = { 'count' : craft_count, 'total' : recipe_count };
 			pt_pct = getPTLink(craft_count / recipe_count, true);
 		}
 		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
@@ -2060,7 +2211,7 @@ window.onload = function () {
 			'</span>';
 		if (mod_count > 0) {
 			output += '<br /><span class="result note">' + $(player).children('name').html() + " has also caught " +
-				mod_count + " mod fish (total unavailable).</span>";
+				mod_count + " unrecognized (probably mod) fish.</span>";
 		}
 		output += '<ul class="ach_list"><li>';
 		output += (count >= 100) ? getAchieveString('Mother Catch', 'catch 100 total fish', 1) :
@@ -2085,8 +2236,20 @@ window.onload = function () {
 					getMilestoneString('Catch every type of fish', 0) + (recipe_count - craft_count) + ' more';				
 			}
 		}
-		
-		output += '</li></ul></div>';
+		output += '</li></ul>';
+		// New bobber menu stuff
+		var total_bobbers = 39;
+		var bobbers_unlocked = Math.min(total_bobbers, 1 + Math.floor(bobber_count/2));
+		var bobber_fish_left = 2*(total_bobbers-1) - bobber_count;
+		if (compareSemVer(saveInfo.version, "1.6") >= 0) {
+			output += '<span class="result">' + $(player).children('name').html() + ' has unlocked ' + bobbers_unlocked +
+				' of ' + total_bobbers + ' bobber styles.</span>';
+			output += '<ul class="ach_list"><li>';
+			output += (bobbers_unlocked >= total_bobbers) ? getMilestoneString('Unlock every bobber style', 1) :
+				getMilestoneString('Unlock every bobber style', 0) + bobber_fish_left + ' more unique fish';
+			output += '</li></ul>';
+		}
+		output += '</div>';
 		if (craft_count < recipe_count) {
 			need = [];
 			for (id in meta.recipes) {
@@ -2099,7 +2262,26 @@ window.onload = function () {
 			}
 			meta.hasDetails = true;
 			output += '<div class="' + meta.anchor + '_details ' + meta.det_class + '">';
-			output += '<span class="need">Left to catch:<ol>' + need.sort().join('') + '</ol></span></div>';
+			output += '<span class="need">Left to catch for achievements and bobber unlocks:<ol>' + need.sort().join('') + '</ol></span></div>';
+		}
+		// Existing pre-1.6 saves will usually have extra fish caught that might result in them not needing any of the extended family
+		// legendaries. We don't want to show the second list in that situation
+		if (compareSemVer(saveInfo.version, "1.6") >= 0) {
+			var achieve_left = recipe_count - craft_count;
+			if ((bobbers_unlocked < total_bobbers) && (bobber_fish_left > achieve_left)) {
+				need = [];
+				for (id in meta.bobber) {
+					if (meta.bobber.hasOwnProperty(id)) {
+						r = meta.bobber[id];
+						if (!known.hasOwnProperty(r)) {
+							need.push('<li>' + wikify(r) + '</li>');
+						}
+					}
+				}
+				meta.hasDetails = true;
+				output += '<div class="' + meta.anchor + '_details ' + meta.det_class + '">';
+				output += '<span class="need">Left to catch for bobber unlocks (don\'t need all):<ol>' + need.sort().join('') + '</ol></span></div>';
+			}
 		}
 		return [output];
 	}
@@ -2272,14 +2454,20 @@ window.onload = function () {
 			meta.recipes[909] = "Radioactive Ore";
 			meta.recipes[910] = "Radioactive Bar";
 		}
-		table[0] = parsePlayerBasicShipping($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
-		if (saveInfo.numPlayers > 1) {
-			$(xmlDoc).find('farmhand').each(function () {
-				if (isValidFarmhand(this)) {
-					table.push(parsePlayerBasicShipping(this, saveInfo, meta));
-				}
-			});
+		if (compareSemVer(saveInfo.version, "1.6") >= 0) {
+			meta.recipes["Moss"] = "Moss";
+			meta.recipes["MysticSyrup"] = "Mystic Syrup";
+			meta.recipes["Raisins"] = "Raisins";
+			meta.recipes["DriedFruit"] = "Dried Fruit";
+			meta.recipes["DriedMushrooms"] = "Dried Mushrooms";
+			meta.recipes["Carrot"] = "Carrot";
+			meta.recipes["SummerSquash"] = "Summer Squash";
+			meta.recipes["Broccoli"] = "Broccoli";
+			meta.recipes["Powdermelon"] = "Powdermelon";
+			meta.recipes["SmokedFish"] = "Smoked Fish";
 		}
+		table[0] = parsePlayerBasicShipping($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
+		parseFarmhands(xmlDoc, saveInfo, table, parsePlayerBasicShipping, meta);
 		playerOutput += printTranspose(table);
 		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + playerOutput + getSectionFooter();
 		return output;
@@ -2293,12 +2481,12 @@ window.onload = function () {
 			craft_count = 0,
 			need = [],
 			id,
-			umid = $(player).children('UniqueMultiplayerID').text(),
+			umid = (compareSemVer(saveInfo.version, "1.3") >= 0) ? $(player).children('UniqueMultiplayerID').text() : saveInfo.farmerId,
 			pt_pct = '',
 			r;
 
 		$(player).find('basicShipped > item').each(function () {
-			var id = $(this).find('key > int').text(),
+			var id = $(this).find('key > *').text(),
 				num = Number($(this).find('value > int').text());
 			if (meta.recipes.hasOwnProperty(id) && num > 0) {
 				crafted[meta.recipes[id]] = num;
@@ -2306,8 +2494,8 @@ window.onload = function () {
 			}
 		});
 
-		saveInfo.perfectionTracker[umid]["Shipping"] = { 'count' : craft_count, 'total' : recipe_count };
 		if (compareSemVer(saveInfo.version, "1.5") >= 0) {
+			saveInfo.perfectionTracker[umid]["Shipping"] = { 'count' : craft_count, 'total' : recipe_count };
 			pt_pct = getPTLink(craft_count / recipe_count, true);
 		}
 		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
@@ -2390,13 +2578,7 @@ window.onload = function () {
 			};
 			
 		table[0] = parsePlayerCropShipping($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
-		if (saveInfo.numPlayers > 1) {
-			$(xmlDoc).find('farmhand').each(function () {
-				if (isValidFarmhand(this)) {
-					table.push(parsePlayerCropShipping(this, saveInfo, meta));
-				}
-			});
-		}
+		parseFarmhands(xmlDoc, saveInfo, table, parsePlayerCropShipping, meta);
 		playerOutput += printTranspose(table);
 		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + playerOutput + getSectionFooter();
 		return output;
@@ -2417,7 +2599,7 @@ window.onload = function () {
 			farmer = $(player).children('name').html();
 
 		$(player).find('basicShipped > item').each(function () {
-			var id = $(this).find('key > int').text(),
+			var id = $(this).find('key > *').text(),
 				num = Number($(this).find('value > int').text());
 			if (meta.poly_crops.hasOwnProperty(id)) {
 				crafted[meta.poly_crops[id]] = num;
@@ -2458,7 +2640,7 @@ window.onload = function () {
 					} else {
 						n = Number(crafted[r]);
 						if (n < 15) {
-							need.push('<li>' + wikify(r) + ' --' + (15 - n) + ' more</li>');
+							need.push('<li>' + wikify(r) + ' -- ' + (15 - n) + ' more</li>');
 						}
 					}
 				}
@@ -2486,13 +2668,7 @@ window.onload = function () {
 			meta.next_level = [100,380,770,1300,2150,3300,4800,6900,10000,15000];
 			
 		table[0] = parsePlayerSkills($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
-		if (saveInfo.numPlayers > 1) {
-			$(xmlDoc).find('farmhand').each(function () {
-				if (isValidFarmhand(this)) {
-					table.push(parsePlayerSkills(this, saveInfo, meta));
-				}
-			});
-		}
+		parseFarmhands(xmlDoc, saveInfo, table, parsePlayerSkills, meta);
 		playerOutput += printTranspose(table);
 		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + playerOutput + getSectionFooter();
 		return output;
@@ -2501,48 +2677,43 @@ window.onload = function () {
 	function parsePlayerSkills(player, saveInfo, meta) {
 		var output = '',
 			xp = {},
-			i = 0,
-			j,
 			level = 10,
-			num,
 			count = 0,
-			umid = $(player).children('UniqueMultiplayerID').text(),
+			umid = (compareSemVer(saveInfo.version, "1.3") >= 0) ? $(player).children('UniqueMultiplayerID').text() : saveInfo.farmerId,
 			isMale = ($(player).children('isMale').text() === "true"),
 			pt_pct = '',
 			pt_level = 0,
 			title = '',
+			masteryXP = 0,
 			need = [];
 
-		$(player).find('experiencePoints > int').each(function () {
-			// We need to skip the unused 6th entry (Luck)
-			if (i < 5) {
-				num = Number($(this).text());
-				xp[meta.skills[i]] = num;
-				// The current skill levels are also stored separately in 'player > fishingLevel' (and similar)
-				if (num < 15000) {
-					for (j = 0; j < 10; j++) {
-						if (meta.next_level[j] > num) {
-							level = j;
-							break;
-						}
+		for (var i = 0; i < meta.skills.length; i++) {
+			var num = saveInfo.data[umid].experiencePoints[i];
+			xp[meta.skills[i]] = num;
+			// The current skill levels are also stored separately in 'player > fishingLevel' (and similar)
+			// which we will use later, but for now we figure it out as we process the xp
+			if (num < 15000) {
+				for (var j = 0; j < 10; j++) {
+					if (meta.next_level[j] > num) {
+						level = j;
+						break;
 					}
-					need.push('<li>' + wikify(meta.skills[i]) + ' (level ' + level + ') -- need ' + 
-						addCommas(meta.next_level[level] - num) + ' more xp to next level and ' + addCommas(15000 - num) + ' more xp to max</li>\n');
-				} else {
-					count++;
 				}
-				i++;
+				need.push('<li>' + wikify(meta.skills[i]) + ' (level ' + level + ') -- need ' + 
+					addCommas(meta.next_level[level] - num) + ' more xp to next level and ' + addCommas(15000 - num) + ' more xp to max</li>\n');
+			} else {
+				count++;
 			}
-		});
+		}
 
 		// We could tally this up while we are checking the xp values, but since we need to account for Luck anyway, we might
 		//  as well just directly calculate this the same way the game does.
 		pt_level = Math.floor((Number($(player).find('farmingLevel').text()) + Number($(player).find('miningLevel').text()) +
 					Number($(player).find('combatLevel').text()) + Number($(player).find('foragingLevel').text()) +
 					Number($(player).find('fishingLevel').text()) + Number($(player).find('luckLevel').text()))/2);
-		saveInfo.perfectionTracker[umid]["Skills"] = { 'count' : pt_level, 'total' : 25 };
 		if (compareSemVer(saveInfo.version, "1.5") >= 0) {
 			pt_pct = getPTLink((pt_level / .25) + "%");
+			saveInfo.perfectionTracker[umid]["Skills"] = { 'count' : pt_level, 'total' : 25 };
 		}
 		switch (pt_level) {
 			case 0:
@@ -2595,10 +2766,10 @@ window.onload = function () {
 		}
 				
 		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
-		output += '<span class="result">' + $(player).children('name').html() +
+		output += '<span class="result">' + saveInfo.players[umid] +
 			' is <a href="https://stardewvalleywiki.com/Skills#Skill-Based_Title">Farmer Level</a> ' + pt_level + 
 			' with title ' + title + '.' + pt_pct + '</span><br />';
-		output += '<span class="result">' + $(player).children('name').html() + ' has reached level 10 in ' + count + 
+		output += '<span class="result">' + saveInfo.players[umid] + ' has reached level 10 in ' + count + 
 			' of 5 skills.</span><br />';
 		output += '<ul class="ach_list"><li>';
 		output += (count >= 1) ? getAchieveString('Singular Talent', 'level 10 in a skill', 1) :
@@ -2612,6 +2783,98 @@ window.onload = function () {
 			meta.hasDetails = true;
 			output += '<div class="' + meta.anchor + '_details ' + meta.det_class + '">';
 			output += '<span class="need">Skills left:<ol>' + need.sort().join('') + '</ol></span></div>';
+		}
+		return [output];
+	}
+
+	function parseSkillMastery(xmlDoc, saveInfo) {
+		var title = 'Skill Mastery',
+			output = '',
+			anchor = makeAnchor(title),
+			version = "1.6",
+			sum_class = getSummaryClass(saveInfo, version),
+			det_class = getDetailsClass(saveInfo, version),
+			output = '',
+			playerOutput = '',
+			meta = { "hasDetails": false, "anchor": anchor, "sum_class": sum_class, "det_class": det_class },
+			table = [];
+			
+			meta.skills = ["Farming", "Fishing", "Foraging", "Mining", "Combat"];
+			meta.nextLevel = [0, 10000, 25000, 45000, 70000, 100000];
+
+		if (compareSemVer(saveInfo.version, version) < 0) {
+			return '';
+		}
+		table[0] = parsePlayerSkillMastery($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
+		parseFarmhands(xmlDoc, saveInfo, table, parsePlayerSkillMastery, meta);
+		playerOutput += printTranspose(table);
+		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + playerOutput + getSectionFooter();
+		return output;
+	}
+	
+	function parsePlayerSkillMastery(player, saveInfo, meta) {
+		var output = '',
+			xp = {},
+			i = 0,
+			num,
+			maxCount = 0,
+			perkCount = 0,
+			umid = $(player).children('UniqueMultiplayerID').text(),
+			masteryXP = 0,
+			masteryNextLvl,
+			masteryNextXP,
+			unchosen = 0,
+			needPerk = [];
+		
+		if (saveInfo.data[umid].stats.hasOwnProperty("MasteryExp")) {
+			masteryXP = saveInfo.data[umid].stats.MasteryExp;
+		}
+		if (masteryXP < 100000) {
+			for (i = 1; i <= 5; i++) {
+				if (masteryXP < meta.nextLevel[i]) {
+					masteryNextLvl = i;
+					break;
+				}
+			}
+			masteryNextXP = meta.nextLevel[masteryNextLvl];
+		}
+		for (i = 0; i < meta.skills.length; i++) {
+			var id = "mastery_" + i;
+			if (saveInfo.data[umid].stats.hasOwnProperty(id)) {
+				perkCount++;
+			} else {
+				needPerk.push('<li>' + meta.skills[i] + '</li>');
+			}
+			if (saveInfo.data[umid].experiencePoints[i] >= 15000) {
+				maxCount++;
+			}
+		}
+		if (masteryNextLvl > perkCount + 1) {
+			unchosen = masteryNextLvl - perkCount - 1;
+		}
+		
+		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
+		output += '<span class="result">' + saveInfo.players[umid] + ' has maxed ' + maxCount + ' of ' + meta.skills.length + ' skills.</span><br />';
+		output += '<ul class="ach_list"><li>\n';
+		output += (maxCount >= 5) ? getMilestoneString('Gain access to the Mastery Cave', 1) :
+				getMilestoneString('Gain access to the Mastery Cave', 0) + (meta.skills.length - maxCount) +
+				' more maxed skills -- <a href="#sec_Skills">see above for needs</a>';
+		output += '</li></ul><span class="result">' + saveInfo.players[umid] + ' has ' + addCommas(masteryXP) + ' mastery xp.</span><br />';
+		output += '<ul class="ach_list"><li>\n';
+		output += (masteryXP >= 100000) ? getMilestoneString('Reach 100,000 mastery xp', 1) :
+				getMilestoneString('Reach 100,000 mastery xp', 0) + addCommas(masteryNextXP - masteryXP) + ' more xp for next perk unlock and ' +
+				addCommas(100000 - masteryXP) + ' more xp overall';
+		output += '</li></ul><span class="result">' + saveInfo.players[umid] + ' has selected ' + perkCount + ' of ' + meta.skills.length + ' mastery perks.</span><br />';
+		output += '<ul class="ach_list"><li>\n';
+		output += (perkCount >= 5) ? getMilestoneString('Acquire all mastery perks', 1) :
+				getMilestoneString('Acquire all mastery perks', 0) + (meta.skills.length - perkCount) + ' more';
+		output += (perkCount < 5 && unchosen > 0) ? ' including ' + unchosen + ' available but unselected.' : '.';
+		output += '</li></ul></div>';
+		
+		if (needPerk.length > 0) {
+			meta.hasDetails = true;
+			output += '<div class="' + meta.anchor + '_details ' + meta.det_class + '">';
+			output += '<span class="need">Perks left:<ol>' + needPerk.sort().join('') + '</ol></span></div>';
 		}
 		return [output];
 	}
@@ -2736,7 +2999,7 @@ window.onload = function () {
 
 
 		$(museum).find('museumPieces > item').each(function () {
-			var id = Number($(this).find('value > int').text());
+			var id = Number($(this).find('value > *').text());
 			if (meta.artifacts.hasOwnProperty(id) || meta.minerals.hasOwnProperty(id)) {
 				meta.donated[id] = 1;
 			}
@@ -2746,9 +3009,9 @@ window.onload = function () {
 		output = '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
 		var intro;
 		if (saveInfo.numPlayers > 1) {
-			intro = 'Inhabitants of ' + $(xmlDoc).find('player > farmName').html(); + ' Farm have';
+			intro = 'Inhabitants of ' + saveInfo.farmName + ' Farm have';
 		} else {
-			intro = $(xmlDoc).find('player > name').html() + ' has';
+			intro = saveInfo.players[saveInfo.farmerId] + ' has';
 		}
 		output += '<span class="result">' + intro + ' donated ' + donated_count + ' of ' +
 			museum_count + ' items to the museum.</span><ul class="ach_list">\n';
@@ -2769,13 +3032,7 @@ window.onload = function () {
 		}
 		
 		table[0] = parsePlayerMuseum($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
-		if (saveInfo.numPlayers > 1) {
-			$(xmlDoc).find('farmhand').each(function () {
-				if (isValidFarmhand(this)) {
-					table.push(parsePlayerMuseum(this, saveInfo, meta));
-				}
-			});
-		}
+		parseFarmhands(xmlDoc, saveInfo, table, parsePlayerMuseum, meta);
 		playerOutput += printTranspose(table);
 		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + output + playerOutput + getSectionFooter();
 		return output;
@@ -2798,7 +3055,7 @@ window.onload = function () {
 			farmer = $(player).children('name').html();
 	
 		$(player).find('archaeologyFound > item').each(function () {
-			var id = $(this).find('key > int').text(),
+			var id = $(this).find('key > *').text(),
 				num = Number($(this).find('value > ArrayOfInt > int').first().text());
 			if (meta.artifacts.hasOwnProperty(id) && num > 0) {
 				found[id] = num;
@@ -2806,7 +3063,7 @@ window.onload = function () {
 			}
 		});
 		$(player).find('mineralsFound > item').each(function () {
-			var id = $(this).find('key > int').text(),
+			var id = $(this).find('key > *').text(),
 				num = Number($(this).find('value > int').text());
 			if (meta.minerals.hasOwnProperty(id) && num > 0) {
 				found[id] = num;
@@ -2959,13 +3216,7 @@ window.onload = function () {
 			meta.monsters["Skeletons"].push("Skeleton Mage");
 		}
 		table[0] = parsePlayerMonsters($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
-		if (saveInfo.numPlayers > 1) {
-			$(xmlDoc).find('farmhand').each(function () {
-				if (isValidFarmhand(this)) {
-					table.push(parsePlayerMonsters(this, saveInfo, meta));
-				}
-			});
-		}
+		parseFarmhands(xmlDoc, saveInfo, table, parsePlayerMonsters, meta);
 		playerOutput += printTranspose(table);
 		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + playerOutput + getSectionFooter();
 		return output;
@@ -2979,7 +3230,7 @@ window.onload = function () {
 			completed = 0,
 			need = [],
 			id,
-			umid = $(player).children('UniqueMultiplayerID').text(),
+			umid = (compareSemVer(saveInfo.version, "1.3") >= 0) ? $(player).children('UniqueMultiplayerID').text() : saveInfo.farmerId,
 			pt_pct = '',
 			stats,
 			mineLevel = Number($(player).children('deepestMineLevel').text()),
@@ -3001,12 +3252,23 @@ window.onload = function () {
 				' has not yet explored the Skull Cavern');
 			output += '.</span></div>';
 		}
-		table.push(output);
-		output = '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
+		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
 		output += '<ul class="ach_list"><li>\n';
 		output += (mineLevel >= 120) ? getAchieveString('The Bottom', 'reach mine level 120', 1) :
 				getAchieveString('The Bottom', 'reach mine level 120', 0) + (120 - mineLevel) + ' more';
 		output += '</li></ul></div>';
+
+		if (compareSemVer(saveInfo.version, "1.6") >= 0) {
+			var totalMonstersKilled = saveInfo.data[umid].stats.hasOwnProperty("monstersKilled") ? Number(saveInfo.data[umid].stats["monstersKilled"]) : 0;
+			output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
+			output += '<span class="result">' + farmer + ' has killed ' + addCommas(totalMonstersKilled) +
+				' monsters</span><br />\n';
+			output += '<ul class="ach_list"><li>\n';
+			output += (totalMonstersKilled >= 1000) ? getMilestoneString('Gain access to the Adventure Guild back room', 1) :
+					getMilestoneString('Gain access to the Adventure Guild back room', 0) + ' to kill ' + (1000 - totalMonstersKilled) +
+					' more monsters';
+			output += '</li></ul></div>';
+		}
 		
 		if (compareSemVer(saveInfo.version, "1.3") >= 0) {
 			stats = $(player).find('stats > specificMonstersKilled');
@@ -3042,8 +3304,8 @@ window.onload = function () {
 			}
 		}
 
-		saveInfo.perfectionTracker[umid]["Monsters"] = (completed >= goal_count);
 		if (compareSemVer(saveInfo.version, "1.5") >= 0) {
+			saveInfo.perfectionTracker[umid]["Monsters"] = (completed >= goal_count);
 			pt_pct = getPTLink((completed >= goal_count) ? "Yes" : "No");
 		}
 		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
@@ -3074,13 +3336,7 @@ window.onload = function () {
 			table = [];
 			
 		table[0] = parsePlayerQuests($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
-		if (saveInfo.numPlayers > 1) {
-			$(xmlDoc).find('farmhand').each(function () {
-				if (isValidFarmhand(this)) {
-					table.push(parsePlayerQuests(this, saveInfo, meta));
-				}
-			});
-		}
+		parseFarmhands(xmlDoc, saveInfo, table, parsePlayerQuests, meta);
 		playerOutput += printTranspose(table);
 		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + playerOutput + getSectionFooter();
 		return output;
@@ -3089,8 +3345,10 @@ window.onload = function () {
 	function parsePlayerQuests(player, saveInfo, meta) {
 		var output = '',
 			count;
-			
-		if (compareSemVer(saveInfo.version, "1.3") >= 0) {
+
+		if (compareSemVer(saveInfo.version, "1.6") >= 0) {
+			count = Number($(player).find('stats > Values > item:contains("questsCompleted") > value > *').text());
+		} else if (compareSemVer(saveInfo.version, "1.3") >= 0) {
 			count = Number($(player).find('stats > questsCompleted').text());
 		} else {
 			// In 1.2, stats are under the root SaveGame so we must go back up the tree
@@ -3132,13 +3390,7 @@ window.onload = function () {
 			};
 			
 		table[0] = parsePlayerStardrops($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
-		if (saveInfo.numPlayers > 1) {
-			$(xmlDoc).find('farmhand').each(function () {
-				if (isValidFarmhand(this)) {
-					table.push(parsePlayerStardrops(this, saveInfo, meta));
-				}
-			});
-		}
+		parseFarmhands(xmlDoc, saveInfo, table, parsePlayerStardrops, meta);
 		playerOutput += printTranspose(table);
 		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + playerOutput + getSectionFooter();
 		return output;
@@ -3148,33 +3400,27 @@ window.onload = function () {
 		var output = '',
 			count = 0,
 			id,
-			umid = $(player).children('UniqueMultiplayerID').text(),
+			umid = (compareSemVer(saveInfo.version, "1.3") >= 0) ? $(player).children('UniqueMultiplayerID').text() : saveInfo.farmerId,
 			pt_pct = '',
 			need = [],
-			received = {},
 			stardrop_count = Object.keys(meta.stardrops).length;
 
-		$(player).find('mailReceived > string').each(function () {
-			var id = $(this).text();
-			if (meta.stardrops.hasOwnProperty(id)) {
-				count++;
-				received[id] = 1;
-			}
-		});
 		for (id in meta.stardrops) {
 			if (meta.stardrops.hasOwnProperty(id)) {
-				if (!received.hasOwnProperty(id)) {
+				if (saveInfo.data[umid].mailReceived.hasOwnProperty(id)) {
+					count++;
+				} else {
 					need.push('<li>' + meta.stardrops[id] + '</li>');
 				}
 			}
 		}
 
-		saveInfo.perfectionTracker[umid]["Stardrops"] = (count >= stardrop_count);
 		if (compareSemVer(saveInfo.version, "1.5") >= 0) {
+			saveInfo.perfectionTracker[umid]["Stardrops"] = (count >= stardrop_count);
 			pt_pct = getPTLink((count >= stardrop_count) ? "Yes" : "No");
 		}
 		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
-		output += '<span class="result">' + $(player).children('name').html() + ' has received ' + count +
+		output += '<span class="result">' + saveInfo.players[umid] + ' has received ' + count +
 				' of ' + stardrop_count + ' stardrops.' + pt_pct + '</span><br />\n';
 		output += '<ul class="ach_list"><li>';
 		output += (count >= stardrop_count) ? getAchieveString('Mystery Of The Stardrops', 'find every stardrop', 1) :
@@ -3225,8 +3471,8 @@ window.onload = function () {
 			isJojaMember = 0,
 			spouse = $(xmlDoc).find('player > spouse'), // will trigger during 3 day engagement too
 			houseUpgrades = Number($(xmlDoc).find('player > houseUpgradeLevel').text()),
-			hasRustyKey = $(xmlDoc).find('player > hasRustyKey').text(),
-			hasSkullKey = $(xmlDoc).find('player > hasSkullKey').text(),
+			hasRustyKey = 'false',
+			hasSkullKey = 'false',
 			hasKeys = [],
 			heart_count = 0,
 			hasPet = 0,
@@ -3238,6 +3484,19 @@ window.onload = function () {
 								Number($(xmlDoc).find('player > fishingLevel').text()) +
 								Number($(xmlDoc).find('player > luckLevel').text())),
 			playerLevel = realPlayerLevel / 2;
+			
+		// 1.6 removed the old stats for rusty and skull keys and instead has some mail flags
+		if (compareSemVer(saveInfo.version, "1.6") >= 0) {
+			if (saveInfo.data[saveInfo.farmerId].mailReceived.hasOwnProperty("HasRustyKey")) {
+				hasRustyKey = 'true';
+			}
+			if (saveInfo.data[saveInfo.farmerId].mailReceived.hasOwnProperty("HasSkullKey")) {
+				hasSkullKey = 'true';
+			}
+		} else {
+			hasRustyKey = $(xmlDoc).find('player > hasRustyKey').text();
+			hasSkullKey = $(xmlDoc).find('player > hasSkullKey').text();
+		}			
 
 		// Pre-calculating totals to put summary info up top.
 		if (money >= 1e6) {
@@ -3260,22 +3519,20 @@ window.onload = function () {
 				ach_have[id] = 1;
 			}
 		});
-		$(xmlDoc).find('player > eventsSeen > int').each(function () {
-			if ($(this).text() === '191393') {
-				cc_done = 1;
-			}
-		});
+		if (saveInfo.data[saveInfo.farmerId].eventsSeen.hasOwnProperty("191393")) {
+			cc_done = 1;
+		}
 		if (cc_done) {
 			count += 3;
 		} else {
-			$(xmlDoc).find('player > mailReceived > string').each(function () {
-				var id = $(this).text();
-				if (id === 'JojaMember') {
-					isJojaMember = 1;
-				} else if (ccRooms.hasOwnProperty(id)) {
+			if (saveInfo.data[saveInfo.farmerId].mailReceived.hasOwnProperty("JojaMember")) {
+				isJojaMember = 1;
+			}
+			for (var id in ccRooms) {
+				if (ccRooms.hasOwnProperty(id) && saveInfo.data[saveInfo.farmerId].mailReceived.hasOwnProperty(id)) {
 					cc_have++;
 				}
-			});
+			}
 			if (cc_have >= cc_count) {
 				count++;
 			}
@@ -3319,11 +3576,20 @@ window.onload = function () {
 			count += 1;
 		}
 		$(xmlDoc).find('locations > GameLocation > Characters > NPC').each(function () {
-			if ($(this).attr(saveInfo.ns_prefix + ':type') === 'Cat' || $(this).attr(saveInfo.ns_prefix + ':type') === 'Dog') {
+			if ($(this).attr(saveInfo.ns_prefix + ':type') === 'Pet' || $(this).attr(saveInfo.ns_prefix + ':type') === 'Cat' || $(this).attr(saveInfo.ns_prefix + ':type') === 'Dog') {
 				hasPet = 1;
-				petLove = Number($(this).find('friendshipTowardFarmer').text());
+				var thisPetLove = Number($(this).find('friendshipTowardFarmer').text());
+				if (thisPetLove > petLove) {
+					petLove = thisPetLove;
+				}
 			}
 		});
+		// Handling the case of a previously maxed but now butterflied pet.
+		if (compareSemVer(saveInfo.version, "1.6") >= 0) {
+			if (saveInfo.data[saveInfo.farmerId].mailReceived.hasOwnProperty("petLoveMessage")) {
+				petLove = 1000;
+			}			
+		}
 		if (petLove >= 999) {
 			count++;
 		}
@@ -3423,16 +3689,21 @@ window.onload = function () {
 				getPointString(1, '~8&#x2665; with 10 people', 1, 0) + ' -- need ' + (10 - heart_count) + ' more';
 		output += '</li></ul>\n';
 
+		// This doesn't correctly summarize a situation of a butterflied 1000 pt pet and a current pet with fewer points
 		if (hasPet) {
-			output += '<span class="result">' + farmer + ' has a pet with ' + petLove + ' friendship points.</span><br />\n';
+			output += '<span class="result">' + farmer + ' has a pet with ' + petLove + ' friendship points.</span><br/>';
+			need = (999 - petLove) + ' more friendship points';
 		} else {
-			need = ' a pet and ';
-			output += '<span class="result">' + farmer + ' does not have a pet.</span><br />\n';
+			if (petLove > 0) {
+				output += '<span class="result">' + farmer + ' previously had a pet with ' + petLove + ' friendship points.</span><br/>'
+			} else {
+				output += '<span class="result">' + farmer + ' has not had a pet with any friendship points.</span><br/>';
+			}
+			need = "a pet and 999 friendship points";
 		}
 		output += '<ul class="ach_list"><li>';
 		output += (petLove >= 999) ? getPointString(1, 'pet with at least 999 friendship points', 0, 1) :
-				getPointString(1, 'pet with at least 999 friendship points', 0, 0) + ' -- need ' +
-				need + (999 - petLove) + ' friendship points';
+				getPointString(1, 'pet with at least 999 friendship points', 0, 0) + ' -- need ' + need;
 		output += '</li></ul>\n';
 
 		output += '<span class="result">' + farmer + ((spouse.length > 0) ? ' is' : ' is not') +
@@ -3466,282 +3737,52 @@ window.onload = function () {
 		return output;
 	}
 
-	function parseBundlesOld(xmlDoc, saveInfo) {
-		// TODO - boy howdy is 1.5 different
-		// Bundle info from Data\Bundles.xnb & StardewValley.Locations.CommunityCenter class
-		var title = 'Community Center / Joja Community Development',
-			anchor = makeAnchor(title),
-			version = "1.2",
-			sum_class = getSummaryClass(saveInfo, version),
-			det_class = getDetailsClass(saveInfo, version),
-			output = '',
-			farmer = $(xmlDoc).find('player > name').html(),
-			hasDetails = false,
-			isJojaMember = 0,
-			room = {
-				0: {
-					'name': 'Pantry',
-					'bundles': {
-						0: 'Spring Crops',
-						1: 'Summer Crops',
-						2: 'Fall Crops',
-						3: 'Quality Crops',
-						4: 'Animal',
-						5: 'Artisan'
-					}
-				},
-				1: {
-					'name': 'Crafts Room',
-					'bundles': {
-						13: 'Spring Foraging',
-						14: 'Summer Foraging',
-						15: 'Fall Foraging',
-						16: 'Winter Foraging',
-						17: 'Construction',
-						19: 'Exotic Foraging'
-					}
-				},
-				2: {
-					'name': 'Fish Tank',
-					'bundles': {
-						6: 'River Fish',
-						7: 'Lake Fish',
-						8: 'Ocean Fish',
-						9: 'Night Fishing',
-						10: 'Specialty Fish',
-						11: 'Crab Pot'
-					}
-				},
-				3: {
-					'name': 'Boiler Room',
-					'bundles': {
-						20: "Blacksmith's",
-						21: "Geologist's",
-						22: "Adventurer's"
-					}
-				},
-				4: {
-					'name': 'Vault',
-					'bundles': {
-						23: ' 2,500g',
-						24: ' 5,000g',
-						25: '10,000g',
-						26: '25,000g'
-					}
-				},
-				5: {
-					'name': 'Bulletin Board',
-					'bundles': {
-						31: "Chef's",
-						32: 'Field Research',
-						33: "Enchanter's",
-						34: 'Dye',
-						35: 'Fodder'
+	function parseBundleData(xmlDoc, saveInfo, input, output, meta) {
+		meta.roomID = {
+			'Pantry': 0,
+			'Crafts Room': 1,
+			'Fish Tank': 2,
+			'Boiler Room': 3,
+			'Vault': 4,
+			'Bulletin Board': 5,
+			'Abandoned Joja Mart': 6
+		};
+		meta.quality = {
+			1: "Silver",
+			2: "Gold",
+			4: "Iridium",
+		};
+		meta.bundleRoom = {};
+		for (var k in input) {
+			if (input.hasOwnProperty(k)) {
+				var kFields = k.split('/');
+				var room = kFields[0];
+				var id = kFields[1];
+				var vFields = input[k].split('/');
+				var bundleName = vFields[0];
+				var itemData = vFields[2].split(' ');
+				var qty = vFields[4];
+				
+				if (!output.hasOwnProperty(meta.roomID[room])) {
+					output[meta.roomID[room]] = { 'name': room, 'bundles': {} };
+				}
+				output[meta.roomID[room]].bundles[id] = { 'name': bundleName, 'qty': qty, 'items': [] };
+				meta.bundleRoom[id] = meta.roomID[room];
+				for(var i = 0; i < itemData.length; i += 3) {
+					var itemName = (saveInfo.objects.hasOwnProperty(itemData[i])) ? saveInfo.objects[itemData[i]] : "Object ID " + itemData[i];
+					var n = (Number(itemData[i+1]) > 1) ? itemData[i+1] + "x " : "";
+					var q = (meta.quality.hasOwnProperty(itemData[i+2])) ? meta.quality[itemData[i+2]] + " " : "";
+					if (itemData[i] === "-1") {
+						output[meta.roomID[room]].bundles[id].items.push(addCommas(itemData[i+1]) + "g");
+					} else {
+						output[meta.roomID[room]].bundles[id].items.push(n + q + wikify(itemName));
 					}
 				}
-			},
-			bundleHave = {},
-			bundleCount = { // number of items in each bundle
-				0: 4,
-				1: 4,
-				2: 4,
-				3: 3,
-				4: 5,
-				5: 6,
-				6: 4,
-				7: 4,
-				8: 4,
-				9: 3,
-				10: 4,
-				11: 5,
-				13: 4,
-				14: 3,
-				15: 4,
-				16: 4,
-				17: 4,
-				19: 5,
-				20: 3,
-				21: 4,
-				22: 2,
-				23: 1,
-				24: 1,
-				25: 1,
-				26: 1,
-				31: 6,
-				32: 4,
-				33: 4,
-				34: 6,
-				35: 3
-			},
-			ccMail = {
-				'ccBoilerRoom': 3,
-				'ccCraftsRoom': 1,
-				'ccPantry': 0,
-				'ccFishTank': 2,
-				'ccVault': 4,
-				'ccBulletin': 5
-			},
-			ccCount = 6,
-			ccHave = 0,
-			ccEvent = '191393',
-			project = ['Greenhouse', 'Bridge', 'Panning', 'Minecarts', 'Bus'],
-			price = ['35,000g', '25,000g', '20,000g', '15,000g', '40,000g'],
-			jojaMail = {
-				'jojaBoilerRoom': 3,
-				'jojaCraftsRoom': 1,
-				'jojaPantry': 0,
-				'jojaFishTank': 2,
-				'jojaVault': 4
-			},
-			jojaCount = 5,
-			jojaHave = 0,
-			jojaEvent = '502261',
-			eventToCheck = '',
-			hasSeenCeremony = 0,
-			done = {},
-			hybrid = 0,
-			hybridLeft = 0,
-			id,
-			r,
-			b,
-			temp,
-			bundleNeed = [],
-			need = [],
-			ccLoc = $(xmlDoc).find("locations > GameLocation[" + saveInfo.ns_prefix + "\\:type='CommunityCenter']");
-
-		// First check basic completion
-		r = 0;
-		$(ccLoc).find('areasComplete > boolean').each(function () {
-			if ($(this).text() === 'true') {
-				ccHave++;
-				done[r] = 1;
-			}
-			r++;
-		});
-		// Now look at bundles. Getting an item count but not which items are placed
-		$(ccLoc).find('bundles > item').each(function () {
-			id = $(this).find('key > int').text();
-			bundleHave[id] = 0;
-			$(this).find('ArrayOfBoolean > boolean').each(function () {
-				if ($(this).text() === 'true') {
-					bundleHave[id]++;
+				if (qty === '') {
+					output[meta.roomID[room]].bundles[id].qty = output[meta.roomID[room]].bundles[id].items.length;
 				}
-			});
-		});
-		$(xmlDoc).find('player > mailReceived > string').each(function () {
-			var id = $(this).text();
-			if (id === 'JojaMember') {
-				isJojaMember = 1;
-			} else if (jojaMail.hasOwnProperty(id)) {
-				jojaHave++;
-				done[jojaMail[id]] = 1;
 			}
-		});
-		if (ccHave > 0 && isJojaMember) {
-			hybrid = 1;
 		}
-		hybridLeft = jojaCount - ccHave;
-		if (done.hasOwnProperty(ccMail.ccBulletin)) {
-			hybridLeft++;
-		}
-		eventToCheck = (isJojaMember) ? jojaEvent : ccEvent;
-		$(xmlDoc).find('player > eventsSeen > int').each(function () {
-			if ($(this).text() === eventToCheck) {
-				hasSeenCeremony = 1;
-			}
-		});
-		
-		output += '<div class="' + anchor + '_summary ' + sum_class + '">';
-		// New information from Gigafreak#4754 on Discord confirms that the Joja achieve does trigger even if
-		// most of the CC was completed through bundles. So warnings are removed and Joja will not be marked
-		// impossible unless the CC is actually done.
-		if (isJojaMember) {
-			if (hybrid) {
-				output += '<span class="result">' + farmer + ' completed ' + ccHave +
-					' Community Center room(s) and then became a Joja member.</span><br />\n';
-				output += '<span class="result">' + farmer + ' has since completed ' + jojaHave + ' of the remaining ' +
-					hybridLeft + ' projects on the Community Development Form.</span><br />\n';
-			} else {
-				output += '<span class="result">' + farmer + ' is a Joja member and has completed ' + jojaHave +
-					' of the ' + jojaCount + ' projects on the Community Development Form.</span><br />\n';
-			}
-			hybridLeft -= jojaHave;
-			output += '<span class="result">' + farmer + ((hasSeenCeremony) ? ' has' : ' has not') +
-					' attended the completion ceremony</span><br />\n<ul class="ach_list"><li>';
-			output += getAchieveImpossibleString('Local Legend', 'restore the Pelican Town Community Center');
-			output += '</li><li>\n';
-			if (!hasSeenCeremony) {
-				if (hybridLeft > 0) {
-					temp = hybridLeft + ' more project(s) and the ceremony';
-					// Since we are supporting hybrid playthrough, we check the CC versions of mail, not joja
-					for (id in ccMail) {
-						if (ccMail.hasOwnProperty(id) && id !== "ccBulletin") {
-							if (!done.hasOwnProperty(ccMail[id])) {
-								need.push('<li> Purchase ' + project[ccMail[id]] + ' project for ' + price[ccMail[id]] + '</li>');
-							}
-						}
-					}
-				} else {
-					temp = ' to attend the ceremony';
-				}
-				need.push('<li>Attend the completion ceremony at the Joja Warehouse</li>');
-			}
-			output += (hasSeenCeremony) ? getAchieveString('Joja Co. Member Of The Year', '', 1) :
-					getAchieveString('Joja Co. Member Of The Year', '', 0) + temp;
-			output += '</li></ul>\n';
-		} else {
-			output += '<span class="result">' + farmer + ' is not a Joja member and has completed ' + ccHave +
-					' of the ' + ccCount + ' Community Center rooms.</span><br />\n';
-			output += '<span class="result">' + farmer + ((hasSeenCeremony) ? ' has' : ' has not') +
-					' attended the completion ceremony</span><br />\n<ul class="ach_list"><li>';
-			if (ccHave === 0) {
-				output += getAchieveString('Joja Co. Member Of The Year', '', 0) + 'to become a Joja member and purchase all community development perks';
-			} else if (ccHave < ccCount) {
-				output += getAchieveString('Joja Co. Member Of The Year', '', 0) + 'to become a Joja member and purchase any remaining community development perks (' + hybridLeft + " left)";
-			} else {
-				output += getAchieveImpossibleString('Joja Co. Member Of The Year', 'become a Joja member and purchase all community development perks');
-			}
-			output += '</li><li>\n';
-			if (!hasSeenCeremony) {
-				if (ccHave < ccCount) {
-					temp = (ccCount - ccHave) + ' more room(s) and the ceremony';
-					for (id in ccMail) {
-						if (ccMail.hasOwnProperty(id)) {
-							r = ccMail[id];
-							if (!done.hasOwnProperty(r)) {
-								bundleNeed = [];
-								if (room.hasOwnProperty(r)) {
-									for (b in room[r].bundles) {
-										if (room[r].bundles.hasOwnProperty(b)) {
-											if (bundleHave[b] < bundleCount[b]) {
-												bundleNeed.push('<li>' + room[r].bundles[b] + ' Bundle -- ' +
-													(bundleCount[b] - bundleHave[b]) + ' more item(s)</li>');
-											}
-										}
-									}
-								}
-								need.push('<li> ' + wikify(room[r].name, 'Bundles') + '<ol>' + bundleNeed.sort().join('') + '</ol></li>');
-							}
-						}
-					}
-				} else {
-					temp = ' to attend the ceremony';
-				}
-				need.push('<li>Attend the re-opening ceremony at the Community Center</li>');
-			}
-			output += (ccHave >= ccCount && hasSeenCeremony) ? getAchieveString('Local Legend', '', 1) :
-					getAchieveString('Local Legend', '', 0) + temp;
-			output += '</li></ul></div>';
-		}
-		if (need.length > 0) {
-			hasDetails = true;
-			output += '<div class="' + anchor + '_details ' + det_class + '">';
-			output += '<span class="result warn">Note: This does not yet support the randomized bundles from version 1.5, so the details may be inaccurate.<br /></span>';
-			output += '<span class="need">Left to do:<ol>' + need.sort().join('') + '</ol></span></div>';
-		}
-
-		output = getSectionHeader(saveInfo, title, anchor, hasDetails, version) + output + getSectionFooter();
-		return output;
 	}
 
 	function parseBundles(xmlDoc, saveInfo) {
@@ -3755,12 +3796,12 @@ window.onload = function () {
 			sum_class = getSummaryClass(saveInfo, version),
 			det_class = getDetailsClass(saveInfo, version),
 			output = '',
+			meta = {},
 			farmer = $(xmlDoc).find('player > name').html(),
 			hasDetails = false,
 			isJojaMember = 0,
 			room = {},
 			bundleHave = {},
-			bundleCount = {},
 			ccMail = {
 				'ccBoilerRoom': 3,
 				'ccCraftsRoom': 1,
@@ -3792,148 +3833,56 @@ window.onload = function () {
 			id,
 			r,
 			b,
+			i,
+			itemsHave = {},
 			temp,
 			bundleNeed = [],
 			need = [],
 			ccLoc = $(xmlDoc).find("locations > GameLocation[" + saveInfo.ns_prefix + "\\:type='CommunityCenter']"),
+			bundleData = {},
+			rawData = {},
 			defaultData = {
-				"Pantry/0": "Spring Crops/O 465 20/24 1 0 188 1 0 190 1 0 192 1 0/0",
-				"Pantry/1": "Summer Crops/O 621 1/256 1 0 260 1 0 258 1 0 254 1 0/3",
-				"Pantry/2": "Fall Crops/BO 10 1/270 1 0 272 1 0 276 1 0 280 1 0/2",
-				"Pantry/3": "Quality Crops/BO 15 1/24 5 2 254 5 2 276 5 2 270 5 2/6/3",
-				"Pantry/4": "Animal/BO 16 1/186 1 0 182 1 0 174 1 0 438 1 0 440 1 0 442 1 0 639 1 0 640 1 0 641 1 0 642 1 0 643 1 0/4/5",
-				"Pantry/5": "Artisan/BO 12 1/432 1 0 428 1 0 426 1 0 424 1 0 340 1 0 344 1 0 613 1 0 634 1 0 635 1 0 636 1 0 637 1 0 638 1 0/1/6",
-				"Crafts Room/13": "Spring Foraging/O 495 30/16 1 0 18 1 0 20 1 0 22 1 0/0",
-				"Crafts Room/14": "Summer Foraging/O 496 30/396 1 0 398 1 0 402 1 0/3",
-				"Crafts Room/15": "Fall Foraging/O 497 30/404 1 0 406 1 0 408 1 0 410 1 0/2",
-				"Crafts Room/16": "Winter Foraging/O 498 30/412 1 0 414 1 0 416 1 0 418 1 0/6",
-				"Crafts Room/17": "Construction/BO 114 1/388 99 0 388 99 0 390 99 0 709 10 0/4",
-				"Crafts Room/19": "Exotic Foraging/O 235 5/88 1 0 90 1 0 78 1 0 420 1 0 422 1 0 724 1 0 725 1 0 726 1 0 257 1 0/1/5",
-				"Fish Tank/6": "River Fish/O 685 30/145 1 0 143 1 0 706 1 0 699 1 0/6",
-				"Fish Tank/7": "Lake Fish/O 687 1/136 1 0 142 1 0 700 1 0 698 1 0/0",
-				"Fish Tank/8": "Ocean Fish/O 690 5/131 1 0 130 1 0 150 1 0 701 1 0/5",
-				"Fish Tank/9": "Night Fishing/R 516 1/140 1 0 132 1 0 148 1 0/1",
-				"Fish Tank/10": "Specialty Fish/O 242 5/128 1 0 156 1 0 164 1 0 734 1 0/4",
-				"Fish Tank/11": "Crab Pot/O 710 3/715 1 0 716 1 0 717 1 0 718 1 0 719 1 0 720 1 0 721 1 0 722 1 0 723 1 0 372 1 0/1/5",
-				"Boiler Room/20": "Blacksmith's/BO 13 1/334 1 0 335 1 0 336 1 0/2",
-				"Boiler Room/21": "Geologist's/O 749 5/80 1 0 86 1 0 84 1 0 82 1 0/1",
-				"Boiler Room/22": "Adventurer's/R 518 1/766 99 0 767 10 0 768 1 0 769 1 0/1/2",
-				"Vault/23": "2,500g/O 220 3/-1 2500 2500/4",
-				"Vault/24": "5,000g/O 369 30/-1 5000 5000/2",
-				"Vault/25": "10,000g/BO 9 1/-1 10000 10000/3",
-				"Vault/26": "25,000g/BO 21 1/-1 25000 25000/1",
-				"Bulletin Board/31": "Chef's/O 221 3/724 1 0 259 1 0 430 1 0 376 1 0 228 1 0 194 1 0/4",
-				"Bulletin Board/32": "Field Research/BO 20 1/422 1 0 392 1 0 702 1 0 536 1 0/5",
-				"Bulletin Board/33": "Enchanter's/O 336 5/725 1 0 348 1 0 446 1 0 637 1 0/1",
-				"Bulletin Board/34": "Dye/BO 25 1/420 1 0 397 1 0 421 1 0 444 1 0 62 1 0 266 1 0/6",
-				"Bulletin Board/35": "Fodder/BO 104 1/262 10 0 178 10 0 613 3 0/3",
-				"Abandoned Joja Mart/36": "The Missing//348 1 1 807 1 0 74 1 0 454 5 2 795 1 2 445 1 0/1/5"
+				"Pantry/0": "Spring Crops/O 465 20/24 1 0 188 1 0 190 1 0 192 1 0/0///Spring Crops",
+				"Pantry/1": "Summer Crops/O 621 1/256 1 0 260 1 0 258 1 0 254 1 0/3///Summer Crops",
+				"Pantry/2": "Fall Crops/BO 10 1/270 1 0 272 1 0 276 1 0 280 1 0/2///Fall Crops",
+				"Pantry/3": "Quality Crops/BO 15 1/24 5 2 254 5 2 276 5 2 270 5 2/6/3//Quality Crops",
+				"Pantry/4": "Animal/BO 16 1/186 1 0 182 1 0 174 1 0 438 1 0 440 1 0 442 1 0/4/5//Animal",
+				"Pantry/5": "Artisan/BO 12 1/432 1 0 428 1 0 426 1 0 424 1 0 340 1 0 344 1 0 613 1 0 634 1 0 635 1 0 636 1 0 637 1 0 638 1 0/1/6//Artisan",
+				"Crafts Room/13": "Spring Foraging/O 495 30/16 1 0 18 1 0 20 1 0 22 1 0/0///Spring Foraging",
+				"Crafts Room/14": "Summer Foraging/O 496 30/396 1 0 398 1 0 402 1 0/3///Summer Foraging",
+				"Crafts Room/15": "Fall Foraging/O 497 30/404 1 0 406 1 0 408 1 0 410 1 0/2///Fall Foraging",
+				"Crafts Room/16": "Winter Foraging/O 498 30/412 1 0 414 1 0 416 1 0 418 1 0/6///Winter Foraging",
+				"Crafts Room/17": "Construction/BO 114 1/388 99 0 388 99 0 390 99 0 709 10 0/4///Construction",
+				"Crafts Room/19": "Exotic Foraging/O 235 5/88 1 0 90 1 0 78 1 0 420 1 0 422 1 0 724 1 0 725 1 0 726 1 0 257 1 0/1/5//Exotic Foraging",
+				"Fish Tank/6": "River Fish/O 685 30/145 1 0 143 1 0 706 1 0 699 1 0/6///River Fish",
+				"Fish Tank/7": "Lake Fish/O 687 1/136 1 0 142 1 0 700 1 0 698 1 0/0///Lake Fish",
+				"Fish Tank/8": "Ocean Fish/O 690 5/131 1 0 130 1 0 150 1 0 701 1 0/5///Ocean Fish",
+				"Fish Tank/9": "Night Fishing/R 516 1/140 1 0 132 1 0 148 1 0/1///Night Fishing",
+				"Fish Tank/10": "Specialty Fish/O 242 5/128 1 0 156 1 0 164 1 0 734 1 0/4///Specialty Fish",
+				"Fish Tank/11": "Crab Pot/O 710 3/715 1 0 716 1 0 717 1 0 718 1 0 719 1 0 720 1 0 721 1 0 722 1 0 723 1 0 372 1 0/1/5//Crab Pot",
+				"Boiler Room/20": "Blacksmith's/BO 13 1/334 1 0 335 1 0 336 1 0/2///Blacksmith's",
+				"Boiler Room/21": "Geologist's/O 749 5/80 1 0 86 1 0 84 1 0 82 1 0/1///Geologist's",
+				"Boiler Room/22": "Adventurer's/R 518 1/766 99 0 767 10 0 768 1 0 769 1 0/1/2//Adventurer's",
+				"Vault/23": "2,500g/O 220 3/-1 2500 2500/4///2,500g",
+				"Vault/24": "5,000g/O 369 30/-1 5000 5000/2///5,000g",
+				"Vault/25": "10,000g/BO 9 1/-1 10000 10000/3///10,000g",
+				"Vault/26": "25,000g/BO 21 1/-1 25000 25000/1///25,000g",
+				"Bulletin Board/31": "Chef's/O 221 3/724 1 0 259 1 0 430 1 0 376 1 0 228 1 0 194 1 0/4///Chef's",
+				"Bulletin Board/32": "Field Research/BO 20 1/422 1 0 392 1 0 702 1 0 536 1 0/5///Field Research",
+				"Bulletin Board/33": "Enchanter's/O 336 5/725 1 0 348 1 0 446 1 0 637 1 0/1///Enchanter's",
+				"Bulletin Board/34": "Dye/BO 25 1/420 1 0 397 1 0 421 1 0 444 1 0 62 1 0 266 1 0/6///Dye",
+				"Bulletin Board/35": "Fodder/BO 104 1/262 10 0 178 10 0 613 3 0/3///Fodder",
+				"Abandoned Joja Mart/36": "The Missing//348 1 1 807 1 0 74 1 0 454 5 2 795 1 2 445 1 0/1/5//The Missing"
 			};
 
 		if (compareSemVer(saveInfo.version, version) < 0) {
-			return parseBundlesOld(xmlDoc, saveInfo);
+			parseBundleData(xmlDoc, saveInfo, defaultData, bundleData, meta);
 		} else {
-			return parseBundlesOld(xmlDoc, saveInfo);
+			$(xmlDoc).find('bundleData > item').each(function() {
+				rawData[$(this).find("key > string").text()] = $(this).find("value > string").text();
+			});
+			parseBundleData(xmlDoc, saveInfo, rawData, bundleData, meta);
 		}
-		
-/*		
-		// TODO - boy howdy is 1.5 different
-		// Bundle info from Data\Bundles.xnb & StardewValley.Locations.CommunityCenter class
-			room = {
-				0: {
-					'name': 'Pantry',
-					'bundles': {
-						0: 'Spring Crops',
-						1: 'Summer Crops',
-						2: 'Fall Crops',
-						3: 'Quality Crops',
-						4: 'Animal',
-						5: 'Artisan'
-					}
-				},
-				1: {
-					'name': 'Crafts Room',
-					'bundles': {
-						13: 'Spring Foraging',
-						14: 'Summer Foraging',
-						15: 'Fall Foraging',
-						16: 'Winter Foraging',
-						17: 'Construction',
-						19: 'Exotic Foraging'
-					}
-				},
-				2: {
-					'name': 'Fish Tank',
-					'bundles': {
-						6: 'River Fish',
-						7: 'Lake Fish',
-						8: 'Ocean Fish',
-						9: 'Night Fishing',
-						10: 'Specialty Fish',
-						11: 'Crab Pot'
-					}
-				},
-				3: {
-					'name': 'Boiler Room',
-					'bundles': {
-						20: "Blacksmith's",
-						21: "Geologist's",
-						22: "Adventurer's"
-					}
-				},
-				4: {
-					'name': 'Vault',
-					'bundles': {
-						23: ' 2,500g',
-						24: ' 5,000g',
-						25: '10,000g',
-						26: '25,000g'
-					}
-				},
-				5: {
-					'name': 'Bulletin Board',
-					'bundles': {
-						31: "Chef's",
-						32: 'Field Research',
-						33: "Enchanter's",
-						34: 'Dye',
-						35: 'Fodder'
-					}
-				}
-			},
-			bundleCount = { // number of items in each bundle
-				0: 4,
-				1: 4,
-				2: 4,
-				3: 3,
-				4: 5,
-				5: 6,
-				6: 4,
-				7: 4,
-				8: 4,
-				9: 3,
-				10: 4,
-				11: 5,
-				13: 4,
-				14: 3,
-				15: 4,
-				16: 4,
-				17: 4,
-				19: 5,
-				20: 3,
-				21: 4,
-				22: 2,
-				23: 1,
-				24: 1,
-				25: 1,
-				26: 1,
-				31: 6,
-				32: 4,
-				33: 4,
-				34: 6,
-				35: 3
-			},
-*/
 		// First check basic completion
 		r = 0;
 		$(ccLoc).find('areasComplete > boolean').each(function () {
@@ -3943,38 +3892,40 @@ window.onload = function () {
 			}
 			r++;
 		});
-		// Now look at bundles. Getting an item count but not which items are placed
+		// Now look at bundles. Getting donated items and count
 		$(ccLoc).find('bundles > item').each(function () {
 			id = $(this).find('key > int').text();
 			bundleHave[id] = 0;
+			itemsHave[id] = {};
+			i = 0;
 			$(this).find('ArrayOfBoolean > boolean').each(function () {
 				if ($(this).text() === 'true') {
 					bundleHave[id]++;
+					itemsHave[id][i] = true;
 				}
+				i++;
 			});
 		});
-		$(xmlDoc).find('player > mailReceived > string').each(function () {
-			var id = $(this).text();
-			if (id === 'JojaMember') {
-				isJojaMember = 1;
-			} else if (jojaMail.hasOwnProperty(id)) {
+		if (saveInfo.data[saveInfo.farmerId].mailReceived.hasOwnProperty("JojaMember")) {
+			isJojaMember = true;
+		}
+		Object.keys(jojaMail).forEach(function (id) {
+			if (saveInfo.data[saveInfo.farmerId].mailReceived.hasOwnProperty(id)) {
 				jojaHave++;
-				done[jojaMail[id]] = 1;
+				done[jojaMail[id]] = true;
 			}
 		});
 		if (ccHave > 0 && isJojaMember) {
-			hybrid = 1;
+			hybrid = true;
 		}
 		hybridLeft = jojaCount - ccHave;
 		if (done.hasOwnProperty(ccMail.ccBulletin)) {
 			hybridLeft++;
 		}
 		eventToCheck = (isJojaMember) ? jojaEvent : ccEvent;
-		$(xmlDoc).find('player > eventsSeen > int').each(function () {
-			if ($(this).text() === eventToCheck) {
-				hasSeenCeremony = 1;
-			}
-		});
+		if (saveInfo.data[saveInfo.farmerId].eventsSeen.hasOwnProperty(eventToCheck)) {
+			hasSeenCeremony = true;
+		}
 		
 		output += '<div class="' + anchor + '_summary ' + sum_class + '">';
 		// New information from Gigafreak#4754 on Discord confirms that the Joja achieve does trigger even if
@@ -4035,17 +3986,23 @@ window.onload = function () {
 							r = ccMail[id];
 							if (!done.hasOwnProperty(r)) {
 								bundleNeed = [];
-								if (room.hasOwnProperty(r)) {
-									for (b in room[r].bundles) {
-										if (room[r].bundles.hasOwnProperty(b)) {
-											if (bundleHave[b] < bundleCount[b]) {
-												bundleNeed.push('<li>' + room[r].bundles[b] + ' Bundle -- ' +
-													(bundleCount[b] - bundleHave[b]) + ' more item(s)</li>');
+								if (bundleData.hasOwnProperty(r)) {
+									for (b in bundleData[r].bundles) {
+										if (bundleData[r].bundles.hasOwnProperty(b)) {
+											if (bundleHave[b] < bundleData[r].bundles[b].qty) {
+												var possibles = [];
+												bundleData[r].bundles[b].items.forEach(function (e, i, a) {
+													if (!itemsHave[b].hasOwnProperty(i)) {
+														possibles.push(bundleData[r].bundles[b].items[i]);
+													}
+												});
+												bundleNeed.push('<li>' + bundleData[r].bundles[b].name + ' Bundle -- need ' +
+													(bundleData[r].bundles[b].qty - bundleHave[b]) + ' of: ' + possibles.join(', ') + '</li>');
 											}
 										}
 									}
 								}
-								need.push('<li> ' + wikify(room[r].name, 'Bundles') + '<ol>' + bundleNeed.sort().join('') + '</ol></li>');
+								need.push('<li> ' + wikify(bundleData[r].name, 'Bundles') + '<ol>' + bundleNeed.sort().join('') + '</ol></li>');
 							}
 						}
 					}
@@ -4115,13 +4072,7 @@ window.onload = function () {
 		}
 		
 		table[0] = parsePlayerSecretNotes($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
-		if (saveInfo.numPlayers > 1) {
-			$(xmlDoc).find('farmhand').each(function () {
-				if (isValidFarmhand(this)) {
-					table.push(parsePlayerSecretNotes(this, saveInfo, meta));
-				}
-			});
-		}
+		parseFarmhands(xmlDoc, saveInfo, table, parsePlayerSecretNotes, meta);
 		playerOutput += printTranspose(table);
 		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + playerOutput + getSectionFooter();
 		return output;
@@ -4132,8 +4083,9 @@ window.onload = function () {
 			table = [],
 			farmer = $(player).children('name').html(),
 			hasSeenKrobus = false,
-			hasMagnifyingGlass = ($(player).children('hasMagnifyingGlass').text() === 'true'),
+			hasMagnifyingGlass = false,
 			isJojaMember = false,
+			umid = $(player).children('UniqueMultiplayerID').text(),
 			notes = {},
 			need = [],
 			rewards = {},
@@ -4141,38 +4093,85 @@ window.onload = function () {
 			found_notes = 0,
 			found_rewards = 0,
 			note_count = 23,
+			mod_count = 0,
 			reward_start = 13,
 			reward_count = note_count - reward_start + 1,
-			reward_re,
 			i;
 
 		if (compareSemVer(saveInfo.version, "1.4") >= 0) {
 			note_count = 25;
-			reward_count = 12;
+			reward_count++;
 			reward_skip[24] = true;
 		}
-		// Check Krobus event, then check for magnifier, then check number of notes
-		// Also checking for one of the reward events here, so don't use "return false" to end early.
-		$(player).find('eventsSeen > int').each(function () {
-			if ($(this).text() === '520702') {
-				hasSeenKrobus = true;
-			} else if ($(this).text() === '2120303') {
-				rewards[23] = true;
+		if (compareSemVer(saveInfo.version, "1.6") >= 0) {
+			note_count = 27;
+			reward_skip[26] = true;
+			reward_skip[27] = true;
+			if (saveInfo.data[umid].mailReceived.hasOwnProperty('HasMagnifyingGlass')) {
+				hasMagnifyingGlass = true;
+			}
+		} else {
+			hasMagnifyingGlass = ($(player).children('hasMagnifyingGlass').text() === 'true');
+		}
+
+		if (saveInfo.data[umid].eventsSeen.hasOwnProperty('520702')) {
+			hasSeenKrobus = true;
+		}
+		if (saveInfo.data[umid].eventsSeen.hasOwnProperty('2120303')) {
+			rewards[23] = true;
+			found_rewards++;
+		}
+		
+		var rewardMail = {
+			'gotPearl': 15,
+			'junimoPlush': 13,
+			// Qi quest we just check for the start. Full completion is 'TH_Lumberpile'
+			'TH_Tunnel': 22, 
+			'carolinesNecklace': 25,
+			'SecretNote16_done': 16,
+			'SecretNote17_done': 17,
+			'SecretNote18_done': 18,
+			'SecretNote19_done': 19,
+			'SecretNote20_done': 20,
+			'secretNote21_done': 21,
+		};		
+		Object.keys(rewardMail).forEach(function(id) {
+			if (saveInfo.data[umid].mailReceived.hasOwnProperty(id)) {
+				rewards[rewardMail[id]] = true;
 				found_rewards++;
 			}
 		});
+		if (saveInfo.data[umid].mailReceived.hasOwnProperty('JojaMember')) {
+			isJojaMember = true;
+		}
+		if (isJojaMember) {
+			reward_count--;
+			reward_skip[14] = true;
+		} else if (meta.hasStoneJunimo) {
+			rewards[14] = true;
+			found_rewards++;
+		}
+		
+		// Check Krobus event, then check for magnifier, then check number of notes
 		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
 		output += '<span class="result">' + farmer + ' has ' + (hasSeenKrobus ? '' : 'not ') + ' seen the Shadow Guy at the Bus Stop.</span><br />\n';
 		output += '<span class="result">' + farmer + ' has ' + (hasMagnifyingGlass ? '' : 'not ') + ' found the Magnifying Glass.</span><br />\n';
 		$(player).find('secretNotesSeen > int').each(function () {
 			// Filter out journal scraps
 			if (Number($(this).text()) < 1000) {
-				notes[$(this).text()] = true;
-				found_notes++;
+				if (Number($(this).text()) > note_count) {
+					mod_count++;
+				} else {
+					notes[$(this).text()] = true;
+					found_notes++;
+				}
 			}
 		});
 		output += '<span class="result">' + farmer + ' has read ' + found_notes + ' of ' +
 			note_count + ' secret notes.</span><br />\n';
+		if (mod_count > 0) {
+			output += '<span class="result note">' + farmer + ' has read ' + mod_count + ' mod secret note(s).</span><br />\n';
+		}
 		output += '<ul class="ach_list"><li>';
 		output += (found_notes >= note_count) ? getMilestoneString('Read all the secret notes', 1) :
 				getMilestoneString('Read all the secret notes', 0) + (note_count - found_notes) + ' more';
@@ -4190,38 +4189,7 @@ window.onload = function () {
 			}
 		}
 		table.push(output);
-		// Most rewards are noted by SecretNoteXX_done mail items. The one for note 21 starts with lower-case s though.
-		reward_re = new RegExp('[Ss]ecretNote(\\d+)_done');
-		$(player).find('mailReceived > string').each(function () {
-			var match = reward_re.exec($(this).text());
-			if (match !== null) {
-				rewards[match[1]] = true;
-				found_rewards++;
-			} else if ($(this).text() === 'gotPearl') {
-				rewards[15] = true;
-				found_rewards++;
-			} else if ($(this).text() === 'junimoPlush') {
-				rewards[13] = true;
-				found_rewards++;
-			} else if ($(this).text() === 'TH_Tunnel') {
-				// Qi quest we just check for the start. Full completion is 'TH_Lumberpile'
-				rewards[22] = true;
-				found_rewards++;
-			} else if ($(this).text() === 'carolinesNecklace') {
-				rewards[25] = true;
-				found_rewards++;
-			} else if ($(this).text() === 'JojaMember') {
-				isJojaMember = true;
-			}
-		});
 		// Stone Junimo not available for Joja route. We silently remove it from the list, which isn't optimal
-		if (isJojaMember) {
-			reward_count--;
-			reward_skip[14] = true;
-		} else if (meta.hasStoneJunimo) {
-			rewards[14] = true;
-			found_rewards++;
-		}
 
 		output = '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
 		output += '<span class="result">' + farmer + ' has found the rewards from  ' + found_rewards + ' of ' +
@@ -4267,13 +4235,7 @@ window.onload = function () {
 		}
 		
 		table[0] = parsePlayerJournalScraps($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
-		if (saveInfo.numPlayers > 1) {
-			$(xmlDoc).find('farmhand').each(function () {
-				if (isValidFarmhand(this)) {
-					table.push(parsePlayerJournalScraps(this, saveInfo, meta));
-				}
-			});
-		}
+		parseFarmhands(xmlDoc, saveInfo, table, parsePlayerJournalScraps, meta);
 		playerOutput += printTranspose(table);
 		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + playerOutput + getSectionFooter();
 		return output;
@@ -4284,6 +4246,7 @@ window.onload = function () {
 			table = [],
 			farmer = $(player).children('name').html(),
 			hasVisitedIsland = false,
+			umid = $(player).children('UniqueMultiplayerID').text(),
 			notes = {},
 			need = [],
 			rewards = { 1004: false, 1006: false, 1009: false, 1010: false },
@@ -4291,36 +4254,46 @@ window.onload = function () {
 			found_rewards = 0,
 			note_count = 11,
 			reward_count = 4,
+			mod_count = 0,
 			i;
 
-		// Checking some reward completions here too
-		$(player).find('mailReceived > string').each(function () {
-			var mail = $(this).text();
-			if (mail === 'Visited_Island') {
-				hasVisitedIsland = true;
-			} else if (mail === 'Island_W_BuriedTreasure2') {
-				rewards[1006] = true;
-				found_rewards++;
-			} else if (mail === 'Island_W_BuriedTreasure') {
-				rewards[1004] = true;
-				found_rewards++;
-			} else if (mail === 'Island_N_BuriedTreasure') {
-				rewards[1010] = true;
+		var rewardMail = {
+			'Island_W_BuriedTreasure2': 1006,
+			'Island_W_BuriedTreasure': 1004,
+			'Island_N_BuriedTreasure': 1010, 
+		};		
+		Object.keys(rewardMail).forEach(function(id) {
+			if (saveInfo.data[umid].mailReceived.hasOwnProperty(id)) {
+				rewards[rewardMail[id]] = true;
 				found_rewards++;
 			}
 		});
+		if (saveInfo.data[umid].mailReceived.hasOwnProperty('Visited_Island')) {
+			hasVisitedIsland = true;
+		}
 		
 		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
 		output += '<span class="result">' + farmer + ' has ' + (hasVisitedIsland ? '' : 'not ') + ' visited the Island.</span><br />\n';
+		output += '<ul class="ach_list"><li>';
+		output += (hasVisitedIsland) ? getAchieveString('A Distant Shore', 'Reach Ginger Island', 1) :
+				getAchieveString('A Distant Shore', 'Reach Ginger Island', 0) + ' to visit'
+		output += '</li></ul></div>';
 		$(player).find('secretNotesSeen > int').each(function () {
-			// Only count Journal Scraps
+			// Only count Journal Scraps but watch out for mods. Any additional base game scraps will need this to be adjusted.
 			if (Number($(this).text()) >= 1000) {
-				notes[$(this).text()] = true;
-				found_notes++;
+				if (Number($(this).text()) >= 1012) {
+					mod_count++;
+				} else {
+					notes[$(this).text()] = true;
+					found_notes++;
+				}
 			}
 		});
 		output += '<span class="result">' + farmer + ' has read ' + found_notes + ' of ' +
 			note_count + ' journal scraps.</span><br />\n';
+		if (mod_count > 0) {
+			output += '<span class="result note">' + farmer + ' has read ' + mod_count + ' mod journal scrap(s).</span><br />\n';
+		}
 		output += '<ul class="ach_list"><li>';
 		output += (found_notes >= note_count) ? getMilestoneString('Read all the journal scraps', 1) :
 				getMilestoneString('Read all the journal scraps', 0) + (note_count - found_notes) + ' more';
@@ -4405,9 +4378,9 @@ window.onload = function () {
 
 		var intro;
 		if (saveInfo.numPlayers > 1) {
-			intro = 'Inhabitants of ' + $(xmlDoc).find('player > farmName').html(); + ' Farm have';
+			intro = 'Inhabitants of ' + saveInfo.farmName + ' Farm have';
 		} else {
-			intro = $(xmlDoc).find('player > name').html() + ' has';
+			intro = saveInfo.players[saveInfo.farmerId] + ' has';
 		}
 		output = '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
 		output += '<span class="result">' + intro + ' completed ' + found_count + ' of ' +
@@ -4442,10 +4415,10 @@ window.onload = function () {
 			output = '',
 			playerOutput = '',
 			meta = { "hasDetails": false, "anchor": anchor, "sum_class": sum_class, "det_class": det_class },
-			farmName = $(xmlDoc).find('player > farmName').html(),
 			count = 0,
 			found_count = 0,
 			game_count = Number($(xmlDoc).find('goldenWalnutsFound').text()),
+			parrotUsed = ($(xmlDoc).find('activatedGoldenParrot').text() === "true"),
 			found = {},
 			need = {},
 			id,
@@ -4499,7 +4472,7 @@ window.onload = function () {
 				"Buried_IslandWest_88_14": { 'num':1, 'name':'Island West Buried', 'hint':'In grass in NE corner, between animated tiles (88,14)' },
 				"Buried_IslandWest_43_74": { 'num':1, 'name':'Island West Buried', 'hint':'Near tidal pools between blue and yellow starfish, initially blocked by boulder (43,74)' },
 				"Buried_IslandWest_30_75": { 'num':1, 'name':'Island West Buried', 'hint':'Between tidal pools, marked by X (30,75)' },
-				"IslandWestCavePuzzle": { 'num':3, 'name':'Island West Cave Puzzle', 'hint':'"Simon Says" musical crystals in hidden cave N of suspension bridge' },
+				"IslandWestCavePuzzle": { 'num':3, 'name':'Island West Cave Puzzle', 'hint':'&quot;Simon Says&quot; musical crystals in hidden cave N of suspension bridge' },
 				"SandDuggy": { 'num':1, 'name':'Island West Sand Duggy', 'hint':'Can place items to block other holes' },
 				"TreeNutShot": { 'num':1, 'name':'Island North Palm Tree', 'hint':'Can use slingshot to knock walnut from tree' },
 				"Mermaid": { 'num':5, 'name':'Island Cove Mermaid Puzzle', 'hint':'Use flute blocks to play Mermaid\s song; stones provide tuning clues' },
@@ -4510,7 +4483,7 @@ window.onload = function () {
 				"IslandGourmand1": { 'num':5, 'name':'Island Farm Cave Gourmand Reward #1', 'hint':'Grow some melons for the Gourmand' },
 				"IslandGourmand2": { 'num':5, 'name':'Island Farm Cave Gourmand Reward #2', 'hint':'Grow some wheat for the Gourmand' },
 				"IslandGourmand3": { 'num':5, 'name':'Island Farm Cave Gourmand Reward #3', 'hint':'Grow some garlic for the Gourmand' },
-				"IslandShrinePuzzle": { 'num':5, 'name':'Island Jungle Gem Shrine Reward', 'hint':'Place gems dropped by the birds on appropriate pedestals' },
+				"IslandShrinePuzzle": { 'num':5, 'name':'Island Jungle Gem Shrine Reward', 'hint':'Place gems (amethyst, aquamarine, emerald, ruby, topaz) dropped by birds on appropriate pedestals' },
 			},
 			trackerExtra = {
 				// Extra because it has unique handling via a special NetWorldState variable
@@ -4555,9 +4528,11 @@ window.onload = function () {
 		$(xmlDoc).find('limitedNutDrops > item').each(function () {
 			id = $(this).find('key > string').text();
 			num = Number($(this).find('value > int').text());
+			// Using the Joja Golden Parrot sets a lot of these to 9999
 			if (trackerLimited.hasOwnProperty(id) && num > 0) {
-				found[id] = num;
-				found_count += num;
+				var n = Math.min(num, trackerLimited[id].num); 
+				found[id] = n;
+				found_count += n;
 			}
 		});
 		
@@ -4591,7 +4566,7 @@ window.onload = function () {
 		}
 		
 		// The game_count vs found_count discrepancy should only happen through mods or cheating, but we will account for it
-		// Most goals will use goal_count except for the "collect all" milestone since we can still list unfound ones after.
+		// Most goals will use game_count except for the "collect all" milestone since we can still list unfound ones after.
 		saveInfo.perfectionTracker[umid]["Walnuts"] = { 'count' : game_count, 'total' : count };
 		if (compareSemVer(saveInfo.version, "1.5") >= 0) {
 			var x = Math.min(100, 100 * game_count / count);
@@ -4602,14 +4577,19 @@ window.onload = function () {
 		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
 		var intro;
 		if (saveInfo.numPlayers > 1) {
-			intro = 'Inhabitants of ' + $(xmlDoc).find('player > farmName').html(); + ' Farm have';
+			intro = 'Inhabitants of ' + saveInfo.farmName + ' Farm have';
 		} else {
-			intro = $(xmlDoc).find('player > name').html() + ' has';
+			intro = saveInfo.players[saveInfo.farmerId] + ' has';
 		}
 		output += '<span class="result">' + intro + ' found ' + game_count + ' of ' +
 			count + ' golden walnuts.' + pt_pct + '</span>';
 		if (found_count !== game_count) {
 			output += '<br /><span class="result warn">Warning: Save lists a count of ' + game_count + " but we've found markers for " + found_count + '</span>';
+		}
+		if (game_count < count) {
+			output += '<br/><span class="result">The ' + wikify("Golden Parrot") + ' will charge ' + addCommas(10000*(count - game_count)) + 'g to collect the rest.</span>';
+		} else {
+			output += '<br/><span class="result">The ' + wikify("Golden Parrot") + (parrotUsed ? ' was' : ' was not') + ' used to finish the collection.</span>';
 		}
 		output += '<ul class="ach_list"><li>';
 		output += (game_count >= 10) ? getMilestoneString('Collect enough walnuts (10) to earn Leo\'s trust.', 1) :
@@ -4618,8 +4598,14 @@ window.onload = function () {
 		output += (game_count >= 101) ? getMilestoneString('Collect enough walnuts (101) to access the secret room.', 1) :
 				getMilestoneString('Collect enough walnuts (101) to access the secret room', 0) + (101 - game_count) + ' more';
 		output += '</li>\n<li>';
-		output += (found_count >= count) ? getMilestoneString('Collect all golden walnuts.', 1) :
-				getMilestoneString('Collect all golden walnuts', 0) + (count - found_count) + ' more';
+		/*
+		if (found_count >= count) {
+			output += parrotUsed ? getAchieveImpossibleString('Master of Walnuts', 'collect all golden walnuts without any help') :
+				getAchieveString('Master of Walnuts', 'collect all golden walnuts without any help', 1);
+		} else {
+			output += getAchieveString('Master of Walnuts', 'collect all golden walnuts without any help', 0) + (count - found_count) + ' more';
+		}
+		*/
 		output += '</li></ul></div>';
 
 		if (found_count < count) {
@@ -4688,7 +4674,6 @@ window.onload = function () {
 			output = '',
 			playerOutput = '',
 			meta = { "hasDetails": false, "anchor": anchor, "sum_class": sum_class, "det_class": det_class },
-			farmName = $(xmlDoc).find('player > farmName').html(),
 			count = 0,
 			bought_count = 0,
 			bought = {},
@@ -4713,31 +4698,22 @@ window.onload = function () {
 			return '';
 		}
 		count = Object.keys(upgrades).length;
-		$(xmlDoc).find('player > mailReceived > string').each(function () {
-			id = $(this).text();
-			
-			if (upgrades.hasOwnProperty(id)) {
+		Object.keys(upgrades).forEach(function(id) {
+			if (upgrades.hasOwnProperty(id) && saveInfo.data[saveInfo.farmerId].mailReceived.hasOwnProperty(id)) {
 				bought[id] = 1
 				bought_count++;
-			}
+			} else {
+				need[id] = upgrades[id].cost;
+				cost += upgrades[id].cost;
+			}				
 		});
-		
-		if (bought_count < count) {
-			var keys = Object.keys(upgrades);
-			for (var i = 0; i < count; i++) {
-				if (!bought.hasOwnProperty(keys[i])) {
-					need[keys[i]] = upgrades[keys[i]].cost;
-					cost += upgrades[keys[i]].cost;
-				}
-			}
-		}
 		
 		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
 		var intro;
 		if (saveInfo.numPlayers > 1) {
-			intro = 'Inhabitants of ' + $(xmlDoc).find('player > farmName').html(); + ' Farm have';
+			intro = 'Inhabitants of ' + saveInfo.farmName + ' Farm have';
 		} else {
-			intro = $(xmlDoc).find('player > name').html() + ' has';
+			intro = saveInfo.players[saveInfo.farmerId] + ' has';
 		}
 		output += '<span class="result">' + intro + ' purchased ' + bought_count + ' of ' +
 			count + ' Island Upgrades.</span><ul class="ach_list">\n';
@@ -4779,7 +4755,17 @@ window.onload = function () {
 			meta = { "hasDetails": false, "anchor": anchor, "sum_class": sum_class, "det_class": det_class },
 			buildings = $(xmlDoc).find("locations > GameLocation[" + saveInfo.ns_prefix + "\\:type='Farm'] > buildings"),
 			type,
-			table = [];
+			pt_pct = 0,
+			adj_pct = 0,
+			waivers = (compareSemVer(saveInfo.version, '1.6') >= 0) ? Number($(xmlDoc).find("perfectionWaivers").text()) : 0,
+			extra = (waivers > 0) ? ("(+" + waivers + " Waivers)") : "",
+			left,
+			places = 1,
+			numObelisks = 0,
+			missingObelisks = [],
+			pKeys = ["Shipping","Cooking","Crafting","Fishing","Great Friends","Skills"],
+			bKeys = ["Monsters","Stardrops"],
+			need = '';
 
 		if (compareSemVer(saveInfo.version, version) < 0) {
 			return '';
@@ -4792,16 +4778,98 @@ window.onload = function () {
 			}
 		});
 
-		table[0] = parsePlayerPerfection($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
-		if (saveInfo.numPlayers > 1) {
-			$(xmlDoc).find('farmhand').each(function () {
-				if (isValidFarmhand(this)) {
-					table.push(parsePlayerPerfection(this, saveInfo, meta));
+		// Perfection is somewhat different than other mechanics for multiplayer. While some objectives are global and others are
+		// player-specific, the game will count the highest percentage for all player-specific goals. The end result is that there
+		// is only a single combined perfection score which could be larger than any player's individual total.
+		if (saveInfo.perfectionTracker.global["Earth Obelisk"]) { numObelisks++; } else { missingObelisks.push(wikify("Earth", "Earth Obelisk", 1)); }
+		if (saveInfo.perfectionTracker.global["Water Obelisk"]) { numObelisks++; } else { missingObelisks.push(wikify("Water", "Water Obelisk", 1)); }
+		if (saveInfo.perfectionTracker.global["Desert Obelisk"]) { numObelisks++; } else { missingObelisks.push(wikify("Desert", "Desert Obelisk", 1)); }
+		if (saveInfo.perfectionTracker.global["Island Obelisk"]) { numObelisks++; } else { missingObelisks.push(wikify("Island", "Island Obelisk", 1)); }
+		numObelisks = Math.min(numObelisks, 4);
+		var pct = { "Walnuts": Math.min(saveInfo.perfectionTracker.global["Walnuts"].count / saveInfo.perfectionTracker.global["Walnuts"].total, 1) },
+			best = {};
+		pKeys.forEach(function (k) {
+			pct[k] = 0;
+			best[k] = "";
+			Object.keys(saveInfo.players).forEach(function (umid) {
+				var p = Math.min(saveInfo.perfectionTracker[umid][k].count / saveInfo.perfectionTracker[umid][k].total, 1);
+				if (p > pct[k]) {
+					pct[k] = p;
+					best[k] = saveInfo.players[umid];
 				}
 			});
+		});
+		// Boolean perfection goals are stored in the pct structure too even though it's confusing and inconsistent
+		bKeys.forEach(function (k) {
+			pct[k] = false;
+			best[k] = "";
+			Object.keys(saveInfo.players).forEach(function (umid) {
+				if (!pct[k] && saveInfo.perfectionTracker[umid][k]) {
+					pct[k] = true;
+					best[k] = saveInfo.players[umid];
+				}
+			});
+		});
+		
+		pt_pct = numObelisks + (saveInfo.perfectionTracker.global["Gold Clock"] ? 10 : 0) +
+			(pct["Monsters"] ? 10 : 0) + (pct["Stardrops"] ? 10 : 0) + 
+			15 * pct["Shipping"] + 11 * pct["Great Friends"] + 10 * pct["Cooking"] + 10 * pct["Crafting"] + 10 * pct["Fishing"] +
+			5 * pct["Walnuts"]  + 5 * pct["Skills"];
+		0;
+		left = 100 - pt_pct - waivers;
+		adj_pct = Math.min(100, pt_pct +  waivers);
+		adj_pct = adj_pct.toFixed( (adj_pct < 100) ? 1 : 0 );
+		pt_pct = pt_pct.toFixed( (pt_pct < 100) ? 1 : 0 );
+		left = left.toFixed( (left < 100) ? 1 : 0 );
+		
+		output = '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
+		output += '<span class="result">' + 'Inhabitants of ' + saveInfo.farmName + ' Farm have earned ' + adj_pct + '% Total Perfection (details below).</span>';
+		output += '<br/><span class="result">Note that the Walnut Room display always rounds down and will show: ' + Math.floor(pt_pct) +
+			'% ' + extra + '</span>';
+		output += '<ul class="ach_list"><li>';
+		output += (pt_pct >= 100) ? getMilestoneString('100% Completion', 1) :
+				getMilestoneString('100% Completion', 0) + left + '% more';
+		output += '</li></ul></div>';
+		meta.hasDetails = true;
+		output += '<div class="' + meta.anchor + '_details ' + meta.det_class + '">';
+		output += '<span class="result">Percentage Breakdown</span>';
+		output += '<ul class="ach_list"><li>';
+		output += (pct["Shipping"] >= 1) ? getPerfectionPctString(pct["Shipping"], 15, 'Produce &amp; Forage Shipped', 1, best["Shipping"]) :
+				getPerfectionPctString(pct["Shipping"], 15, 'Produce &amp; Forage Shipped', 0, best["Shipping"]) + ' -- <a href="#sec_Basic_Shipping">see above for needs</a>';
+		output += '</li><li>';
+		output += (numObelisks == 4) ? getPerfectionNumString(numObelisks, 4, 'Obelisks on Farm', 1) :
+				getPerfectionNumString(numObelisks, 4, 'Obelisks on Farm', 0) + ' -- need ' + missingObelisks.join(', ');
+		output += '</li><li>';
+		output += getPerfectionBoolString(10, 'Golden Clock on Farm', saveInfo.perfectionTracker.global["Gold Clock"]) + (saveInfo.perfectionTracker.global["Gold Clock"] ? "" : ' -- need to build a ' + wikify("Gold Clock"));
+		output += '</li><li>';
+		output += getPerfectionBoolString(10, 'Monster Slayer Hero (all slayer goals)', pct["Monsters"], best["Monsters"]) + (pct["Monsters"] ? "" : ' -- <a href="#sec_Monster_Hunting">see above for needs</a>');
+		output += '</li><li>';
+		output += (pct["Great Friends"] >= 1) ? getPerfectionPctString(pct["Great Friends"], 11, 'Great Friends (maxing all relationships)', 1, best["Great Friends"]) :
+				getPerfectionPctString(pct["Great Friends"], 11, 'Great Friends (maxing all relationships)', 0, best["Great Friends"]) + ' -- <a href="#sec_Social">see above for needs</a>';
+		output += '</li><li>';
+		output += (pct["Skills"] >= 1) ? getPerfectionPctNumString(pct["Skills"], 5, 25, 'Farmer Level (max all skills)', 1, best["Skills"]) :
+				getPerfectionPctNumString(pct["Skills"], 5, 25, 'Farmer Level (max all skills)', 0, best["Skills"]) + ' -- <a href="#sec_Skills">see above for needs</a>';
+		output += '</li><li>';
+		output += getPerfectionBoolString(10, 'Found All Stardrops', pct["Stardrops"], best["Stardrops"]) + (pct["Stardrops"] ? "" : ' -- <a href="#sec_Stardrops">see above for needs</a>');
+		output += '</li><li>';
+		output += (pct["Cooking"] >= 1) ? getPerfectionPctString(pct["Cooking"], 10, 'Cooking Recipes Made', 1, best["Cooking"]) :
+				getPerfectionPctString(pct["Cooking"], 10, 'Cooking Recipes Made', 0, best["Cooking"]) + ' -- <a href="#sec_Cooking">see above for needs</a>';
+		output += '</li><li>';
+		output += (pct["Crafting"] >= 1) ? getPerfectionPctString(pct["Crafting"], 10, 'Crafting Recipes Made', 1, best["Crafting"]) :
+				getPerfectionPctString(pct["Crafting"], 10, 'Crafting Recipes Made', 0, best["Crafting"]) + ' -- <a href="#sec_Crafting">see above for needs</a>';
+		output += '</li><li>';
+		output += (pct["Fishing"] >= 1) ? getPerfectionPctString(pct["Fishing"], 10, 'Fish Caught', 1, best["Fishing"]) :
+				getPerfectionPctString(pct["Fishing"], 10, 'Fish Caught', 0, best["Fishing"]) + ' -- <a href="#sec_Fishing">see above for needs</a>';
+		output += '</li><li>';
+		output += (pct["Walnuts"] >= 1) ? getPerfectionPctNumString(pct["Walnuts"], 5, 130, 'Golden Walnuts Found', 1) :
+				getPerfectionPctNumString(pct["Walnuts"], 5, 130, 'Golden Walnuts Found', 0) + ' -- <a href="#sec_Skills">see above for needs</a>';
+		if (waivers > 0) {
+			output += '</li><li><span class="pt_yes"><span class="pts">' + waivers + '%</span> from purchase of ' + waivers +
+				' Perfection Waivers</span>';
 		}
-		playerOutput += printTranspose(table);
-		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + playerOutput + getSectionFooter();
+		output += '</li></ul></div>';
+
+		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + output + getSectionFooter();
 		return output;
 	}
 	
@@ -4887,6 +4955,366 @@ window.onload = function () {
 		return table;
 	}
 
+	function parsePowers(xmlDoc, saveInfo) {
+		// Power information is taken and modified from Data/Powers.xnb
+		// We only handle queries used in that file. See StardewValley.GameStateQuery.DefaultResolvers for other possibilities
+		var title = 'Books, Special Items &amp; Powers',
+			anchor = makeAnchor(title),
+			version = "1.6",
+			sum_class = getSummaryClass(saveInfo, version),
+			det_class = getDetailsClass(saveInfo, version),
+			output = '',
+			playerOutput = '',
+			meta = { "hasDetails": false, "anchor": anchor, "sum_class": sum_class, "det_class": det_class },
+			table = [];
+			meta.bookpowers = {
+				"Book_AnimalCatalogue": "PLAYER_STAT Current Book_AnimalCatalogue 1",
+				"Book_Artifact": "PLAYER_STAT Current Book_Artifact 1",
+				"Book_Bombs": "PLAYER_STAT Current Book_Bombs 1",
+				"Book_Crabbing": "PLAYER_STAT Current Book_Crabbing 1",
+				"Book_Defense": "PLAYER_STAT Current Book_Defense 1",
+				"Book_Diamonds": "PLAYER_STAT Current Book_Diamonds 1",
+				"Book_Friendship": "PLAYER_STAT Current Book_Friendship 1",
+				"Book_Grass": "PLAYER_STAT Current Book_Grass 1",
+				"Book_Horse": "PLAYER_STAT Current Book_Horse 1",
+				"Book_Marlon": "PLAYER_STAT Current Book_Marlon 1",
+				"Book_Mystery": "PLAYER_STAT Current Book_Mystery 1",
+				"Book_PriceCatalogue": "PLAYER_STAT Current Book_PriceCatalogue 1",
+				"Book_Roe": "PLAYER_STAT Current Book_Roe 1",
+				"Book_Speed": "PLAYER_STAT Current Book_Speed 1",
+				"Book_Speed2": "PLAYER_STAT Current Book_Speed2 1",
+				"Book_Trash": "PLAYER_STAT Current Book_Trash 1",
+				"Book_Void": "PLAYER_STAT Current Book_Void 1",
+				"Book_WildSeeds": "PLAYER_STAT Current Book_WildSeeds 1",
+				"Book_Woodcutting": "PLAYER_STAT Current Book_Woodcutting 1",
+			},
+			meta.otherpowers = {
+				"BearPaw": "PLAYER_HAS_SEEN_EVENT Current 2120303",
+				"ClubCard": "PLAYER_HAS_FLAG Current HasClubCard",
+				"DarkTalisman": "PLAYER_HAS_FLAG Current HasDarkTalisman",
+				"DwarvishTranslationGuide": "PLAYER_HAS_FLAG Host HasDwarvishTranslationGuide",
+				"ForestMagic": "PLAYER_HAS_FLAG Current canReadJunimoText",
+				"KeyToTheTown": "PLAYER_HAS_FLAG Current HasTownKey",
+				"MagicInk": "PLAYER_HAS_FLAG Current HasMagicInk",
+				"MagnifyingGlass": "PLAYER_HAS_FLAG Current HasMagnifyingGlass",
+				"Mastery_Combat": "PLAYER_STAT Current mastery_4 1",
+				"Mastery_Farming": "PLAYER_STAT Current mastery_0 1",
+				"Mastery_Fishing": "PLAYER_STAT Current mastery_1 1",
+				"Mastery_Foraging": "PLAYER_STAT Current mastery_2 1",
+				"Mastery_Mining": "PLAYER_STAT Current mastery_3 1",
+				"RustyKey": "PLAYER_HAS_FLAG Host HasRustyKey",
+				"SkullKey": "PLAYER_HAS_FLAG Host HasSkullKey",
+				"SpecialCharm": "PLAYER_HAS_FLAG Current HasSpecialCharm",
+				"SpringOnionMastery": "PLAYER_HAS_SEEN_EVENT Current 3910979",
+			},
+			meta.translate = {
+				"BearPaw": "Bear's Knowledge",
+				"ClubCard": "Qi Club Card",
+				"DarkTalisman": "Dark Talisman",
+				"DwarvishTranslationGuide": "Dwarvish Translation Guide",
+				"ForestMagic": "Forest Magic",
+				"KeyToTheTown": "Key to the Town",
+				"MagicInk": "Magic Ink",
+				"MagnifyingGlass": "Magnifying Glass",
+				"Mastery_Combat": "Combat Mastery Perk",
+				"Mastery_Farming": "Farming Mastery Perk",
+				"Mastery_Fishing": "Fishing Mastery Perk",
+				"Mastery_Foraging": "Foraging Mastery Perk",
+				"Mastery_Mining": "Mining Mastery Perk",
+				"RustyKey": "Rusty Key",
+				"SkullKey": "Skull Key",
+				"SpecialCharm": "Special Charm",
+				"SpringOnionMastery": "Spring Onion Mastery",
+			},
+			meta.query = {
+				'PLAYER_HAS_SEEN_EVENT': 'eventsSeen',
+				'PLAYER_STAT': 'stats',
+				'PLAYER_HAS_FLAG': 'mailReceived',
+			};
+			
+		if (compareSemVer(saveInfo.version, version) < 0) {
+			return '';
+		}
+		table[0] = parsePlayerPowers($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
+		parseFarmhands(xmlDoc, saveInfo, table, parsePlayerPowers, meta);
+		playerOutput += printTranspose(table);
+		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + playerOutput + getSectionFooter();
+		return output;
+	}
+
+	function parsePlayerPowers(player, saveInfo, meta) {
+		var output = '',
+			have_book = 0,
+			have_other = 0,
+			id,
+			umid = $(player).children('UniqueMultiplayerID').text(),
+			need = [],
+			book_count = Object.keys(meta.bookpowers).length,
+			other_count = Object.keys(meta.otherpowers).length,
+			power_count = book_count + other_count;
+
+		Object.keys(meta.bookpowers).forEach(function (k) {
+			//type of check | who | key to compare | value to compare
+			var fields = meta.bookpowers[k].split(' ');
+			var hasIt = false;
+			var checkVal = (fields.length > 3) ? fields[3] : true;
+			// we assume that a Host check actually checks both host and current player;
+			// and, since the only values used in the base game are Host and Current, we therefore
+			// always check the current player if we haven't found it yet.
+			if (fields[1] === 'Host') {
+				hasIt = (saveInfo.data[saveInfo.farmerId][meta.query[fields[0]]].hasOwnProperty(fields[2]) &&
+					saveInfo.data[saveInfo.farmerId][meta.query[fields[0]]][fields[2]] === checkVal);
+			}
+			if (!hasIt) {
+				hasIt = (saveInfo.data[umid][meta.query[fields[0]]].hasOwnProperty(fields[2]) &&
+					saveInfo.data[umid][meta.query[fields[0]]][fields[2]] === checkVal);
+			}
+			if (hasIt) {
+				have_book++;
+			} else {
+				var txt = k;
+				if (meta.translate.hasOwnProperty(k)) {
+					txt = meta.translate[k];
+				} else if (saveInfo.objects.hasOwnProperty(k)) {
+					txt = saveInfo.objects[k];
+				} 
+				need.push('<li><span class="booktitle">' + txt + '</span></li>');
+			}
+		});
+
+		Object.keys(meta.otherpowers).forEach(function (k) {
+			var fields = meta.otherpowers[k].split(' ');
+			var hasIt = false;
+			var checkVal = (fields.length > 3) ? fields[3] : true;
+			if (fields[1] === 'Host') {
+				hasIt = (saveInfo.data[saveInfo.farmerId][meta.query[fields[0]]].hasOwnProperty(fields[2]) &&
+					saveInfo.data[saveInfo.farmerId][meta.query[fields[0]]][fields[2]] === checkVal);
+			}
+			if (!hasIt) {
+				hasIt = (saveInfo.data[umid][meta.query[fields[0]]].hasOwnProperty(fields[2]) &&
+					saveInfo.data[umid][meta.query[fields[0]]][fields[2]] === checkVal);
+			}
+			if (hasIt) {
+				have_other++;
+			} else {
+				var txt = k;
+				if (meta.translate.hasOwnProperty(k)) {
+					txt = meta.translate[k];
+				} else if (saveInfo.objects.hasOwnProperty(k)) {
+					txt = saveInfo.objects[k];
+				} 
+				need.push('<li>' + txt + '</li>');
+			}
+		});
+		
+		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
+		output += '<span class="result">' + saveInfo.players[umid] + ' has read ' + have_book +
+				' of ' + book_count + ' books.</span><br />\n';
+		output += '<ul class="ach_list"><li>';
+		output += (have_book >= book_count) ? getAchieveString('Well Read', 'Read all books', 1) :
+				getAchieveString('Well-read', 'Read all books', 0) + (book_count - have_book) + ' more';
+		output += '</li></ul></div>';
+		output += '<span class="result">' + saveInfo.players[umid] + ' has received ' + have_other +
+				' of ' + other_count + ' special items &amp; powers.</span><br />\n';
+		output += '<ul class="ach_list"><li>';
+		output += (have_other >= other_count) ? getMilestoneString('Acquire all special items &amp; powers', 1) :
+				getMilestoneString('Acquire all special items &amp; powers', 0) + (other_count - have_other) + ' more';
+		output += '</li></ul></div>';
+		if (need.length > 0) {
+			meta.hasDetails = true;
+			output += '<div class="' + meta.anchor + '_details ' + meta.det_class + '">';
+			output += '<span class="need">Left:';
+			if (have_book < book_count) {
+				output += ' (Books listed first)';
+			}
+			output += '<ol>' + need.sort().join('') + '</ol></span></div>';
+		}
+		return [output];
+	}
+
+	function parseArcadeGames(xmlDoc, saveInfo) {
+		var title = 'Arcade Games',
+			anchor = makeAnchor(title),
+			version = "1.5",
+			sum_class = getSummaryClass(saveInfo, version),
+			det_class = getDetailsClass(saveInfo, version),
+			output = '',
+			playerOutput = '',
+			table = [],
+			meta = { "hasDetails": false, "anchor": anchor, "sum_class": sum_class, "det_class": det_class };
+
+		if (compareSemVer(saveInfo.version, version) < 0) {
+			return '';
+		}
+
+		table[0] = parsePlayerArcade($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
+		parseFarmhands(xmlDoc, saveInfo, table, parsePlayerArcade, meta);
+		playerOutput += printTranspose(table);
+		// reusing table in a different way
+		table = [];
+		$(xmlDoc).find("junimoKartLeaderboards > entries > NetLeaderboardsEntry").each( function() {
+			table.push('<li>' + addCommas($(this).find('score > *').text()) + ' &ndash; ' + $(this).find('name > *').text() + '</li>');
+			//table.push('<li>' + $(this).find('name > *').text() + ' &ndash; ' + addCommas($(this).find('score > *').text()) + '</li>');
+		});
+		meta.hasDetails = (table.length > 0);
+		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + playerOutput;
+		if (table.length > 0) {
+			output += '<div class="' + meta.anchor + '_details ' + meta.det_class + '">';
+			output += '<span class="result">Junimo Kart (Endless Mode) Leaderboard:</span><ol class="outer">';
+			output += table.join('');
+			output += '</ol></div>';
+		}
+		output += getSectionFooter();
+		return output;
+	}
+
+	function parsePlayerArcade(player, saveInfo, meta) {
+		var output = '',
+			umid = $(player).children('UniqueMultiplayerID').text(),
+			hasBeatenPK = saveInfo.data[umid].mailReceived.hasOwnProperty("Beat_PK"),
+			hasBeatenJK = saveInfo.data[umid].mailReceived.hasOwnProperty("JunimoKart"),
+			need = [];
+
+		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
+		output += '<span class="result">' + saveInfo.players[umid] + ' has' + (hasBeatenPK ? '' : ' not') + ' beaten Journey of the Prairie King.</span><br/>';
+		var pkProgress = 0;
+		var pkSave = $(player).children('JOTPKProgress');
+		if (pkSave.length > 0) {
+			var level = 1 + Number($(pkSave).find('whichRound > int').text());
+			var sublevel = 1 + Number($(pkSave).find('whichWave > int').text());
+			output += '<span class="result">' + saveInfo.players[umid] + ' has a JotPK save at stage ' + level + '-' + sublevel + ' (' +
+				(($(pkSave).find('died > boolean').text() === 'true') ? 'not ' : '') + 'deathless)</span><br/>';
+			pkProgress = (level == 3) ? 8 : ((level == 2) ? 4 : -1) + sublevel;
+		} else {
+			output += '<span class="result">' + saveInfo.players[umid] + ' does not have a saved JotPK game.';
+		}
+		output += '<ul class="ach_list"><li>';
+		output += (hasBeatenPK) ? getAchieveString('Prairie King', "Beat 'Journey of the Prairie King'", 1) :
+				getAchieveString('Prairie King', "Beat 'Journey of the Prairie King'", 0) + ' to clear ' + (13 - pkProgress) + ' more level(s)';
+		output += '</li></ul>';
+
+		output += '<span class="result">' + saveInfo.players[umid] + ' has' + (hasBeatenJK ? '' : ' not') + ' beaten Junimo Kart (Progress Mode).</span><br/>';
+		output += '<ul class="ach_list"><li>';
+		output += (hasBeatenJK) ? getMilestoneString("Beat 'Junimo Kart'", 1) :
+				getMilestoneString("Beat 'Junimo Kart'", 0) + ' to complete Progress Mode';
+		output += '</li></ul>';
+
+		output += '</div>';
+		return [output];
+	}
+
+	function parseAnimals(xmlDoc, saveInfo) {
+		var title = 'Animal Summary',
+			anchor = makeAnchor(title),
+			version = "1.6",
+			sum_class = getSummaryClass(saveInfo, version),
+			det_class = getDetailsClass(saveInfo, version),
+			output = '',
+			playerOutput = '',
+			meta = { "hasDetails": false, "anchor": anchor, "sum_class": sum_class, "det_class": det_class };
+
+		if (compareSemVer(saveInfo.version, version) < 0) {
+			return '';
+		}
+		// Technically this should only be set if there are actually pets/animals on the farm
+		meta.hasDetails = true;			
+
+		var list = [];
+		$(xmlDoc).find('locations > GameLocation > Characters > NPC').each(function () {
+			if ($(this).attr(saveInfo.ns_prefix + ':type') === 'Pet' || $(this).attr(saveInfo.ns_prefix + ':type') === 'Cat' || $(this).attr(saveInfo.ns_prefix + ':type') === 'Dog') {
+				var type = $(this).find('petType').text();
+				//var breed = $(this).find('whichBreed').text();
+				var thisPetLove = Number($(this).find('friendshipTowardFarmer').text());
+				list.push('<li>' + type + ' named ' + $(this).find('name').first().text() + ' (' + thisPetLove + ' friendship points)</li>');
+			}
+		});
+		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
+		output += '<span class="result">Farm Pets (' + list.length + ')</span></div>';
+		output += '<div class="' + meta.anchor + '_details ' + meta.det_class + '">';
+		output += '<ol class="outer">' + list.sort().join('') + "</ol>";
+		output += "</div>";
+
+		$(xmlDoc).find("[" + saveInfo.ns_prefix + "\\:type='Farm'] Building").each( function() {
+			var btype = $(this).find('buildingType').text();
+			var cur = $(this).find('currentOccupants').text();
+			var max = $(this).find('maxOccupants').text();
+			if (btype === "Coop" || btype === "Big Coop" || btype === "Deluxe Coop" || btype === "Barn" || btype === "Big Barn" || btype === "Deluxe Barn") {
+				var list = [];
+				$(this).find('indoors > Animals > SerializableDictionaryOfInt64FarmAnimal FarmAnimal').each( function() {
+					var cracker = $(this).find('hasEatenAnimalCracker').text() === 'true';
+					var type = $(this).find('type').text();
+					var extra;
+					if (type === 'Pig') {
+						extra = ' [<span class="ms_imp">cannot eat cracker</span>]';
+					} else {
+						extra = (cracker) ? ' [<span class="ms_yes">has eaten cracker</span>]' : ' [<span class="ms_no">has not eaten cracker</span>]';
+					}
+					list.push('<li>' + type + ' named ' + $(this).find('name').text() + extra + '</li>');
+				});
+				output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
+				output += '<span class="result">' + btype + ' (' + cur + '/' + max + ')</span></div>';
+				output += '<div class="' + meta.anchor + '_details ' + meta.det_class + '"><ol class="outer">';
+				output += list.sort().join('') + "</ol></div>";
+			}
+		});
+		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + output + getSectionFooter();
+		return output;
+	}
+
+	function parseRaccoons(xmlDoc, saveInfo) {
+		var title = 'Forest Neighbors',
+			anchor = makeAnchor(title),
+			version = "1.6",
+			sum_class = getSummaryClass(saveInfo, version),
+			det_class = getDetailsClass(saveInfo, version),
+			output = '',
+			playerOutput = '',
+			meta = { "hasDetails": false, "anchor": anchor, "sum_class": sum_class, "det_class": det_class },
+			intro,
+			timesFed = Number($(xmlDoc).find("SaveGame > timesFedRaccoons").text()),
+			lastFed = Number($(xmlDoc).find("SaveGame > daysPlayedWhenLastRaccoonBundleWasFinished").text()),
+			daysSinceFed = saveInfo.data[saveInfo.farmerId].stats["daysPlayed"] - lastFed,
+			checkBundles = false,
+			id;
+		
+		if (compareSemVer(saveInfo.version, version) < 0) {
+			return '';
+		}
+		// Windstorm: mail flags raccoonTreeFallen, checkedRaccoonStump, raccoonMovedIn
+		// Stump repaired: <worldStateIDs><string>forestStumpFixed</string>
+		// Progress: netWorldState IDs timesFedRaccoons and daysPlayedWhenLastRaccoonBundleWasFinished
+		if (saveInfo.data[saveInfo.farmerId].mailReceived.hasOwnProperty("raccoonMovedIn")) {
+			intro = "Mr. Raccoon has moved into the refurbished stump in the forest.";
+			checkBundles = true;
+		} else if (saveInfo.data[saveInfo.farmerId].mailReceived.hasOwnProperty("raccoonTreeFallen")) {
+			intro = "The big tree in the forest has fallen and repairs may be needed.";
+		} else if (saveInfo.data[saveInfo.farmerId].mailReceived.hasOwnProperty('ccPantry') || 
+				saveInfo.data[saveInfo.farmerId].mailReceived.hasOwnProperty('jojaPantry')) {
+			intro = "The Greenhouse has been repaired. Where did that raccoon go?";
+		} else {
+			intro = "The Greenhouse has not yet been repaired.";
+		}
+		output = '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
+		output += '<span class="result">' + intro + '</span><br />\n';
+		output += '<span class="result">The neighbors have been helped ' + timesFed + ' times';
+		if (lastFed > 0) {
+			output += ' (most recently ' + daysSinceFed + ' days ago)';
+		}
+		output += '.</span><br />\n';
+		output += '<ul class="ach_list"><li>';
+		if (timesFed > 8 || (timesFed == 8 && daysSinceFed > 7)) {
+			output += getAchieveString("Good Neighbors", "help your forest neighbors grow their family", 1);
+		} else if (timesFed == 8 && daysSinceFed <= 7) {
+			output += getAchieveString("Good Neighbors", "help your forest neighbors grow their family", 0) + 'to wait a few more days';
+		} else {
+			output += getAchieveString("Good Neighbors", "help your forest neighbors grow their family", 0) + 'to help ' + (8 - timesFed) + ' more times';
+		}
+
+		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + output + getSectionFooter();
+		return output;
+	}
+
+
 	function createTOC() {
 		var text,
 			id,
@@ -4904,7 +5332,7 @@ window.onload = function () {
 	}
 
 	function togglePlayer(e) {
-		console.log("Somebody clicked on " + $(e.currentTarget).attr('id') + " which has a class of " + $(e.currentTarget).attr('class'));
+		//console.log("Somebody clicked on " + $(e.currentTarget).attr('id') + " which has a class of " + $(e.currentTarget).attr('class'));
 		// Adjust PlayerList entry to reflect status of this player
 		var isOn = ($(e.currentTarget).attr('class') === 'on'),
 			match = "td." + $(e.currentTarget).attr('id').substring(5);
@@ -4966,7 +5394,7 @@ window.onload = function () {
 				for(var i = 0; i < opt.length; i++){
 					if(opt[i].checked){
 						saveInfo.outputPrefOld = opt[i].value;
-						Cookies.set('checkup-opt-old', opt[i].value, { expires: 365, path: '' });
+						Cookies.set('checkup-opt-old', opt[i].value, { expires: 365, path: '', SameSite: "Lax" });
 						break;
 					}
 				}
@@ -4977,7 +5405,7 @@ window.onload = function () {
 				for(var i = 0; i < opt.length; i++){
 					if(opt[i].checked){
 						saveInfo.outputPrefNew = opt[i].value;
-						Cookies.set('checkup-opt-new', opt[i].value, { expires: 365, path: '' });
+						Cookies.set('checkup-opt-new', opt[i].value, { expires: 365, path: '', SameSite: "Lax" });
 						break;
 					}
 				}
@@ -4986,7 +5414,9 @@ window.onload = function () {
 			output += parseSummary(xmlDoc, saveInfo);
 			output += parseMoney(xmlDoc, saveInfo);
 			output += parseSkills(xmlDoc, saveInfo);
+			output += parseSkillMastery(xmlDoc, saveInfo);
 			output += parseQuests(xmlDoc, saveInfo);
+			output += parseSpecialOrders(xmlDoc, saveInfo);
 			output += parseMonsters(xmlDoc, saveInfo);
 			output += parseStardrops(xmlDoc, saveInfo);
 			output += parseFamily(xmlDoc, saveInfo);
@@ -4996,15 +5426,18 @@ window.onload = function () {
 			output += parseFishing(xmlDoc, saveInfo);
 			output += parseBasicShipping(xmlDoc, saveInfo);
 			output += parseCropShipping(xmlDoc, saveInfo);
+			output += parsePowers(xmlDoc, saveInfo);
 			output += parseMuseum(xmlDoc, saveInfo);
 			output += parseSecretNotes(xmlDoc, saveInfo);
-			output += parseBundles(xmlDoc, saveInfo);
-			output += parseGrandpa(xmlDoc, saveInfo);
-			output += parseSpecialOrders(xmlDoc, saveInfo);
 			output += parseJournalScraps(xmlDoc, saveInfo);
+			output += parseBundles(xmlDoc, saveInfo);
+			output += parseRaccoons(xmlDoc, saveInfo);
+			output += parseGrandpa(xmlDoc, saveInfo);
 			output += parseWalnuts(xmlDoc, saveInfo);
 			output += parseIslandUpgrades(xmlDoc, saveInfo);
 			output += parsePerfectionTracker(xmlDoc, saveInfo);
+			output += parseArcadeGames(xmlDoc, saveInfo);
+			output += parseAnimals(xmlDoc, saveInfo);
 
 			// End of checks
 			prog.value = 100;

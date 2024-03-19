@@ -49,7 +49,7 @@ h3 {
 .path {
 	font-family: monospace;
 }
-.ach,.warn,.note {
+.ach,.warn,.note,.booktitle {
 	font-style: italic;
 }
 .pts, .strong {
