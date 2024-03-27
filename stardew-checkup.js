@@ -1107,7 +1107,7 @@ window.onload = function () {
 			output += '<div class="' + meta.anchor + '_details ' + meta.det_class + '">';
 			output += '<span class="result">Earnings Breakdown:</span><ul class="outer">';
 			Object.keys(saveInfo.players).forEach(function(id) {
-				var m = saveInfo.data[id].stats.individualMoneyEarned;
+				var m = saveInfo.data[id].stats.individualMoneyEarned || 0;
 				output += '<li>' + addCommas(m) + 'g earned by ' + saveInfo.players[id] + '</li>';
 				left -= m;
 			});
