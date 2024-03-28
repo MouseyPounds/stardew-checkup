@@ -10,6 +10,7 @@ The app is written in Javascript and uses [jQuery](https://jquery.com/), [emver-
 
 ## Changelog
 
+* 28 Mar  2024 - v5.0.1 - Remove monster who snuck into Social summary
 * 19 Mar  2024 - v5.0   - Support for Stardew Valley 1.6
 *  7 Jan  2021 - v4.0.3 - More Monster Hunting updates, added Special Orders tracking
 *  3 Jan  2021 - v4.0.2 - Updated Monster Hunting counts, ignoring special furniture items in fishing, fix museum details

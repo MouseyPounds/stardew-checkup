@@ -1153,6 +1153,7 @@ window.onload = function () {
 				'Fizz' : 1,
 				'Pet' : 1,
 				'Raccoon' : 1,
+				'Bat' : 1, // This one is from Lewis' Basement
 			};
 			meta.npc = {};
 			// <NPC>: [ [<numHearts>, <id>], ... ]
@@ -1203,7 +1204,7 @@ window.onload = function () {
 				// This event does not require 2 hearts, but getting into the room does
 				meta.eventList.Caroline.push([2, 719926]);
 				// 14-Heart spouse events. Many have multiple parts; to preserve their proper order,
-				//  we will use 14.2, 14.3, etc. even though it the requirements are exactly 14
+				//  we will use 14.2, 14.3, etc. even though the requirements are all exactly 14
 				meta.eventList.Abigail.push([14, 6963327]);
 				meta.eventList.Emily.push([14.1, 3917600], [14.2, 3917601]);
 				meta.eventList.Haley.push([14.1, 6184643], [14.2, 8675611], [14.3, 6184644]);
