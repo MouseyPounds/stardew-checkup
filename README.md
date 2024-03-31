@@ -6,10 +6,13 @@ This app checks a [Stardew Valley](http://stardewvalley.net/) save file for vari
 
 Most changed & added content from version 1.6 is supported, and 1.6-specific features should only appear in the results if the save is detected to be from that version. If you load a 1.6 save into the app, expect to see spoilers. There is now some spoiler protection for major systems by using the Output Preferences to hide some section results, but the titles of the new sections will still be visible and new items will still appear in the details of old sections.
 
-The app is written in Javascript and uses [jQuery](https://jquery.com/), [emver-compare](https://github.com/substack/semver-compare) and [Javascript Cookie](https://github.com/js-cookie/js-cookie); it is hosted on GitHub Pages at https://mouseypounds.github.io/stardew-checkup/ and the source code repository is https://github.com/MouseyPounds/stardew-checkup. Please report any bugs, suggestions, or other feedback to [the topic in the Chucklefish forums](https://community.playstarbound.com/threads/webapp-stardew-checkup-achievement-completion-progress.141706/).
+The app is written in Javascript and uses [jQuery](https://jquery.com/), [emver-compare](https://github.com/substack/semver-compare) and [Javascript Cookie](https://github.com/js-cookie/js-cookie); it is hosted on GitHub Pages at https://mouseypounds.github.io/stardew-checkup/ and the source code repository is https://github.com/MouseyPounds/stardew-checkup.
+
+Please report any bugs, suggestions, or other feedback to [the topic in the Stardew official forums](https://forums.stardewvalley.net/threads/web-apps-stardew-checkup-predictor-and-fair-helper.28393/) or to @mouseypounds on Discord.
 
 ## Changelog
 
+* 30 Mar  2024 - v5.0.2 - Finally added slightly more friendly error-handling
 * 28 Mar  2024 - v5.0.1 - Remove monster who snuck into Social summary
 * 19 Mar  2024 - v5.0   - Support for Stardew Valley 1.6
 *  7 Jan  2021 - v4.0.3 - More Monster Hunting updates, added Special Orders tracking

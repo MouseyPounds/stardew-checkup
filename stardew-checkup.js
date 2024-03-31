@@ -5218,7 +5218,7 @@ window.onload = function () {
 			return '';
 		}
 		// Technically this should only be set if there are actually pets/animals on the farm
-		meta.hasDetails = true;			
+		meta.hasDetails = true;
 
 		var list = [];
 		$(xmlDoc).find('locations > GameLocation > Characters > NPC').each(function () {
@@ -5380,7 +5380,7 @@ window.onload = function () {
 		};
 		reader.onprogress = function (e) {
 			if (e.lengthComputable) {
-				var p = 20 + (e.loaded / e.total * 60);
+				var p = 20 + (e.loaded / e.total * 30);
 				prog.value = p;
 			}
 		};
@@ -5412,48 +5412,55 @@ window.onload = function () {
 				}
 			}
 
-			output += parseSummary(xmlDoc, saveInfo);
-			output += parseMoney(xmlDoc, saveInfo);
-			output += parseSkills(xmlDoc, saveInfo);
-			output += parseSkillMastery(xmlDoc, saveInfo);
-			output += parseQuests(xmlDoc, saveInfo);
-			output += parseSpecialOrders(xmlDoc, saveInfo);
-			output += parseMonsters(xmlDoc, saveInfo);
-			output += parseStardrops(xmlDoc, saveInfo);
-			output += parseFamily(xmlDoc, saveInfo);
-			output += parseSocial(xmlDoc, saveInfo);
-			output += parseCooking(xmlDoc, saveInfo);
-			output += parseCrafting(xmlDoc, saveInfo);
-			output += parseFishing(xmlDoc, saveInfo);
-			output += parseBasicShipping(xmlDoc, saveInfo);
-			output += parseCropShipping(xmlDoc, saveInfo);
-			output += parsePowers(xmlDoc, saveInfo);
-			output += parseMuseum(xmlDoc, saveInfo);
-			output += parseSecretNotes(xmlDoc, saveInfo);
-			output += parseJournalScraps(xmlDoc, saveInfo);
-			output += parseBundles(xmlDoc, saveInfo);
-			output += parseRaccoons(xmlDoc, saveInfo);
-			output += parseGrandpa(xmlDoc, saveInfo);
-			output += parseWalnuts(xmlDoc, saveInfo);
-			output += parseIslandUpgrades(xmlDoc, saveInfo);
-			output += parsePerfectionTracker(xmlDoc, saveInfo);
-			output += parseArcadeGames(xmlDoc, saveInfo);
-			output += parseAnimals(xmlDoc, saveInfo);
+			try {
+				output += parseSummary(xmlDoc, saveInfo);
+				output += parseMoney(xmlDoc, saveInfo);
+				output += parseSkills(xmlDoc, saveInfo);
+				output += parseSkillMastery(xmlDoc, saveInfo);
+				output += parseQuests(xmlDoc, saveInfo);
+				output += parseSpecialOrders(xmlDoc, saveInfo);
+				output += parseMonsters(xmlDoc, saveInfo);
+				prog.value = 60;
+				output += parseStardrops(xmlDoc, saveInfo);
+				output += parseFamily(xmlDoc, saveInfo);
+				output += parseSocial(xmlDoc, saveInfo);
+				output += parseCooking(xmlDoc, saveInfo);
+				output += parseCrafting(xmlDoc, saveInfo);
+				output += parseFishing(xmlDoc, saveInfo);
+				output += parseBasicShipping(xmlDoc, saveInfo);
+				prog.value = 70;
+				output += parseCropShipping(xmlDoc, saveInfo);
+				output += parsePowers(xmlDoc, saveInfo);
+				output += parseMuseum(xmlDoc, saveInfo);
+				output += parseSecretNotes(xmlDoc, saveInfo);
+				output += parseJournalScraps(xmlDoc, saveInfo);
+				output += parseBundles(xmlDoc, saveInfo);
+				output += parseRaccoons(xmlDoc, saveInfo);
+				prog.value = 80;
+				output += parseGrandpa(xmlDoc, saveInfo);
+				output += parseWalnuts(xmlDoc, saveInfo);
+				output += parseIslandUpgrades(xmlDoc, saveInfo);
+				output += parsePerfectionTracker(xmlDoc, saveInfo);
+				output += parseArcadeGames(xmlDoc, saveInfo);
+				output += parseAnimals(xmlDoc, saveInfo);
+				prog.value = 90;
 
-			// End of checks
-			prog.value = 100;
+				document.getElementById('out').innerHTML = output;
+				prog.value = 100;
 
-			document.getElementById('out').innerHTML = output;
+				// Now that output has been added to the page, we need to add the output-toggling to each section
+				$('#output-container .collapsible').each(function() {
+					$(this).children('button').click(toggleVisible);
+				});
 
-			// Now that output has been added to the page, we need to add the output-toggling to each section
-			$('#output-container .collapsible').each(function() {
-				$(this).children('button').click(toggleVisible);
-			});
-
-			$('#output-container').show();
-			$('#progress-container').hide();
-			createTOC();
-			$('#TOC').show();
+				$('#output-container').show();
+				$('#progress-container').hide();
+				createTOC();
+				$('#TOC').show();
+			} catch(error) {
+				var message = "<h3>Save Parse Error</h3><p>The app was unable to process the save file. This is most likely a bug with the app, so please let the dev know about it. Details below.</p>";
+				$('#parse-error').html(message + '<p class="code">' + error + '<br/>' + error.stack + '</p>');				
+			}
 		};
 		reader.readAsText(file);
 	}

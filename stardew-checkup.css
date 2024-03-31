@@ -49,6 +49,11 @@ h3 {
 .path {
 	font-family: monospace;
 }
+.code {
+	font-family: monospace;
+	font-weight: bold;
+	white-space: pre;
+}
 .ach,.warn,.note,.booktitle {
 	font-style: italic;
 }
