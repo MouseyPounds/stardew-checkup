@@ -12,6 +12,7 @@ Please report any bugs, suggestions, or other feedback to [the topic in the Star
 
 ## Changelog
 
+*  2 Apr  2024 - v5.0.3 - A couple of really old bugfixes
 * 30 Mar  2024 - v5.0.2 - Finally added slightly more friendly error-handling
 * 28 Mar  2024 - v5.0.1 - Remove monster who snuck into Social summary
 * 19 Mar  2024 - v5.0   - Support for Stardew Valley 1.6

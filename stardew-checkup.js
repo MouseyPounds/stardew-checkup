@@ -1372,10 +1372,10 @@ window.onload = function () {
 		};
 		for (var who in meta.npc) {
 			// Overriding status for the confrontation events
-			if (dumped_Girls > 0 && npc[who].isDatable && npc[who].isGirl) {
+			if (dumped_Girls > 0 && who.isDatable && who.isGirl) {
 				meta.npc[who].relStatus = 'Angry (' + dumped_Girls + ' more day(s))';
-			} else if (dumped_Guys > 0 && npc[who].isDatable && !npc[who].isGirl) {
-				nmeta.pc[who].relStatus = 'Angry (' + dumped_Guys + ' more day(s))';
+			} else if (dumped_Guys > 0 && who.isDatable && !who.isGirl) {
+				nmeta.npc[who].relStatus = 'Angry (' + dumped_Guys + ' more day(s))';
 			} 
 			var pts = 0;
 			if (points.hasOwnProperty(who)) {
@@ -3210,7 +3210,7 @@ window.onload = function () {
 			meta.categories["Magma Duggy"] = "Duggies";
 			meta.monsters["Duggies"].push("Magma Duggy");
 			meta.categories["Iridium Bat"] = "Bats";
-			meta.monsters["Bats"].push("Iridum Bat");
+			meta.monsters["Bats"].push("Iridium Bat");
 			meta.categories["Royal Serpent"] = "Serpents";
 			meta.monsters["Serpents"].push("Royal Serpent");
 			// These exist now in hard mode so need to be included in output
