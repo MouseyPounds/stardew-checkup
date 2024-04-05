@@ -2,7 +2,7 @@
 
 ## About Stardew Checkup
 
-This app checks a [Stardew Valley](http://stardewvalley.net/) save file for various achievements and milestones and lets you know what is missing. Currently it checks for progress on 46 achievements as well as other progression and completion mechanics including Grandpa's evaluation, Ginger Island upgrades, Perfection, and social relationships.
+This app checks a [Stardew Valley](https://stardewvalley.net/) save file for various achievements and milestones and lets you know what is missing. Currently it checks for progress on 46 achievements as well as other progression and completion mechanics including Grandpa's evaluation, Ginger Island upgrades, Perfection, and social relationships.
 
 Most changed & added content from version 1.6 is supported, and 1.6-specific features should only appear in the results if the save is detected to be from that version. If you load a 1.6 save into the app, expect to see spoilers. There is now some spoiler protection for major systems by using the Output Preferences to hide some section results, but the titles of the new sections will still be visible and new items will still appear in the details of old sections.
 
