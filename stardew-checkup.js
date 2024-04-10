@@ -4588,9 +4588,9 @@ window.onload = function () {
 			output += '<br /><span class="result warn">Warning: Save lists a count of ' + game_count + " but we've found markers for " + found_count + '</span>';
 		}
 		if (game_count < count) {
-			output += '<br/><span class="result">The ' + wikify("Golden Parrot") + ' will charge ' + addCommas(10000*(count - game_count)) + 'g to collect the rest.</span>';
+			output += '<br/><span class="result">The ' + wikify("Golden Parrot", "Golden_Walnut#Golden_Joja_Parrot") + ' will charge ' + addCommas(10000*(count - game_count)) + 'g to collect the rest.</span>';
 		} else {
-			output += '<br/><span class="result">The ' + wikify("Golden Parrot") + (parrotUsed ? ' was' : ' was not') + ' used to finish the collection.</span>';
+			output += '<br/><span class="result">The ' + wikify("Golden Parrot", "Golden_Walnut#Golden_Joja_Parrot") + (parrotUsed ? ' was' : ' was not') + ' used to finish the collection.</span>';
 		}
 		output += '<ul class="ach_list"><li>';
 		output += (game_count >= 10) ? getMilestoneString('Collect enough walnuts (10) to earn Leo\'s trust.', 1) :
@@ -4863,7 +4863,7 @@ window.onload = function () {
 				getPerfectionPctString(pct["Fishing"], 10, 'Fish Caught', 0, best["Fishing"]) + ' -- <a href="#sec_Fishing">see above for needs</a>';
 		output += '</li><li>';
 		output += (pct["Walnuts"] >= 1) ? getPerfectionPctNumString(pct["Walnuts"], 5, 130, 'Golden Walnuts Found', 1) :
-				getPerfectionPctNumString(pct["Walnuts"], 5, 130, 'Golden Walnuts Found', 0) + ' -- <a href="#sec_Skills">see above for needs</a>';
+				getPerfectionPctNumString(pct["Walnuts"], 5, 130, 'Golden Walnuts Found', 0) + ' -- <a href="#sec_Golden_Walnuts">see above for needs</a>';
 		if (waivers > 0) {
 			output += '</li><li><span class="pt_yes"><span class="pts">' + waivers + '%</span> from purchase of ' + waivers +
 				' Perfection Waivers</span>';
@@ -4949,7 +4949,7 @@ window.onload = function () {
 				getPerfectionPctString(pct["Fishing"], 10, 'Fish Caught', 0) + ' -- <a href="#sec_Fishing">see above for needs</a>';
 		output += '</li><li>';
 		output += (pct["Walnuts"] >= 1) ? getPerfectionPctNumString(pct["Walnuts"], 5, 130, 'Golden Walnuts Found', 1) :
-				getPerfectionPctNumString(pct["Walnuts"], 5, 130, 'Golden Walnuts Found', 0) + ' -- <a href="#sec_Skills">see above for needs</a>';
+				getPerfectionPctNumString(pct["Walnuts"], 5, 130, 'Golden Walnuts Found', 0) + ' -- <a href="#sec_Golden_Walnuts">see above for needs</a>';
 		output += '</li></ul></div>';
 		table.push(output);
 
