@@ -1063,7 +1063,15 @@ window.onload = function () {
 			// Note that we are recording the value for Luck here too
 			saveInfo.data[id].experiencePoints.push(Number($(this).text()));
 		});
-
+		// This was added due to 1.6.4 alternative tracking for mines stardrop
+		saveInfo.data[id].chestConsumedMineLevels = {};
+		$(player).find("chestConsumedLevels > item").each(function() {
+			var key, value;
+			key = Number($(this).find('key > int').text());
+			value = $(this).find('value > *').text();
+			saveInfo.data[id].chestConsumedMineLevels[key] = value;
+		});
+		saveInfo.data[id].maxStamina = Number($(player).find("maxStamina").text());
 		return id;
 	}
 
@@ -1150,10 +1158,11 @@ window.onload = function () {
 				'Mister Qi': 1,
 				'Henchman': 1,
 				'Birdie': 1,
-				'Fizz' : 1,
-				'Pet' : 1,
-				'Raccoon' : 1,
-				'Bat' : 1, // This one is from Lewis' Basement
+				'Fizz': 1,
+				'Pet': 1,
+				'Raccoon': 1,
+				'Bat': 1, // This one is from Lewis' Basement
+				'Truffle Crab': 1, // Matching on name
 			};
 			meta.npc = {};
 			// <NPC>: [ [<numHearts>, <id>], ... ]
@@ -1964,8 +1973,8 @@ window.onload = function () {
 		output += '<span class="result">' + $(player).children('name').html() + " has crafted " + craft_count + ' and knows ' +
 			known_count + ' of ' + recipe_count + ' base game recipes.' + pt_pct + '</span>\n';
 		if (mod_known > 0) {
-			output += '<br /><span class="result"><span class="note">' + $(player).children('name').html() + " has also crafted " +
-				mod_craft + ' and knows ' + mod_known + " unrecognized (probably mod) recipes.</span></span>\n";
+			output += '<br /><span class="result note">' + $(player).children('name').html() + " has also crafted " +
+				mod_craft + ' and knows ' + mod_known + " unrecognized (probably mod) recipes.</span>";
 		}
 		output += '<ul class="ach_list"><li>';
 		output += ( (craft_count + mod_craft) >= 15) ? getAchieveString('D.I.Y.', 'craft 15 different items', 1) :
@@ -3216,6 +3225,9 @@ window.onload = function () {
 			// These exist now in hard mode so need to be included in output
 			meta.monsters["Skeletons"].push("Skeleton Mage");
 		}
+		if (compareSemVer(saveInfo.version, "1.6") >= 0) {
+			meta.goals["Cave Insects"] = 80;
+		}
 		table[0] = parsePlayerMonsters($(xmlDoc).find('SaveGame > player'), saveInfo, meta);
 		parseFarmhands(xmlDoc, saveInfo, table, parsePlayerMonsters, meta);
 		playerOutput += printTranspose(table);
@@ -3383,7 +3395,7 @@ window.onload = function () {
 			meta.stardrops = {
 				'CF_Fair': 'Purchased at the Fair for 2000 star tokens.',
 				'CF_Mines': 'Found in the chest on mine level 100.',
-				'CF_Spouse': 'Given by NPC spouse at 13.5 hearts (3375 points).',
+				'CF_Spouse': 'Given by NPC spouse at 12.5 hearts (3125 points).',
 				'CF_Sewer': 'Purchased from Krobus in the Sewers for 20,000g.',
 				'CF_Statue': 'Received from Old Master Cannoli in the Secret Woods.',
 				'CF_Fish': 'Mailed by Willy after Master Angler achievement.',
@@ -3404,25 +3416,36 @@ window.onload = function () {
 			umid = (compareSemVer(saveInfo.version, "1.3") >= 0) ? $(player).children('UniqueMultiplayerID').text() : saveInfo.farmerId,
 			pt_pct = '',
 			need = [],
+			staminaOverride = false,
 			stardrop_count = Object.keys(meta.stardrops).length;
 
 		for (id in meta.stardrops) {
 			if (meta.stardrops.hasOwnProperty(id)) {
-				if (saveInfo.data[umid].mailReceived.hasOwnProperty(id)) {
+				var altTrigger = (id == 'CF_Mines' &&
+					saveInfo.data[umid].chestConsumedMineLevels.hasOwnProperty(100) &&
+					saveInfo.data[umid].chestConsumedMineLevels[100] === 'true');
+				if (saveInfo.data[umid].mailReceived.hasOwnProperty(id) || altTrigger) {
 					count++;
 				} else {
 					need.push('<li>' + meta.stardrops[id] + '</li>');
 				}
 			}
 		}
+		if (saveInfo.data[umid].mailReceived.hasOwnProperty("gotMaxStamina")) {
+			staminaOverride = true;
+		}
 
 		if (compareSemVer(saveInfo.version, "1.5") >= 0) {
 			saveInfo.perfectionTracker[umid]["Stardrops"] = (count >= stardrop_count);
-			pt_pct = getPTLink((count >= stardrop_count) ? "Yes" : "No");
+			pt_pct = getPTLink((staminaOverride || count >= stardrop_count) ? "Yes" : "No");
 		}
 		output += '<div class="' + meta.anchor + '_summary ' + meta.sum_class + '">';
-		output += '<span class="result">' + saveInfo.players[umid] + ' has received ' + count +
-				' of ' + stardrop_count + ' stardrops.' + pt_pct + '</span><br />\n';
+		output += '<span class="result">' + saveInfo.players[umid] + ' has ' + (staminaOverride ? '' : 'not ') + ' reached 508 max stamina (actual amount ' + saveInfo.data[umid].maxStamina + ')</span><br/>';
+		if (staminaOverride && count < stardrop_count) {
+			output += '<span class="result note">Note: Stamina will override stardrop marker count for achievements and perfection.</span><br/>';
+		}
+		output += '<span class="result">' + saveInfo.players[umid] + ' has markers for ' + count +
+				' of ' + stardrop_count + ' stardrops.' + pt_pct + '</span><br/>';
 		output += '<ul class="ach_list"><li>';
 		output += (count >= stardrop_count) ? getAchieveString('Mystery Of The Stardrops', 'find every stardrop', 1) :
 				getAchieveString('Mystery Of The Stardrops', 'find every stardrop', 0) + (stardrop_count - count) + ' more';
@@ -5303,12 +5326,13 @@ window.onload = function () {
 		}
 		output += '.</span><br />\n';
 		output += '<ul class="ach_list"><li>';
-		if (timesFed > 8 || (timesFed == 8 && daysSinceFed > 7)) {
+		// patch 1.6.4 changed achievement trigger from 7 to 8 babies which means 8 to 9 timesFed
+		if (timesFed > 9 || (timesFed == 9 && daysSinceFed > 7)) {
 			output += getAchieveString("Good Neighbors", "help your forest neighbors grow their family", 1);
-		} else if (timesFed == 8 && daysSinceFed <= 7) {
+		} else if (timesFed == 9 && daysSinceFed <= 7) {
 			output += getAchieveString("Good Neighbors", "help your forest neighbors grow their family", 0) + 'to wait a few more days';
 		} else {
-			output += getAchieveString("Good Neighbors", "help your forest neighbors grow their family", 0) + 'to help ' + (8 - timesFed) + ' more times';
+			output += getAchieveString("Good Neighbors", "help your forest neighbors grow their family", 0) + 'to help ' + (9 - timesFed) + ' more times';
 		}
 
 		output = getSectionHeader(saveInfo, title, anchor, meta.hasDetails, version) + output + getSectionFooter();
@@ -5370,6 +5394,11 @@ window.onload = function () {
 			reader = new FileReader(),
 			prog = document.getElementById('progress');
 
+		// Switch version saves are compressed and wind up quite small so we do the probably dumb thing of assuming
+		// compression if the read file is under 500k. We need to make this determination now because a compressed
+		// file should be read as an ArrayBuffer but an uncompressed one as Text
+		var saveCompressed = (file.size < 512000);
+		
 		prog.value = 0;
 		$('#output-container').hide();
 		$('#progress-container').show();
@@ -5386,8 +5415,23 @@ window.onload = function () {
 		};
 		reader.onload = function (e) {
 			var output = "",
-				xmlDoc = $.parseXML(e.target.result),
+				xmlDoc,
 				saveInfo = {};
+			if (saveCompressed) {
+				try {
+					xmlDoc = $.parseXML(pako.inflate(e.target.result, { to: 'string' }));
+				} catch(error) {
+					var message = "<h3>Save Parse Error</h3><p>The app was unable to process the save file. This is most likely a bug with the app, so please let the dev know about it. Details below.</p>";
+					$('#parse-error').html(message + '<p class="code">' + error + '<br/>' + error.stack + '</p>');
+				}
+			} else {
+				try {
+					xmlDoc = $.parseXML(e.target.result);
+				} catch(error) {
+					var message = "<h3>Save Parse Error</h3><p>The app was unable to process the save file. This is most likely a bug with the app, so please let the dev know about it. Details below.</p>";
+					$('#parse-error').html(message + '<p class="code">' + error + '<br/>' + error.stack + '</p>');
+				}
+			}
 
 			saveInfo.outputPrefOld = 'hide_details';
 			var opt = document.getElementsByName('opt-old');
@@ -5462,7 +5506,11 @@ window.onload = function () {
 				$('#parse-error').html(message + '<p class="code">' + error + '<br/>' + error.stack + '</p>');
 			}
 		};
-		reader.readAsText(file);
+		if (saveCompressed) {
+			reader.readAsArrayBuffer(file);
+		} else {
+			reader.readAsText(file);
+		}
 	}
 	document.getElementById('file_select').addEventListener('change', handleFileSelect, false);
 

@@ -6,12 +6,13 @@ This app checks a [Stardew Valley](https://stardewvalley.net/) save file for var
 
 Most changed & added content from version 1.6 is supported, and 1.6-specific features should only appear in the results if the save is detected to be from that version. If you load a 1.6 save into the app, expect to see spoilers. There is now some spoiler protection for major systems by using the Output Preferences to hide some section results, but the titles of the new sections will still be visible and new items will still appear in the details of old sections.
 
-The app is written in Javascript and uses [jQuery](https://jquery.com/), [emver-compare](https://github.com/substack/semver-compare) and [Javascript Cookie](https://github.com/js-cookie/js-cookie); it is hosted on GitHub Pages at https://mouseypounds.github.io/stardew-checkup/ and the source code repository is https://github.com/MouseyPounds/stardew-checkup.
+The app is written in Javascript and uses [jQuery](https://jquery.com/), [emver-compare](https://github.com/substack/semver-compare), [Javascript Cookie](https://github.com/js-cookie/js-cookie), and [pako](https://github.com/nodeca/pako); it is hosted on GitHub Pages at https://mouseypounds.github.io/stardew-checkup/ and the source code repository is https://github.com/MouseyPounds/stardew-checkup.
 
 Please report any bugs, suggestions, or other feedback to [the topic in the Stardew official forums](https://forums.stardewvalley.net/threads/web-apps-stardew-checkup-predictor-and-fair-helper.28393/) or to @mouseypounds on Discord.
 
 ## Changelog
 
+* 18 Apr  2024 - v5.0.5 - Support for compressed switch saves, fixes for 1.6.4, remove Truffle Crab from NPC list
 * 10 Apr  2024 - v5.0.4 - Book power bugfix
 *  2 Apr  2024 - v5.0.3 - A couple of really old bugfixes
 * 30 Mar  2024 - v5.0.2 - Finally added slightly more friendly error-handling

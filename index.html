@@ -19,7 +19,8 @@
 <script>window.jQuery || document.write('<script src="./jquery-3.2.1.min.js"><\/script>')</script>
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
 <script>window.Cookies || document.write('<script src="./js.cookie-2.2.1.min.js"><\/script>')</script>
-<script src="./stardew-checkup.js?v=5.0.4"></script>
+<script src="./stardew-checkup.js?v=5.0.5"></script>
+<script src="./pako.min.js"></script>
 
 </head>
 <body>
@@ -35,7 +36,7 @@
 <p>This app checks a <a href="https://stardewvalley.net/">Stardew Valley</a> save file for various achievements and milestones and
 lets you know what is missing. Currently it checks for progress on 46 achievements as well as other progression and completion mechanics including Grandpa's evaluation, Ginger Island upgrades, Perfection, and social relationships.</p>
 <p>Most changed &amp; added content from version 1.6 is supported, and 1.6-specific features should only appear in the results if the save is detected to be from that version. <span class="strong note">If you load a 1.6 save into the app, expect to see spoilers. There is some spoiler protection for major systems by using the Output Preferences to hide some section results, but the titles of the new sections will still be visible and new items will still appear in the details of old sections.</span> </p>
-<p>The app is written in Javascript and uses <a href="https://jquery.com/">jQuery</a>, <a href="https://github.com/substack/semver-compare">semver-compare</a> and <a href="https://github.com/js-cookie/js-cookie">Javascript Cookie</a>; it is hosted on GitHub Pages at <a href="https://mouseypounds.github.io/stardew-checkup/">https://mouseypounds.github.io/stardew-checkup/</a> and the source code repository is <a href="https://github.com/MouseyPounds/stardew-checkup">https://github.com/MouseyPounds/stardew-checkup</a>.
+<p>The app is written in Javascript and uses <a href="https://jquery.com/">jQuery</a>, <a href="https://github.com/substack/semver-compare">semver-compare</a>, <a href="https://github.com/js-cookie/js-cookie">Javascript Cookie</a> and <a href="https://github.com/nodeca/pako">pako</a>; it is hosted on GitHub Pages at <a href="https://mouseypounds.github.io/stardew-checkup/">https://mouseypounds.github.io/stardew-checkup/</a> and the source code repository is <a href="https://github.com/MouseyPounds/stardew-checkup">https://github.com/MouseyPounds/stardew-checkup</a>.
 Please report any bugs, suggestions, or other feedback to <a href="https://forums.stardewvalley.net/threads/web-apps-stardew-checkup-predictor-and-fair-helper.28393/">the topic in the Stardew official forums</a> or to <span class="code">@mouseypounds</span> on Discord.</p>
 </div>
 
@@ -82,6 +83,7 @@ Please report any bugs, suggestions, or other feedback to <a href="https://forum
 <noscript><span class="error">Javascript appears to be unsupported by or disabled in your browser. Stardew Checkup will not work without it.</span></noscript>
 <h2 id="sec_changelog">Changelog</h2>
 <ul>
+<li>18 Apr  2024 - v5.0.5 - Support for compressed switch saves, fixes for 1.6.4, remove Truffle Crab from NPC list</li>
 <li>10 Apr  2024 - v5.0.4 - Book power bugfix</li>
 <li> 2 Apr  2024 - v5.0.3 - A couple of really old bugfixes</li>
 <li>30 Mar  2024 - v5.0.2 - Finally added slightly more friendly error-handling</li>
