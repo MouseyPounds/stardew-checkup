@@ -1026,9 +1026,14 @@ window.onload = function () {
 		var name = $(player).children('name').html();
 		if (compareSemVer(saveInfo.version, "1.3") >= 0) {
 			id = $(player).children('UniqueMultiplayerID').text();
-			if (BigInt(id) % BigInt(111) === 0) {
-				console.log("Player " + name + " is bad at music");
+			try {
+				if (BigInt(id) % BigInt(111) === 0) {
+					console.log("Player " + name + " is bad at music");
+				}
+			} catch(e) {
+				console.log("Browser doesn't support BigInt so skipped the bad at music check.");
 			}
+				
 		}
 		saveInfo.data[id] = {};
 		saveInfo.data[id].name = name;
