@@ -1842,9 +1842,9 @@ window.onload = function () {
 				if (meta.recipes.hasOwnProperty(id)) {
 					r = meta.recipes[id];
 					if (!known.hasOwnProperty(r)) {
-						need_k.push('<li>' + wikify(r) + '</li>');
+						need_k.push('<li><input type="checkbox" class="completable">' + wikify(r) + '</li>');
 					} else if (!crafted.hasOwnProperty(r)) {
-						need_c.push('<li>' + wikify(r) + '</li>');
+						need_c.push('<li><input type="checkbox" class="completable">' + wikify(r) + '</li>');
 					}
 				}
 			}
@@ -1966,7 +1966,7 @@ window.onload = function () {
 			if (num > 0) {
 				craft_count++;
 			} else {
-				need_c.push('<li>' + wikify(id) + '</li>');
+				need_c.push('<li><input type="checkbox" class="completable">' + wikify(id) + '</li>');
 			}
 		});
 
@@ -2007,7 +2007,7 @@ window.onload = function () {
 					if (meta.recipes.hasOwnProperty(id)) {
 						r = meta.recipes[id];
 						if (!known.hasOwnProperty(r)) {
-							need_k.push('<li>' + wikify(r) + '</li>');
+							need_k.push('<li><input type="checkbox" class="completable">' + wikify(r) + '</li>');
 						}
 					}
 				}
@@ -2271,7 +2271,7 @@ window.onload = function () {
 				if (meta.recipes.hasOwnProperty(id)) {
 					r = meta.recipes[id];
 					if (!known.hasOwnProperty(r)) {
-						need.push('<li>' + wikify(r) + '</li>');
+						need.push('<li><input type="checkbox" class="completable">' + wikify(r) + '</li>');
 					}
 				}
 			}
@@ -2289,7 +2289,7 @@ window.onload = function () {
 					if (meta.bobber.hasOwnProperty(id)) {
 						r = meta.bobber[id];
 						if (!known.hasOwnProperty(r)) {
-							need.push('<li>' + wikify(r) + '</li>');
+							need.push('<li><input type="checkbox" class="completable">' + wikify(r) + '</li>');
 						}
 					}
 				}
@@ -2526,7 +2526,7 @@ window.onload = function () {
 				if (meta.recipes.hasOwnProperty(id)) {
 					r = meta.recipes[id];
 					if (!crafted.hasOwnProperty(r)) {
-						need.push('<li>' + wikify(r) + '</li>');
+						need.push('<li><input type="checkbox" class="completable">' + wikify(r) + '</li>');
 					}
 				}
 			}
@@ -2651,11 +2651,11 @@ window.onload = function () {
 				if (meta.poly_crops.hasOwnProperty(id)) {
 					r = meta.poly_crops[id];
 					if (!crafted.hasOwnProperty(r)) {
-						need.push('<li>' + wikify(r) + ' -- 15 more</li>');
+						need.push('<li><input type="checkbox" class="completable">' + wikify(r) + ' -- 15 more</li>');
 					} else {
 						n = Number(crafted[r]);
 						if (n < 15) {
-							need.push('<li>' + wikify(r) + ' -- ' + (15 - n) + ' more</li>');
+							need.push('<li><input type="checkbox" class="completable">' + wikify(r) + ' -- ' + (15 - n) + ' more</li>');
 						}
 					}
 				}
@@ -2714,7 +2714,7 @@ window.onload = function () {
 						break;
 					}
 				}
-				need.push('<li>' + wikify(meta.skills[i]) + ' (level ' + level + ') -- need ' +
+				need.push('<li><input type="checkbox" class="completable">' + wikify(meta.skills[i]) + ' (level ' + level + ') -- need ' +
 					addCommas(meta.next_level[level] - num) + ' more xp to next level and ' + addCommas(15000 - num) + ' more xp to max</li>\n');
 			} else {
 				count++;
@@ -2858,7 +2858,7 @@ window.onload = function () {
 			if (saveInfo.data[umid].stats.hasOwnProperty(id)) {
 				perkCount++;
 			} else {
-				needPerk.push('<li>' + meta.skills[i] + '</li>');
+				needPerk.push('<li><input type="checkbox" class="completable">' + meta.skills[i] + '</li>');
 			}
 			if (saveInfo.data[umid].experiencePoints[i] >= 15000) {
 				maxCount++;
@@ -3111,7 +3111,7 @@ window.onload = function () {
 						need.push('donated');
 					}
 					if (need.length > 0) {
-						need_art.push('<li>' + wikify(r) + ' -- not ' + need.join(" or ") + '</li>');
+						need_art.push('<li><input type="checkbox" class="completable">' + wikify(r) + ' -- not ' + need.join(" or ") + '</li>');
 					}
 				}
 			}
@@ -3126,7 +3126,7 @@ window.onload = function () {
 						need.push('donated');
 					}
 					if (need.length > 0) {
-						need_min.push('<li>' + wikify(r) + ' -- not ' + need.join(" or ") + '</li>');
+						need_min.push('<li><input type="checkbox" class="completable">' + wikify(r) + ' -- not ' + need.join(" or ") + '</li>');
 					}
 				}
 			}
@@ -3312,11 +3312,11 @@ window.onload = function () {
 					if (killed[id] >= meta.goals[id]) {
 						completed++;
 					} else {
-						need.push('<li>' + id + ' -- kill ' + (meta.goals[id] - killed[id]) + ' more of: ' +
+						need.push('<li><input type="checkbox" class="completable">' + id + ' -- kill ' + (meta.goals[id] - killed[id]) + ' more of: ' +
 							meta.monsters[id].map(wikimap).join(', ') + '</li>');
 					}
 				} else {
-					need.push('<li>' + id + ' -- kill ' + meta.goals[id] + ' more of: ' +
+					need.push('<li><input type="checkbox" class="completable">' + id + ' -- kill ' + meta.goals[id] + ' more of: ' +
 						meta.monsters[id].map(wikimap).join(', ') + '</li>');
 				}
 			}
@@ -3432,7 +3432,7 @@ window.onload = function () {
 				if (saveInfo.data[umid].mailReceived.hasOwnProperty(id) || altTrigger) {
 					count++;
 				} else {
-					need.push('<li>' + meta.stardrops[id] + '</li>');
+					need.push('<li><input type="checkbox" class="completable">' + meta.stardrops[id] + '</li>');
 				}
 			}
 		}
@@ -4025,20 +4025,20 @@ window.onload = function () {
 														possibles.push(bundleData[r].bundles[b].items[i]);
 													}
 												});
-												bundleNeed.push('<li>' + bundleData[r].bundles[b].name + ' Bundle -- need ' +
+												bundleNeed.push('<li><input type="checkbox" class="completable">' + bundleData[r].bundles[b].name + ' Bundle -- need ' +
 													(bundleData[r].bundles[b].qty - bundleHave[b]) + ' of: ' + possibles.join(', ') + '</li>');
 											}
 										}
 									}
 								}
-								need.push('<li> ' + wikify(bundleData[r].name, 'Bundles') + '<ol>' + bundleNeed.sort().join('') + '</ol></li>');
+								need.push('<li><input type="checkbox" class="completable"> ' + wikify(bundleData[r].name, 'Bundles') + '<ol>' + bundleNeed.sort().join('') + '</ol></li>');
 							}
 						}
 					}
 				} else {
 					temp = ' to attend the ceremony';
 				}
-				need.push('<li>Attend the re-opening ceremony at the Community Center</li>');
+				need.push('<li><input type="checkbox" class="completable">Attend the re-opening ceremony at the Community Center</li>');
 			}
 			output += (ccHave >= ccCount && hasSeenCeremony) ? getAchieveString('Local Legend', '', 1) :
 					getAchieveString('Local Legend', '', 0) + temp;
@@ -4208,7 +4208,7 @@ window.onload = function () {
 		if (found_notes < note_count) {
 			for (i = 1; i <= note_count; i++) {
 				if (!notes.hasOwnProperty(i)) {
-					need.push('<li>' + wikify('Secret Note #' + i, 'Secret Notes') + '</li>');
+					need.push('<li><input type="checkbox" class="completable">' + wikify('Secret Note #' + i, 'Secret Notes') + '</li>');
 				}
 			}
 			if (need.length > 0) {
@@ -4235,7 +4235,7 @@ window.onload = function () {
 					if (i == 14) {
 						extra = " (Note: may be inaccurate if item was collected and destroyed.)";
 					}
-					need.push('<li> Reward from ' + wikify('Secret Note #' + i, 'Secret Notes') + extra + '</li>');
+					need.push('<li><input type="checkbox" class="completable"> Reward from ' + wikify('Secret Note #' + i, 'Secret Notes') + extra + '</li>');
 				}
 			}
 			if (need.length > 0) {
@@ -4330,7 +4330,7 @@ window.onload = function () {
 		if (found_notes < note_count) {
 			for (i = 1; i <= note_count; i++) {
 				if (!notes.hasOwnProperty(1000 + Number(i))) {
-					need.push('<li>' + wikify('Journal Scrap #' + i, 'Journal Scraps') + '</li>');
+					need.push('<li><input type="checkbox" class="completable">' + wikify('Journal Scrap #' + i, 'Journal Scraps') + '</li>');
 				}
 			}
 			if (need.length > 0) {
@@ -4361,7 +4361,7 @@ window.onload = function () {
 			for (i in k) {
 				if (rewards.hasOwnProperty(k[i]) && !rewards[k[i]]) {
 					var extra = "";
-					need.push('<li> Reward from ' + wikify('Journal Scrap #' + (Number(k[i]) - 1000) , 'Journal Scraps') + extra + '</li>');
+					need.push('<li><input type="checkbox" class="completable"> Reward from ' + wikify('Journal Scrap #' + (Number(k[i]) - 1000) , 'Journal Scraps') + extra + '</li>');
 				}
 			}
 			if (need.length > 0) {
@@ -4421,7 +4421,7 @@ window.onload = function () {
 		if (found_count < town_count) {
 			for (id in town) {
 				if (!found.hasOwnProperty(id)) {
-					need.push('<li>' + wikify(town[id], "Quests#List_of_Special_Orders", true) + '</li>');
+					need.push('<li><input type="checkbox" class="completable">' + wikify(town[id], "Quests#List_of_Special_Orders", true) + '</li>');
 				}
 			}
 			if (need.length > 0) {
@@ -4647,7 +4647,7 @@ window.onload = function () {
 			for (var i in keys) {
 				id = keys[i];
 				val += need[id];
-				output += '<li value="' + val + '">';
+				output += '<li value="' + val + '"><input type="checkbox" class="completable">';
 				var extra = "";
 				if (need[id] > 1) {
 					extra = " -- " + need[id] + " walnuts";
@@ -4763,7 +4763,7 @@ window.onload = function () {
 				if (need[id] > 1) {
 					extra = " -- costs " + need[id] + " walnuts";
 				}
-				output += '<li>' + upgrades[id].name + extra + '</li>';
+				output += '<li><input type="checkbox" class="completable">' + upgrades[id].name + extra + '</li>';
 			}
 			output += '</ol></span></div>';
 		}
@@ -5107,7 +5107,7 @@ window.onload = function () {
 				} else if (saveInfo.objects.hasOwnProperty(k)) {
 					txt = saveInfo.objects[k];
 				}
-				need.push('<li><span class="booktitle">' + txt + '</span></li>');
+				need.push('<li><span class="booktitle"><input type="checkbox" class="completable">' + txt + '</span></li>');
 			}
 		});
 
@@ -5132,7 +5132,7 @@ window.onload = function () {
 				} else if (saveInfo.objects.hasOwnProperty(k)) {
 					txt = saveInfo.objects[k];
 				}
-				need.push('<li>' + txt + '</li>');
+				need.push('<li><input type="checkbox" class="completable">' + txt + '</li>');
 			}
 		});
 
@@ -5506,6 +5506,17 @@ window.onload = function () {
 				$('#progress-container').hide();
 				createTOC();
 				$('#TOC').show();
+				// Applies strikethrough when checkbox is checked
+				$(document).ready(function() {
+					$('.completable[type="checkbox"]').change(function() {
+						var label = $(this).parent();
+						if ($(this).prop('checked')) {
+							label.css('text-decoration', 'line-through');
+						} else {
+							label.css('text-decoration', 'none');
+						}
+					})
+				});
 			} catch(error) {
 				var message = "<h3>Save Parse Error</h3><p>The app was unable to process the save file. This is most likely a bug with the app, so please let the dev know about it. Details below.</p>";
 				$('#parse-error').html(message + '<p class="code">' + error + '<br/>' + error.stack + '</p>');
